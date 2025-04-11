@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -15,7 +14,6 @@ import {
 import { formatCurrency, formatDateTime } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 
-// Dados mockados para simular um pedido específico
 const mockOrder = {
   id: '000123',
   product: 'Smartphone XYZ Pro',
@@ -120,7 +118,6 @@ const DetalheVenda: React.FC = () => {
   const { id } = useParams();
   const { toast } = useToast();
   
-  // Em um cenário real, usaríamos o ID para buscar os dados do pedido
   const order = mockOrder;
   
   const copyToClipboard = (text: string, message: string) => {
@@ -132,11 +129,8 @@ const DetalheVenda: React.FC = () => {
   };
 
   const handleWhatsAppContact = () => {
-    // Format phone number by removing non-numeric characters
     const phoneNumber = order.phone.replace(/\D/g, '');
-    // Create WhatsApp URL with the phone number (assuming Brazilian number)
     const whatsappUrl = `https://wa.me/55${phoneNumber}`;
-    // Open WhatsApp in a new tab
     window.open(whatsappUrl, '_blank');
   };
   
@@ -185,20 +179,15 @@ const DetalheVenda: React.FC = () => {
               <FileText className="h-4 w-4 mr-2" />
               Exportar
             </Button>
-            {order.status === 'Aprovado' && (
-              <Button 
-                variant="destructive" 
-                size="sm"
-                onClick={() => toast({
-                  title: "Atenção",
-                  description: "Função de reembolso simulada.",
-                  variant: "destructive"
-                })}
-              >
-                <DollarSign className="h-4 w-4 mr-2" />
-                Reembolsar
-              </Button>
-            )}
+            <Button 
+              variant="default" 
+              className="bg-green-500 hover:bg-green-600"
+              onClick={handleWhatsAppContact}
+              size="sm"
+            >
+              <MessageSquare className="h-4 w-4 mr-2" />
+              Entrar em contato
+            </Button>
           </div>
         </div>
         
@@ -211,7 +200,6 @@ const DetalheVenda: React.FC = () => {
             <TabsTrigger value="historico">Histórico</TabsTrigger>
           </TabsList>
           
-          {/* Resumo do Pedido */}
           <TabsContent value="resumo" className="space-y-4">
             <Card>
               <CardHeader className="pb-2">
@@ -259,24 +247,13 @@ const DetalheVenda: React.FC = () => {
             </Card>
           </TabsContent>
           
-          {/* Informações do Cliente */}
           <TabsContent value="cliente" className="space-y-4">
             <Card>
               <CardHeader className="pb-2">
-                <div className="flex justify-between items-center">
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <User className="h-5 w-5 text-primary" />
-                    Informações do Cliente
-                  </CardTitle>
-                  <Button 
-                    variant="default" 
-                    className="bg-green-500 hover:bg-green-600"
-                    onClick={handleWhatsAppContact}
-                  >
-                    <MessageSquare className="h-4 w-4 mr-2" />
-                    Entrar em contato
-                  </Button>
-                </div>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <User className="h-5 w-5 text-primary" />
+                  Informações do Cliente
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -307,7 +284,6 @@ const DetalheVenda: React.FC = () => {
             </Card>
           </TabsContent>
           
-          {/* Produtos Comprados */}
           <TabsContent value="produtos" className="space-y-4">
             <Card>
               <CardHeader className="pb-2">
@@ -354,7 +330,6 @@ const DetalheVenda: React.FC = () => {
             </Card>
           </TabsContent>
           
-          {/* Endereço de Entrega */}
           <TabsContent value="endereco" className="space-y-4">
             <Card>
               <CardHeader className="pb-2">
@@ -394,7 +369,6 @@ const DetalheVenda: React.FC = () => {
             </Card>
           </TabsContent>
           
-          {/* Histórico da Venda */}
           <TabsContent value="historico" className="space-y-4">
             <Card>
               <CardHeader className="pb-2">
