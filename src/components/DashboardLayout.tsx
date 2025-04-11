@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { ThemeToggle } from './ThemeToggle';
@@ -53,18 +52,13 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 
   return (
     <SidebarLayout>
-      <div className="min-h-screen bg-background">
-        <header className="bg-card border-b border-border">
-          <div className="container mx-auto px-4 py-4">
-            <div className="flex items-center justify-between">
-              <h1 className="text-xl font-bold text-primary">{pageName}</h1>
-              <ThemeToggle />
-            </div>
-          </div>
-        </header>
+      <div className="min-h-screen bg-background relative">
         <main className={cn("container mx-auto px-4 py-8", className)}>
           {children}
         </main>
+        <div className="fixed bottom-6 right-6 z-50">
+          <ThemeToggle />
+        </div>
       </div>
     </SidebarLayout>
   );
