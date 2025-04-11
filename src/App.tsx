@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -27,6 +28,7 @@ import ListaProdutos from "./pages/produtos/ListaProdutos";
 import NovoProdutoFisico from "./pages/produtos/NovoProdutoFisico";
 import NovoProdutoDigital from "./pages/produtos/NovoProdutoDigital";
 import EditarProduto from "./pages/produtos/EditarProduto";
+import NovoFisico from "./pages/produtos/NovoFisico";
 import { ActivationStepsProvider } from "./contexts/ActivationStepsContextWithStores";
 import { StoreProvider } from "./contexts/StoreContext";
 import { ThemeProvider } from "./providers/ThemeProvider";
