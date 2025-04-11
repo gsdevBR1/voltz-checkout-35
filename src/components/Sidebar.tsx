@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/sidebar';
 import { StoreSelector } from '@/components/StoreSelector';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 interface SidebarProps {
   className?: string;
@@ -59,13 +60,16 @@ export const AppSidebar: React.FC<SidebarProps> = ({ className }) => {
         </SidebarMenu>
       </SidebarContent>
       <SidebarFooter className="px-4 py-3 border-t border-border">
-        <div className="flex items-center justify-between">
-          <StoreSelector />
-          <Avatar className="h-9 w-9 ml-2">
-            <AvatarFallback className="bg-primary text-primary-foreground">
-              <User className="h-5 w-5" />
-            </AvatarFallback>
-          </Avatar>
+        <div className="flex flex-col gap-4">
+          <ThemeToggle />
+          <div className="flex items-center justify-between">
+            <StoreSelector />
+            <Avatar className="h-9 w-9 ml-2">
+              <AvatarFallback className="bg-primary text-primary-foreground">
+                <User className="h-5 w-5" />
+              </AvatarFallback>
+            </Avatar>
+          </div>
         </div>
       </SidebarFooter>
     </Sidebar>
