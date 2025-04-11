@@ -13,14 +13,22 @@ interface FunnelChartProps {
   data: FunnelItem[];
   className?: string;
   showDividers?: boolean;
+  compact?: boolean;
 }
 
-export function FunnelChart({ data, className, showDividers = true }: FunnelChartProps) {
+export function FunnelChart({ 
+  data, 
+  className, 
+  showDividers = true,
+  compact = false 
+}: FunnelChartProps) {
   // Calculate maximum width based on the first item (should be 100%)
   const maxValue = data[0]?.value || 1;
   
   return (
-    <div className={cn("w-full flex flex-col space-y-6", className)}>
+    <div className={cn("w-full flex flex-col space-y-4", className, {
+      "space-y-3": compact
+    })}>
       {data.map((item, index) => {
         const widthPercent = (item.value / maxValue) * 100;
         // Width reduces as we go down the funnel
@@ -28,16 +36,24 @@ export function FunnelChart({ data, className, showDividers = true }: FunnelChar
         
         return (
           <React.Fragment key={item.name}>
-            <div className="w-full flex flex-col space-y-2">
+            <div className="w-full flex flex-col space-y-1">
               <div className="flex flex-row items-center justify-between">
-                <div className="text-2xl font-bold">{item.value}</div>
+                <div className={cn("text-2xl font-bold", {
+                  "text-xl": compact
+                })}>{item.value}</div>
                 <div className="flex flex-col items-end">
-                  <div className="text-base font-medium">{item.name}</div>
-                  <div className="text-lg font-semibold text-muted-foreground">{item.percentage}%</div>
+                  <div className={cn("text-base font-medium", {
+                    "text-sm": compact
+                  })}>{item.name}</div>
+                  <div className={cn("text-lg font-semibold text-muted-foreground", {
+                    "text-sm": compact
+                  })}>{item.percentage}%</div>
                 </div>
               </div>
               
-              <div className="w-full bg-muted/30 h-3 rounded-full overflow-hidden">
+              <div className={cn("w-full bg-muted/30 h-3 rounded-full overflow-hidden", {
+                "h-2": compact
+              })}>
                 <div 
                   className="h-full bg-primary rounded-full transition-all duration-500"
                   style={{ 

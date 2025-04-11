@@ -710,100 +710,109 @@ const Dashboard = () => {
             </CardContent>
           </Card>
           
-          <Card className="mb-6">
-            <CardHeader className="py-4">
-              <CardTitle className="flex items-center gap-2">
-                <PieChart className="h-5 w-5 text-primary" />
-                Funil de Conversão
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 gap-6">
-                <FunnelChart data={funnelData} />
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card className="mb-6">
-            <CardHeader className="py-4">
-              <CardTitle className="flex items-center gap-2">
-                <CreditCard className="h-5 w-5 text-primary" />
-                Conversão por Método de Pagamento
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <Card className="bg-card/50 shadow-none">
-                  <CardHeader className="py-3">
-                    <CardTitle className="text-base">PIX</CardTitle>
-                  </CardHeader>
-                  <CardContent className="pb-4">
-                    <div className="space-y-2">
-                      <div className="flex justify-between">
-                        <span className="text-sm text-muted-foreground">Valor vendido:</span>
-                        <span className="font-medium">{formatCurrency(paymentData.pix.total)}</span>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <Card>
+              <CardHeader className="py-4">
+                <CardTitle className="flex items-center gap-2">
+                  <PieChart className="h-5 w-5 text-primary" />
+                  Funil de Conversão
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <FunnelChart data={funnelData} compact />
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader className="py-4">
+                <CardTitle className="flex items-center gap-2">
+                  <CreditCard className="h-5 w-5 text-primary" />
+                  Meios de Pagamento
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  <div className="rounded-lg bg-[#f1fcf3] dark:bg-green-950/20 p-4">
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-lg bg-[#e1f8e5] dark:bg-green-900/20 flex items-center justify-center">
+                          <div className="text-primary">
+                            <DollarSign className="h-6 w-6" />
+                          </div>
+                        </div>
+                        <div>
+                          <div className="font-medium text-lg">PIX</div>
+                          <div className="text-sm text-muted-foreground">{paymentData.pix.count} vendas</div>
+                        </div>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-sm text-muted-foreground">Quantidade:</span>
-                        <span className="font-medium">{paymentData.pix.count}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-sm text-muted-foreground">Conversão:</span>
-                        <span className="font-medium">{paymentData.pix.conversion}%</span>
-                      </div>
-                      <Progress value={paymentData.pix.conversion} className="h-2 mt-2" />
+                      <div className="text-lg font-medium text-primary">{paymentData.pix.conversion}%</div>
                     </div>
-                  </CardContent>
-                </Card>
-                
-                <Card className="bg-card/50 shadow-none">
-                  <CardHeader className="py-3">
-                    <CardTitle className="text-base">Cartão de Crédito</CardTitle>
-                  </CardHeader>
-                  <CardContent className="pb-4">
-                    <div className="space-y-2">
-                      <div className="flex justify-between">
-                        <span className="text-sm text-muted-foreground">Valor vendido:</span>
-                        <span className="font-medium">{formatCurrency(paymentData.credit.total)}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-sm text-muted-foreground">Quantidade:</span>
-                        <span className="font-medium">{paymentData.credit.count}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-sm text-muted-foreground">Conversão:</span>
-                        <span className="font-medium">{paymentData.credit.conversion}%</span>
-                      </div>
-                      <Progress value={paymentData.credit.conversion} className="h-2 mt-2" />
+                    <div className="mt-3 w-full h-2 bg-[#e1f8e5] dark:bg-green-900/20 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-primary rounded-full"
+                        style={{ width: `${paymentData.pix.conversion}%` }}
+                      ></div>
                     </div>
-                  </CardContent>
-                </Card>
-                
-                <Card className="bg-card/50 shadow-none">
-                  <CardHeader className="py-3">
-                    <CardTitle className="text-base">Boleto</CardTitle>
-                  </CardHeader>
-                  <CardContent className="pb-4">
-                    <div className="space-y-2">
-                      <div className="flex justify-between">
-                        <span className="text-sm text-muted-foreground">Valor vendido:</span>
-                        <span className="font-medium">{formatCurrency(paymentData.boleto.total)}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-sm text-muted-foreground">Quantidade:</span>
-                        <span className="font-medium">{paymentData.boleto.count}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-sm text-muted-foreground">Conversão:</span>
-                        <span className="font-medium">{paymentData.boleto.conversion}%</span>
-                      </div>
-                      <Progress value={paymentData.boleto.conversion} className="h-2 mt-2" />
+                    <div className="mt-2 text-right font-medium">
+                      {formatCurrency(paymentData.pix.total)}
                     </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </CardContent>
-          </Card>
+                  </div>
+                  
+                  <div className="rounded-lg bg-[#eef3fc] dark:bg-blue-950/20 p-4">
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-lg bg-[#dee7f8] dark:bg-blue-900/20 flex items-center justify-center">
+                          <div className="text-blue-600 dark:text-blue-400">
+                            <CreditCard className="h-6 w-6" />
+                          </div>
+                        </div>
+                        <div>
+                          <div className="font-medium text-lg">Cartão de Crédito</div>
+                          <div className="text-sm text-muted-foreground">{paymentData.credit.count} vendas</div>
+                        </div>
+                      </div>
+                      <div className="text-lg font-medium text-blue-600 dark:text-blue-400">{paymentData.credit.conversion}%</div>
+                    </div>
+                    <div className="mt-3 w-full h-2 bg-[#dee7f8] dark:bg-blue-900/20 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-blue-600 dark:bg-blue-400 rounded-full"
+                        style={{ width: `${paymentData.credit.conversion}%` }}
+                      ></div>
+                    </div>
+                    <div className="mt-2 text-right font-medium">
+                      {formatCurrency(paymentData.credit.total)}
+                    </div>
+                  </div>
+                  
+                  <div className="rounded-lg bg-[#f5f0ff] dark:bg-purple-950/20 p-4">
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-lg bg-[#ede4ff] dark:bg-purple-900/20 flex items-center justify-center">
+                          <div className="text-purple-600 dark:text-purple-400">
+                            <Package className="h-6 w-6" />
+                          </div>
+                        </div>
+                        <div>
+                          <div className="font-medium text-lg">Boleto</div>
+                          <div className="text-sm text-muted-foreground">{paymentData.boleto.count} vendas</div>
+                        </div>
+                      </div>
+                      <div className="text-lg font-medium text-purple-600 dark:text-purple-400">{paymentData.boleto.conversion}%</div>
+                    </div>
+                    <div className="mt-3 w-full h-2 bg-[#ede4ff] dark:bg-purple-900/20 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-purple-600 dark:bg-purple-400 rounded-full"
+                        style={{ width: `${paymentData.boleto.conversion}%` }}
+                      ></div>
+                    </div>
+                    <div className="mt-2 text-right font-medium">
+                      {formatCurrency(paymentData.boleto.total)}
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </main>
       </div>
       
