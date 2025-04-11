@@ -1,19 +1,22 @@
+
 import React, { useState } from 'react';
 import CheckoutLayout from '@/components/checkout/CheckoutLayout';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, ExternalLink, Check, X, CreditCard, Edit, Trash2 } from 'lucide-react';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { toast } from '@/hooks/use-toast';
+import { Drawer, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
+import { CreditCard, ExternalLink, Globe, Flag } from 'lucide-react';
 
 interface Gateway {
   id: string;
   name: string;
   logo: string;
+  scopes: string[];
   isActive: boolean;
   publicKey?: string;
   secretKey?: string;
@@ -21,30 +24,57 @@ interface Gateway {
 }
 
 const GatewaysPage = () => {
+  const isMobile = useIsMobile();
   const [gateways, setGateways] = useState<Gateway[]>([
     {
-      id: "stripe",
-      name: "Stripe",
+      id: "alpa",
+      name: "Alpa",
       logo: "/placeholder.svg",
+      scopes: ["Nacional"],
+      isActive: false
+    },
+    {
+      id: "appmax",
+      name: "Appmax",
+      logo: "/placeholder.svg",
+      scopes: ["Nacional"],
+      isActive: false
+    },
+    {
+      id: "astonpay",
+      name: "Aston Pay",
+      logo: "/placeholder.svg",
+      scopes: ["Nacional", "Global"],
       isActive: true,
       publicKey: "pk_test_123",
       secretKey: "sk_test_***"
     },
     {
-      id: "paypal",
-      name: "PayPal",
+      id: "azcend",
+      name: "Azcend",
       logo: "/placeholder.svg",
+      scopes: ["Nacional", "Global"],
       isActive: false
     },
     {
-      id: "mercadopago",
-      name: "Mercado Pago",
+      id: "axionpay",
+      name: "Axionpay",
       logo: "/placeholder.svg",
+      scopes: ["Nacional"],
+      isActive: true,
+      token: "AXN_TOKEN_123"
+    },
+    {
+      id: "bestfy",
+      name: "Bestfy",
+      logo: "/placeholder.svg",
+      scopes: ["Nacional", "Global"],
       isActive: false
     }
   ]);
   
-  const [open, setOpen] = useState(false);
+  const [openDrawer, setOpenDrawer] = useState(false);
+  const [openDialog, setOpenDialog] = useState(false);
   const [currentGateway, setCurrentGateway] = useState<Gateway | null>(null);
   const [formData, setFormData] = useState({
     publicKey: "",
@@ -52,14 +82,19 @@ const GatewaysPage = () => {
     token: ""
   });
   
-  const handleOpenDialog = (gateway: Gateway) => {
+  const handleOpenModal = (gateway: Gateway) => {
     setCurrentGateway(gateway);
     setFormData({
       publicKey: gateway.publicKey || "",
       secretKey: gateway.secretKey || "",
       token: gateway.token || ""
     });
-    setOpen(true);
+    
+    if (isMobile) {
+      setOpenDrawer(true);
+    } else {
+      setOpenDialog(true);
+    }
   };
   
   const handleSaveGateway = () => {
@@ -78,7 +113,8 @@ const GatewaysPage = () => {
     );
     
     setGateways(updatedGateways);
-    setOpen(false);
+    setOpenDialog(false);
+    setOpenDrawer(false);
     
     toast({
       title: "Gateway integrado",
@@ -106,43 +142,59 @@ const GatewaysPage = () => {
       title="Gateways de Pagamento" 
       description="Integre sua loja com diversos gateways de pagamento para oferecer várias opções aos seus clientes."
     >
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-2">
         {gateways.map((gateway) => (
-          <Card key={gateway.id} className={cn(
-            "transition-all",
-            gateway.isActive 
-              ? "border-green-200 dark:border-green-900" 
-              : "hover:border-muted-foreground/20"
-          )}>
-            <CardHeader className="pb-3">
-              <div className="flex justify-between items-center">
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <CreditCard className="h-5 w-5" />
-                  {gateway.name}
-                </CardTitle>
-                {gateway.isActive ? (
-                  <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 dark:bg-green-950 dark:text-green-300 dark:border-green-800">
-                    <Check className="h-3 w-3 mr-1" />
-                    Ativo
-                  </Badge>
-                ) : (
-                  <Badge variant="outline" className="bg-muted">
-                    Inativo
-                  </Badge>
-                )}
+          <div 
+            key={gateway.id} 
+            className={cn(
+              "rounded-lg border bg-card p-4 transition-all hover:shadow-md",
+              gateway.isActive ? "border-green-200 dark:border-green-900" : "hover:border-muted-foreground/20"
+            )}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-md bg-muted">
+                  <CreditCard className="h-6 w-6" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold">{gateway.name}</h3>
+                  <div className="mt-1 flex flex-wrap gap-2">
+                    {gateway.scopes.map((scope) => (
+                      <Badge 
+                        key={scope} 
+                        variant="outline" 
+                        className="bg-muted text-muted-foreground"
+                      >
+                        {scope === "Global" ? (
+                          <Globe className="mr-1 h-3 w-3" />
+                        ) : (
+                          <Flag className="mr-1 h-3 w-3" />
+                        )}
+                        {scope}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
               </div>
-            </CardHeader>
-            <CardFooter className="pt-3">
+              <div 
+                className={cn(
+                  "h-4 w-4 rounded-full transition-colors duration-300",
+                  gateway.isActive 
+                    ? "bg-green-500" 
+                    : "bg-gray-300 dark:bg-gray-600"
+                )}
+              />
+            </div>
+            <div className="mt-4">
               {gateway.isActive ? (
-                <div className="flex w-full gap-2">
+                <div className="flex gap-2">
                   <Button 
                     variant="outline" 
                     size="sm" 
                     className="flex items-center gap-2 flex-1"
-                    onClick={() => handleOpenDialog(gateway)}
+                    onClick={() => handleOpenModal(gateway)}
                   >
-                    <Edit className="h-4 w-4" />
-                    <span>Editar</span>
+                    Editar
                   </Button>
                   <Button 
                     variant="outline" 
@@ -150,8 +202,7 @@ const GatewaysPage = () => {
                     className="flex items-center gap-2 flex-1 text-destructive border-destructive/50 hover:bg-destructive/10"
                     onClick={() => handleRemoveGateway(gateway.id)}
                   >
-                    <Trash2 className="h-4 w-4" />
-                    <span>Remover</span>
+                    Remover
                   </Button>
                 </div>
               ) : (
@@ -159,18 +210,18 @@ const GatewaysPage = () => {
                   variant="outline" 
                   size="sm" 
                   className="flex items-center gap-2 w-full" 
-                  onClick={() => handleOpenDialog(gateway)}
+                  onClick={() => handleOpenModal(gateway)}
                 >
-                  <PlusCircle className="h-4 w-4" />
-                  <span>Integrar</span>
+                  Integrar
                 </Button>
               )}
-            </CardFooter>
-          </Card>
+            </div>
+          </div>
         ))}
       </div>
       
-      <Dialog open={open} onOpenChange={setOpen}>
+      {/* Dialog for desktop */}
+      <Dialog open={openDialog} onOpenChange={setOpenDialog}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Integrar {currentGateway?.name}</DialogTitle>
@@ -201,14 +252,14 @@ const GatewaysPage = () => {
               />
             </div>
             
-            {currentGateway?.id === "mercadopago" && (
+            {currentGateway?.id === "axionpay" && (
               <div className="space-y-2">
                 <Label htmlFor="token">Token</Label>
                 <Input 
                   id="token" 
                   value={formData.token}
                   onChange={(e) => setFormData({...formData, token: e.target.value})}
-                  placeholder="APP_USR-..." 
+                  placeholder="AXN_..." 
                 />
               </div>
             )}
@@ -229,11 +280,77 @@ const GatewaysPage = () => {
           </div>
           
           <DialogFooter>
-            <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
+            <Button variant="outline" onClick={() => setOpenDialog(false)}>Cancelar</Button>
             <Button onClick={handleSaveGateway}>Salvar</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      
+      {/* Drawer for mobile */}
+      <Drawer open={openDrawer} onOpenChange={setOpenDrawer}>
+        <DrawerContent>
+          <DrawerHeader>
+            <DrawerTitle>Integrar {currentGateway?.name}</DrawerTitle>
+            <DrawerDescription>
+              Insira as informações de integração do gateway.
+            </DrawerDescription>
+          </DrawerHeader>
+          
+          <div className="px-4 space-y-4 py-2">
+            <div className="space-y-2">
+              <Label htmlFor="publicKey-mobile">Chave Pública</Label>
+              <Input 
+                id="publicKey-mobile" 
+                value={formData.publicKey}
+                onChange={(e) => setFormData({...formData, publicKey: e.target.value})}
+                placeholder="pk_..." 
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="secretKey-mobile">Chave Secreta</Label>
+              <Input 
+                id="secretKey-mobile" 
+                value={formData.secretKey}
+                onChange={(e) => setFormData({...formData, secretKey: e.target.value})}
+                placeholder="sk_..." 
+                type="password"
+              />
+            </div>
+            
+            {currentGateway?.id === "axionpay" && (
+              <div className="space-y-2">
+                <Label htmlFor="token-mobile">Token</Label>
+                <Input 
+                  id="token-mobile" 
+                  value={formData.token}
+                  onChange={(e) => setFormData({...formData, token: e.target.value})}
+                  placeholder="AXN_..." 
+                />
+              </div>
+            )}
+            
+            <div className="flex items-center pt-2">
+              <ExternalLink className="h-4 w-4 mr-2 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">
+                <a 
+                  href={`https://${currentGateway?.id}.com/dashboard`} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="underline"
+                >
+                  Acessar dashboard do {currentGateway?.name}
+                </a>
+              </span>
+            </div>
+          </div>
+          
+          <DrawerFooter>
+            <Button onClick={handleSaveGateway}>Salvar</Button>
+            <Button variant="outline" onClick={() => setOpenDrawer(false)}>Cancelar</Button>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
     </CheckoutLayout>
   );
 };
