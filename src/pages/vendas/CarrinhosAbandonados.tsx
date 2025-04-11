@@ -10,8 +10,6 @@ import { Eye, Search, Filter, Mail } from 'lucide-react';
 import { formatCurrency, formatRelativeTime } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 
-// Let's add the formatRelativeTime helper function to utils if it doesn't exist
-
 // Mock data for abandoned carts
 const mockAbandonedCarts = [
   {

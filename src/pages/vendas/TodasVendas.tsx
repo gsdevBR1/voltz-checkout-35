@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,7 +9,6 @@ import { Badge } from '@/components/ui/badge';
 import { Eye, Search, Filter } from 'lucide-react';
 import { formatCurrency, formatDateTime } from '@/lib/utils';
 
-// Mock data for demonstration
 const mockOrders = [
   {
     id: '000123',
@@ -86,7 +84,6 @@ const TodasVendas: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [paymentFilter, setPaymentFilter] = useState('all');
   
-  // Filter orders based on search and filters
   const filteredOrders = mockOrders.filter(order => {
     const matchesSearch = 
       order.id.includes(searchTerm) || 
