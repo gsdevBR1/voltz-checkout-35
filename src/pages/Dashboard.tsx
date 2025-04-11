@@ -732,20 +732,20 @@ const Dashboard = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-6">
-                  <div className="rounded-lg bg-[#f1fcf3] dark:bg-green-950/20 p-4">
+                  <div className="rounded-lg bg-[#f0f9f0] dark:bg-green-950/20 p-4 border-l-4 border-primary">
                     <div className="flex justify-between items-center">
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-lg bg-[#e1f8e5] dark:bg-green-900/20 flex items-center justify-center">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-[#e1f8e5] dark:bg-green-900/20 flex items-center justify-center">
                           <div className="text-primary">
-                            <DollarSign className="h-6 w-6" />
+                            <DollarSign className="h-5 w-5" />
                           </div>
                         </div>
                         <div>
-                          <div className="font-medium text-lg">PIX</div>
-                          <div className="text-sm text-muted-foreground">{paymentData.pix.count} vendas</div>
+                          <div className="font-medium">PIX</div>
+                          <div className="text-xs text-muted-foreground">{paymentData.pix.count} vendas</div>
                         </div>
                       </div>
-                      <div className="text-lg font-medium text-primary">{paymentData.pix.conversion}%</div>
+                      <div className="text-lg font-semibold text-primary">{paymentData.pix.conversion}%</div>
                     </div>
                     <div className="mt-3 w-full h-2 bg-[#e1f8e5] dark:bg-green-900/20 rounded-full overflow-hidden">
                       <div 
@@ -758,20 +758,20 @@ const Dashboard = () => {
                     </div>
                   </div>
                   
-                  <div className="rounded-lg bg-[#eef3fc] dark:bg-blue-950/20 p-4">
+                  <div className="rounded-lg bg-[#eef3fc] dark:bg-blue-950/20 p-4 border-l-4 border-blue-500">
                     <div className="flex justify-between items-center">
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-lg bg-[#dee7f8] dark:bg-blue-900/20 flex items-center justify-center">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-[#dee7f8] dark:bg-blue-900/20 flex items-center justify-center">
                           <div className="text-blue-600 dark:text-blue-400">
-                            <CreditCard className="h-6 w-6" />
+                            <CreditCard className="h-5 w-5" />
                           </div>
                         </div>
                         <div>
-                          <div className="font-medium text-lg">Cartão de Crédito</div>
-                          <div className="text-sm text-muted-foreground">{paymentData.credit.count} vendas</div>
+                          <div className="font-medium">Cartão de Crédito</div>
+                          <div className="text-xs text-muted-foreground">{paymentData.credit.count} vendas</div>
                         </div>
                       </div>
-                      <div className="text-lg font-medium text-blue-600 dark:text-blue-400">{paymentData.credit.conversion}%</div>
+                      <div className="text-lg font-semibold text-blue-600 dark:text-blue-400">{paymentData.credit.conversion}%</div>
                     </div>
                     <div className="mt-3 w-full h-2 bg-[#dee7f8] dark:bg-blue-900/20 rounded-full overflow-hidden">
                       <div 
@@ -784,20 +784,20 @@ const Dashboard = () => {
                     </div>
                   </div>
                   
-                  <div className="rounded-lg bg-[#f5f0ff] dark:bg-purple-950/20 p-4">
+                  <div className="rounded-lg bg-[#f6f1ff] dark:bg-purple-950/20 p-4 border-l-4 border-purple-500">
                     <div className="flex justify-between items-center">
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-lg bg-[#ede4ff] dark:bg-purple-900/20 flex items-center justify-center">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-[#ede4ff] dark:bg-purple-900/20 flex items-center justify-center">
                           <div className="text-purple-600 dark:text-purple-400">
-                            <Package className="h-6 w-6" />
+                            <Package className="h-5 w-5" />
                           </div>
                         </div>
                         <div>
-                          <div className="font-medium text-lg">Boleto</div>
-                          <div className="text-sm text-muted-foreground">{paymentData.boleto.count} vendas</div>
+                          <div className="font-medium">Boleto</div>
+                          <div className="text-xs text-muted-foreground">{paymentData.boleto.count} vendas</div>
                         </div>
                       </div>
-                      <div className="text-lg font-medium text-purple-600 dark:text-purple-400">{paymentData.boleto.conversion}%</div>
+                      <div className="text-lg font-semibold text-purple-600 dark:text-purple-400">{paymentData.boleto.conversion}%</div>
                     </div>
                     <div className="mt-3 w-full h-2 bg-[#ede4ff] dark:bg-purple-900/20 rounded-full overflow-hidden">
                       <div 
