@@ -110,7 +110,17 @@ const HomePage = () => {
         {/* Optional steps section */}
         {optionalSteps.length > 0 && (
           <div className="mt-10">
-            <ShopifyCard />
+            <h2 className="text-xl font-semibold mb-4">
+              Integrações opcionais
+            </h2>
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              {optionalSteps.map(step => {
+                if (step.id === 'shopify') {
+                  return <ShopifyCard key={step.id} />;
+                }
+                return null;
+              })}
+            </div>
           </div>
         )}
       </div>
