@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import CheckoutLayout from '@/components/checkout/CheckoutLayout';
 import { Button } from '@/components/ui/button';
@@ -10,16 +9,19 @@ import { toast } from '@/hooks/use-toast';
 import { Drawer, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
-import { CreditCard, ExternalLink, Globe, Flag, HelpCircle, CreditCard as CardIcon, QrCode } from 'lucide-react';
+import { CreditCard, ExternalLink, Globe, Flag, HelpCircle, CreditCard as CardIcon, QrCode, Percent, ChevronDown } from 'lucide-react';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
 import { Card, CardContent } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface GatewayRule {
   creditCardEnabled: boolean;
   pixEnabled: boolean;
   customInterestRate: boolean;
+  interestRate?: number;
+  installmentOption?: string;
 }
 
 interface Gateway {
@@ -99,6 +101,8 @@ const GatewaysPage = () => {
     creditCardEnabled: false,
     pixEnabled: false,
     customInterestRate: false,
+    interestRate: 5.02,
+    installmentOption: "all",
     isActive: false
   });
   
@@ -109,6 +113,8 @@ const GatewaysPage = () => {
       creditCardEnabled: gateway.rules?.creditCardEnabled || false,
       pixEnabled: gateway.rules?.pixEnabled || false,
       customInterestRate: gateway.rules?.customInterestRate || false,
+      interestRate: gateway.rules?.interestRate || 5.02,
+      installmentOption: gateway.rules?.installmentOption || "all",
       isActive: gateway.isActive || false
     });
     
@@ -140,7 +146,9 @@ const GatewaysPage = () => {
             rules: {
               creditCardEnabled: formData.creditCardEnabled,
               pixEnabled: formData.pixEnabled,
-              customInterestRate: formData.customInterestRate
+              customInterestRate: formData.customInterestRate,
+              interestRate: formData.interestRate,
+              installmentOption: formData.installmentOption
             }
           } 
         : g
@@ -267,6 +275,48 @@ const GatewaysPage = () => {
                     />
                   </div>
                 </div>
+
+                {formData.customInterestRate && (
+                  <div className="mt-6 space-y-6 border-t pt-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="interestRate">Taxa de juros de parcelamento</Label>
+                      <div className="flex">
+                        <Input 
+                          id="interestRate" 
+                          type="number"
+                          value={formData.interestRate}
+                          onChange={(e) => setFormData({...formData, interestRate: parseFloat(e.target.value) || 0})}
+                          step="0.01"
+                          min="0"
+                          max="100"
+                          className="rounded-r-none"
+                        />
+                        <div className="flex items-center justify-center bg-muted border border-l-0 border-input rounded-r-md px-3">
+                          <Percent className="h-4 w-4 text-muted-foreground" />
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label>Oferecer parcelamento sem juros.</Label>
+                      <Select
+                        value={formData.installmentOption}
+                        onValueChange={(value) => setFormData({...formData, installmentOption: value})}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Selecione uma opção" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">Cobrar juros em todas as parcelas</SelectItem>
+                          <SelectItem value="after3">Cobrar juros após 3 parcelas</SelectItem>
+                          <SelectItem value="after6">Cobrar juros após 6 parcelas</SelectItem>
+                          <SelectItem value="after12">Cobrar juros após 12 parcelas</SelectItem>
+                          <SelectItem value="none">Não cobrar juros (parcelamento grátis)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -412,7 +462,6 @@ const GatewaysPage = () => {
         ))}
       </div>
       
-      {/* Dialog for desktop */}
       <Dialog open={openDialog} onOpenChange={setOpenDialog}>
         <DialogContent className="max-w-4xl">
           {currentGateway && renderGatewayModalContent()}
@@ -436,7 +485,6 @@ const GatewaysPage = () => {
         </DialogContent>
       </Dialog>
       
-      {/* Drawer for mobile */}
       <Drawer open={openDrawer} onOpenChange={setOpenDrawer}>
         <DrawerContent className="px-4">
           <DrawerHeader className="text-left">
