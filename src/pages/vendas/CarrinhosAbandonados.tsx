@@ -1,4 +1,6 @@
+
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -195,9 +197,15 @@ const CarrinhosAbandonados: React.FC = () => {
                               <Mail className="h-3.5 w-3.5 mr-1" />
                               Recuperar
                             </Button>
-                            <Button variant="outline" size="sm">
-                              <Eye className="h-3.5 w-3.5 mr-1" />
-                              Detalhes
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              asChild
+                            >
+                              <Link to={`/vendas/abandonados/detalhe/${cart.id}`}>
+                                <Eye className="h-3.5 w-3.5 mr-1" />
+                                Detalhes
+                              </Link>
                             </Button>
                           </div>
                         </TableCell>
