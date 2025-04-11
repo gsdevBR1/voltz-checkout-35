@@ -30,6 +30,7 @@ import NovoProdutoDigital from "./pages/produtos/NovoProdutoDigital";
 import EditarProduto from "./pages/produtos/EditarProduto";
 import NovoFisico from "./pages/produtos/NovoFisico";
 import EditarProdutoFisico from "./pages/produtos/EditarProdutoFisico";
+import VerProduto from "./pages/produtos/VerProduto";
 import { ActivationStepsProvider } from "./contexts/ActivationStepsContextWithStores";
 import { StoreProvider } from "./contexts/StoreContext";
 import { ThemeProvider } from "./providers/ThemeProvider";
@@ -74,6 +75,7 @@ const App: React.FC = () => {
                   <Route path="/produtos/novo/digital" element={<NovoProdutoDigital />} />
                   <Route path="/produtos/editar/:id" element={<EditarProduto />} />
                   <Route path="/produtos/:id/editar" element={<EditarProdutoFisico />} />
+                  <Route path="/produtos/:id/ver" element={<VerProduto />} />
                   <Route path="/steps/billing" element={<BillingStep />} />
                   <Route path="/steps/domain" element={<DomainStep />} />
                   <Route path="/steps/gateway" element={<GatewayStep />} />

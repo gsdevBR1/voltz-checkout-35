@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/card';
 import { ProductTypeBadge, ShopifyBadge } from '@/components/produtos/ProductBadge';
 import { Product } from '@/types/product';
-import { ArrowLeft, Package, FileText } from 'lucide-react';
+import { ArrowLeft, Package, FileText, Eye } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 // Mock data for demonstration purposes
@@ -128,6 +128,13 @@ const EditarProduto: React.FC = () => {
               {product.fromShopify && <ShopifyBadge />}
             </div>
           </div>
+          <Button 
+            variant="outline"
+            onClick={() => navigate(`/produtos/${id}/ver`)}
+          >
+            <Eye className="mr-2 h-4 w-4" />
+            Ver Produto
+          </Button>
         </div>
 
         <Card className="mb-8">
