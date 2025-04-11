@@ -1,14 +1,13 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    --background: 0 0% 98%; /* #F9FAFB for light mode */
     --foreground: 0 0% 0%;
 
-    --card: 0 0% 100%;
+    --card: 0 0% 100%; /* #FFFFFF for cards in light mode */
     --card-foreground: 0 0% 0%;
 
     --popover: 0 0% 100%;
@@ -53,10 +52,10 @@
   }
 
   .dark {
-    --background: 0 0% 6%;
+    --background: 0 0% 10%; /* #1A1A1A for dark mode */
     --foreground: 0 0% 100%;
 
-    --card: 0 0% 10%;
+    --card: 0 0% 16%; /* #2A2A2A for cards in dark mode */
     --card-foreground: 0 0% 100%;
 
     --popover: 0 0% 6%;
