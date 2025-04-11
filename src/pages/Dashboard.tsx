@@ -593,14 +593,14 @@ const Dashboard = () => {
               </Select>
             </CardHeader>
             <CardContent className="pt-0 pb-6">
-              <div className="h-80 min-h-[250px] w-full overflow-hidden rounded-md">
+              <div className="h-72 min-h-[220px] w-full overflow-hidden rounded-md">
                 <ChartContainer 
-                  config={{ data: { theme: { light: '#2BBA00', dark: '#2BBA00' } } }}
+                  config={{ data: { theme: { light: '#2BBA00', dark: '#2BBA00' } }}}
                   className="overflow-visible"
                 >
                   <AreaChart 
                     data={chartData} 
-                    margin={{ top: 20, right: 30, left: 10, bottom: 30 }}
+                    margin={{ top: 20, right: 30, left: 20, bottom: 40 }}
                   >
                     <defs>
                       <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
@@ -619,10 +619,10 @@ const Dashboard = () => {
                       label={{ 
                         value: isHourlyView ? 'Hora' : 'Período', 
                         position: 'insideBottom', 
-                        offset: -15,
+                        offset: -20,
                         fill: 'hsl(var(--muted-foreground))'
                       }}
-                      height={50}
+                      height={60}
                     />
                     <YAxis 
                       axisLine={false}
