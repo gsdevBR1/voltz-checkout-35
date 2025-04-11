@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/DashboardLayout';
 import {
   Table,
@@ -36,6 +35,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { formatCurrency, formatDateTime } from "@/lib/utils";
+import { useToast } from '@/hooks/use-toast';
 import {
   Search,
   FileText,
@@ -46,6 +46,7 @@ import {
   CreditCard,
   ExternalLink,
   RefreshCw,
+  AlertCircle,
 } from "lucide-react";
 
 // Mock customer data
@@ -149,6 +150,8 @@ const MOCK_ORDERS = [
 
 const HistoricoCompras: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const [customer, setCustomer] = useState<typeof MOCK_CUSTOMERS[0] | null>(null);
   const [orders, setOrders] = useState<typeof MOCK_ORDERS>([]);
   const [filteredOrders, setFilteredOrders] = useState<typeof MOCK_ORDERS>([]);
@@ -262,6 +265,45 @@ const HistoricoCompras: React.FC = () => {
   const exportData = () => {
     // In a real app, this would generate and download a CSV/Excel file
     alert('Exportando dados para CSV/Excel');
+  };
+
+  const handleRepurchase = (order: typeof MOCK_ORDERS[0]) => {
+    // In a real app, we would check stock availability and create a new checkout
+    // For now, we'll simulate this with mock data
+    
+    // Check if any products are unavailable (randomly for demo)
+    const unavailableProduct = Math.random() > 0.8 
+      ? order.products[Math.floor(Math.random() * order.products.length)]
+      : null;
+    
+    if (unavailableProduct) {
+      toast({
+        variant: "destructive",
+        title: "Produto indisponível",
+        description: `${unavailableProduct.name} não está mais disponível em estoque.`,
+        action: (
+          <Button variant="outline" size="sm" onClick={() => navigate('/vendas/todas')}>
+            Ver outras opções
+          </Button>
+        ),
+      });
+      return;
+    }
+    
+    // Success path: create checkout and redirect
+    toast({
+      title: "Carrinho recriado com sucesso!",
+      description: `${order.products.length} produto(s) adicionados ao seu carrinho.`,
+    });
+    
+    // In a real app, this would create a checkout and redirect to it
+    // For now, we'll just show another toast
+    setTimeout(() => {
+      toast({
+        title: "Redirecionando para o checkout...",
+        description: "Em um app real, isso abriria uma nova página de checkout.",
+      });
+    }, 1500);
   };
   
   if (loading) {
@@ -449,16 +491,27 @@ const HistoricoCompras: React.FC = () => {
                         </span>
                       </TableCell>
                       <TableCell className="text-right">
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          asChild
-                        >
-                          <Link to={`/vendas/detalhe/${order.id}`}>
-                            <ExternalLink className="h-4 w-4 mr-1" />
-                            Ver detalhes
-                          </Link>
-                        </Button>
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-950"
+                            onClick={() => handleRepurchase(order)}
+                          >
+                            <RefreshCw className="h-4 w-4 mr-1" />
+                            Recomprar
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            asChild
+                          >
+                            <Link to={`/vendas/detalhe/${order.id}`}>
+                              <ExternalLink className="h-4 w-4 mr-1" />
+                              Ver detalhes
+                            </Link>
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))

@@ -24,8 +24,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { formatCurrency, formatDateTime } from "@/lib/utils";
-import { FileText, Search, ExternalLink, ArrowRight } from "lucide-react";
-import { Link } from 'react-router-dom';
+import { FileText, Search, ExternalLink, ArrowRight, RefreshCw } from "lucide-react";
+import { Link, useNavigate } from 'react-router-dom';
+import { useToast } from "@/hooks/use-toast";
 
 // Mock data for customer orders
 const MOCK_ORDERS = [
@@ -85,6 +86,8 @@ interface ClientePurchaseHistoryProps {
 }
 
 const ClientePurchaseHistory: React.FC<ClientePurchaseHistoryProps> = ({ customerId }) => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredOrders, setFilteredOrders] = useState(MOCK_ORDERS);
 
@@ -116,6 +119,43 @@ const ClientePurchaseHistory: React.FC<ClientePurchaseHistoryProps> = ({ custome
       default:
         return 'text-gray-600 bg-gray-100 dark:bg-gray-800 dark:text-gray-400';
     }
+  };
+
+  const handleRepurchase = (order: typeof MOCK_ORDERS[0]) => {
+    // In a real app, we would check stock availability and create a new checkout
+    // For now, we'll simulate this with mock data
+    
+    // Check if the product is unavailable (randomly for demo)
+    const isProductAvailable = Math.random() > 0.2;
+    
+    if (!isProductAvailable) {
+      toast({
+        variant: "destructive",
+        title: "Produto indisponível",
+        description: `${order.product} não está mais disponível em estoque.`,
+        action: (
+          <Button variant="outline" size="sm" onClick={() => navigate('/vendas/todas')}>
+            Ver outras opções
+          </Button>
+        ),
+      });
+      return;
+    }
+    
+    // Success path: create checkout and redirect
+    toast({
+      title: "Carrinho recriado com sucesso!",
+      description: `${order.product} adicionado ao seu carrinho.`,
+    });
+    
+    // In a real app, this would create a checkout and redirect to it
+    // For now, we'll just show another toast
+    setTimeout(() => {
+      toast({
+        title: "Redirecionando para o checkout...",
+        description: "Em um app real, isso abriria uma nova página de checkout.",
+      });
+    }, 1500);
   };
 
   return (
@@ -169,16 +209,27 @@ const ClientePurchaseHistory: React.FC<ClientePurchaseHistoryProps> = ({ custome
                             </span>
                           </TableCell>
                           <TableCell className="text-right">
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              asChild
-                            >
-                              <Link to={`/vendas/detalhe/${order.id}`}>
-                                <ExternalLink className="h-4 w-4 mr-1" />
-                                Ver detalhes
-                              </Link>
-                            </Button>
+                            <div className="flex justify-end gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-950"
+                                onClick={() => handleRepurchase(order)}
+                              >
+                                <RefreshCw className="h-4 w-4 mr-1" />
+                                Recomprar
+                              </Button>
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                asChild
+                              >
+                                <Link to={`/vendas/detalhe/${order.id}`}>
+                                  <ExternalLink className="h-4 w-4 mr-1" />
+                                  Ver detalhes
+                                </Link>
+                              </Button>
+                            </div>
                           </TableCell>
                         </TableRow>
                       ))
