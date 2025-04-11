@@ -40,6 +40,7 @@ interface SidebarProps {
 export const AppSidebar: React.FC<SidebarProps> = ({ className }) => {
   const location = useLocation();
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
+  const [clickedIcon, setClickedIcon] = useState<string | null>(null);
   
   const menuItems = [
     {
@@ -89,6 +90,16 @@ export const AppSidebar: React.FC<SidebarProps> = ({ className }) => {
     setOpenSections(prev => ({ ...prev, [path]: !prev[path] }));
   };
   
+  // Handle icon click animation
+  const handleIconClick = (path: string) => {
+    setClickedIcon(path);
+    
+    // Reset clicked icon after animation completes
+    setTimeout(() => {
+      setClickedIcon(null);
+    }, 300); // 300ms to ensure animation completes
+  };
+  
   return (
     <Sidebar className={className}>
       <SidebarHeader>
@@ -102,6 +113,17 @@ export const AppSidebar: React.FC<SidebarProps> = ({ className }) => {
         </div>
       </SidebarHeader>
       <SidebarContent>
+        <style jsx global>{`
+          @keyframes iconClickPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+            100% { transform: scale(1); }
+          }
+          
+          .icon-pulse {
+            animation: iconClickPulse 0.2s ease-out;
+          }
+        `}</style>
         <SidebarMenu>
           {menuItems.map((item) => (
             <SidebarMenuItem key={item.path}>
@@ -116,9 +138,16 @@ export const AppSidebar: React.FC<SidebarProps> = ({ className }) => {
                         isActive={location.pathname.startsWith(item.path)}
                         tooltip={item.title}
                         className="flex justify-between"
+                        onClick={() => handleIconClick(item.path)}
                       >
                         <div className="flex items-center">
-                          <item.icon className="h-5 w-5 mr-2" />
+                          <item.icon 
+                            className={cn(
+                              "h-5 w-5 mr-2",
+                              clickedIcon === item.path ? "icon-pulse" : ""
+                            )} 
+                            aria-current={location.pathname.startsWith(item.path) ? "page" : undefined}
+                          />
                           <span>{item.title}</span>
                         </div>
                         <ChevronDown 
@@ -138,8 +167,17 @@ export const AppSidebar: React.FC<SidebarProps> = ({ className }) => {
                             asChild
                             isActive={location.pathname === subItem.path}
                           >
-                            <Link to={subItem.path}>
-                              <subItem.icon className="h-4 w-4" />
+                            <Link 
+                              to={subItem.path}
+                              onClick={() => handleIconClick(subItem.path)}
+                            >
+                              <subItem.icon 
+                                className={cn(
+                                  "h-4 w-4",
+                                  clickedIcon === subItem.path ? "icon-pulse" : ""
+                                )}
+                                aria-current={location.pathname === subItem.path ? "page" : undefined}
+                              />
                               <span>{subItem.title}</span>
                             </Link>
                           </SidebarMenuSubButton>
@@ -154,8 +192,18 @@ export const AppSidebar: React.FC<SidebarProps> = ({ className }) => {
                   isActive={location.pathname === item.path}
                   tooltip={item.title}
                 >
-                  <Link to={item.path} className="w-full">
-                    <item.icon className="h-5 w-5" />
+                  <Link 
+                    to={item.path} 
+                    className="w-full"
+                    onClick={() => handleIconClick(item.path)}
+                  >
+                    <item.icon 
+                      className={cn(
+                        "h-5 w-5",
+                        clickedIcon === item.path ? "icon-pulse" : ""
+                      )}
+                      aria-current={location.pathname === item.path ? "page" : undefined}
+                    />
                     <span>{item.title}</span>
                   </Link>
                 </SidebarMenuButton>
