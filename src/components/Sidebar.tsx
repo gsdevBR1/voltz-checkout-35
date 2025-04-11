@@ -30,22 +30,9 @@ import {
   SidebarTrigger,
   SidebarMenuSub,
   SidebarMenuSubItem,
-  SidebarMenuSubButton
+  SidebarMenuSubButton,
+  useSidebar
 } from '@/components/ui/sidebar';
-
-// Define keyframe animation in a style block at the top of the file
-// instead of using styled-jsx
-const iconPulseAnimation = `
-  @keyframes iconClickPulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.15); }
-    100% { transform: scale(1); }
-  }
-  
-  .icon-pulse {
-    animation: iconClickPulse 0.2s ease-out;
-  }
-`;
 
 interface SidebarProps {
   className?: string;
@@ -54,7 +41,7 @@ interface SidebarProps {
 export const AppSidebar: React.FC<SidebarProps> = ({ className }) => {
   const location = useLocation();
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
-  const [clickedIcon, setClickedIcon] = useState<string | null>(null);
+  const { state } = useSidebar();
   
   const menuItems = [
     {
@@ -103,29 +90,17 @@ export const AppSidebar: React.FC<SidebarProps> = ({ className }) => {
   const toggleSection = (path: string) => {
     setOpenSections(prev => ({ ...prev, [path]: !prev[path] }));
   };
-  
-  // Handle icon click animation
-  const handleIconClick = (path: string) => {
-    setClickedIcon(path);
-    
-    // Reset clicked icon after animation completes
-    setTimeout(() => {
-      setClickedIcon(null);
-    }, 300); // 300ms to ensure animation completes
+
+  // Check if a menu item is active
+  const isActive = (path: string): boolean => {
+    return location.pathname === path || location.pathname.startsWith(path);
   };
   
-  // Add global styles using a regular style tag
-  useEffect(() => {
-    // Create a style element
-    const styleEl = document.createElement('style');
-    styleEl.textContent = iconPulseAnimation;
-    document.head.appendChild(styleEl);
-    
-    // Cleanup function to remove the style element when component unmounts
-    return () => {
-      document.head.removeChild(styleEl);
-    };
-  }, []);
+  // Style for active icon
+  const activeIconClass = "text-primary transition-all duration-200 ease-in-out transform scale-110";
+  
+  // Style for inactive icon
+  const inactiveIconClass = "text-muted-foreground transition-all duration-200 ease-in-out";
   
   return (
     <Sidebar className={className}>
@@ -151,25 +126,26 @@ export const AppSidebar: React.FC<SidebarProps> = ({ className }) => {
                   <div className="flex w-full">
                     <CollapsibleTrigger asChild className="w-full">
                       <SidebarMenuButton
-                        isActive={location.pathname.startsWith(item.path)}
+                        isActive={isActive(item.path)}
                         tooltip={item.title}
-                        className="flex justify-between"
-                        onClick={() => handleIconClick(item.path)}
+                        className="flex justify-between group"
                       >
                         <div className="flex items-center">
                           <item.icon 
                             className={cn(
                               "h-5 w-5 mr-2",
-                              clickedIcon === item.path ? "icon-pulse" : ""
+                              isActive(item.path) ? activeIconClass : inactiveIconClass,
+                              "group-hover:scale-110 group-hover:text-primary/80"
                             )} 
-                            aria-current={location.pathname.startsWith(item.path) ? "page" : undefined}
+                            aria-current={isActive(item.path) ? "page" : undefined}
                           />
                           <span>{item.title}</span>
                         </div>
                         <ChevronDown 
                           className={cn(
                             "h-4 w-4 transition-transform duration-200",
-                            openSections[item.path] ? "transform rotate-180" : ""
+                            openSections[item.path] ? "transform rotate-180" : "",
+                            isActive(item.path) && "text-primary"
                           )} 
                         />
                       </SidebarMenuButton>
@@ -183,14 +159,12 @@ export const AppSidebar: React.FC<SidebarProps> = ({ className }) => {
                             asChild
                             isActive={location.pathname === subItem.path}
                           >
-                            <Link 
-                              to={subItem.path}
-                              onClick={() => handleIconClick(subItem.path)}
-                            >
+                            <Link to={subItem.path} className="group">
                               <subItem.icon 
                                 className={cn(
                                   "h-4 w-4",
-                                  clickedIcon === subItem.path ? "icon-pulse" : ""
+                                  location.pathname === subItem.path ? activeIconClass : inactiveIconClass,
+                                  "group-hover:scale-110 group-hover:text-primary/80"
                                 )}
                                 aria-current={location.pathname === subItem.path ? "page" : undefined}
                               />
@@ -208,15 +182,13 @@ export const AppSidebar: React.FC<SidebarProps> = ({ className }) => {
                   isActive={location.pathname === item.path}
                   tooltip={item.title}
                 >
-                  <Link 
-                    to={item.path} 
-                    className="w-full"
-                    onClick={() => handleIconClick(item.path)}
-                  >
+                  <Link to={item.path} className="w-full group">
                     <item.icon 
                       className={cn(
                         "h-5 w-5",
-                        clickedIcon === item.path ? "icon-pulse" : ""
+                        location.pathname === item.path ? activeIconClass : inactiveIconClass,
+                        "group-hover:scale-110 group-hover:text-primary/80",
+                        state === "collapsed" && "mx-auto"
                       )}
                       aria-current={location.pathname === item.path ? "page" : undefined}
                     />
