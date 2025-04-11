@@ -26,12 +26,14 @@ import { DeleteStoreDialog } from '@/components/DeleteStoreDialog';
 import { AlertTriangle, Plus, Store as StoreIcon, CheckCircle, X, Clock } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { useNavigate } from 'react-router-dom';
 
 export default function Stores() {
-  const { stores, addStore } = useStores();
+  const { stores, addStore, setCurrentStore } = useStores();
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
   const [newStoreName, setNewStoreName] = React.useState('');
   const [storeNameError, setStoreNameError] = React.useState('');
+  const navigate = useNavigate();
 
   const handleCreateStore = () => {
     if (!newStoreName.trim()) {
@@ -43,6 +45,11 @@ export default function Stores() {
     setNewStoreName('');
     setStoreNameError('');
     setIsDialogOpen(false);
+  };
+
+  const handleStoreSelect = (store) => {
+    setCurrentStore(store);
+    navigate('/dashboard');
   };
 
   const getStoreCompletionPercentage = (store: Store) => {
@@ -200,7 +207,7 @@ export default function Stores() {
                 <Button 
                   className="w-full" 
                   variant={store.isDemo ? "outline" : "default"}
-                  onClick={() => window.location.href = "/"}
+                  onClick={() => handleStoreSelect(store)}
                 >
                   {store.isDemo ? "Ver Demonstração" : "Gerenciar Loja"}
                 </Button>
