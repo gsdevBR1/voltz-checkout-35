@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -19,11 +20,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
-import { Toast } from '@/components/ui/toast';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, Plus, Trash2, Image, Save, X, RefreshCw } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import {
   Dialog,
   DialogContent,
@@ -333,7 +333,7 @@ const EditarProdutoFisico: React.FC = () => {
   if (loading) {
     return (
       <DashboardLayout>
-        <div className="max-w-4xl mx-auto px-4 py-8">
+        <div className="max-w-4xl mx-auto px-8 py-6">
           <p>Carregando produto...</p>
         </div>
       </DashboardLayout>
@@ -343,7 +343,7 @@ const EditarProdutoFisico: React.FC = () => {
   if (!product) {
     return (
       <DashboardLayout>
-        <div className="max-w-4xl mx-auto px-4 py-8">
+        <div className="max-w-4xl mx-auto px-8 py-6">
           <p>Produto não encontrado.</p>
           <Button className="mt-4" onClick={() => navigate('/produtos')}>
             Voltar para Lista de Produtos
@@ -355,21 +355,28 @@ const EditarProdutoFisico: React.FC = () => {
 
   return (
     <DashboardLayout>
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        <div className="flex items-center mb-6">
-          <Button variant="ghost" onClick={() => navigate('/produtos')} className="mr-2">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Voltar
-          </Button>
-          <h1 className="text-2xl font-bold">Editar Produto: {product.name}</h1>
+      <div className="max-w-4xl mx-auto px-8 py-6">
+        <div className="sticky top-16 z-10 bg-background pb-4 border-b mb-6">
+          <div className="flex items-center mb-4">
+            <Button variant="ghost" onClick={() => navigate('/produtos')} className="mr-2">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Voltar
+            </Button>
+            <h1 className="text-2xl font-semibold">Editar Produto: {product.name}</h1>
+          </div>
         </div>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             {/* Informações Básicas */}
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border shadow-sm">
-              <h2 className="text-xl font-semibold mb-4">Informações Básicas</h2>
-              <div className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Informações Básicas</CardTitle>
+                <CardDescription>
+                  Defina o título e a descrição do seu produto.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
                 <FormField
                   control={form.control}
                   name="name"
@@ -401,97 +408,109 @@ const EditarProdutoFisico: React.FC = () => {
                     </FormItem>
                   )}
                 />
-              </div>
-            </div>
+              </CardContent>
+            </Card>
 
             {/* Imagens do Produto */}
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border shadow-sm">
-              <h2 className="text-xl font-semibold mb-4">Imagens do Produto</h2>
-              <div className="space-y-4">
-                <div className="flex flex-col gap-2">
-                  <label className="text-sm font-medium">
-                    Imagens do Produto *
-                  </label>
-                  <div className="flex items-center gap-2">
-                    <Input
-                      type="file"
-                      accept=".jpg,.jpeg,.png"
-                      onChange={handleImageUpload}
-                      className="hidden"
-                      id="product-images"
-                      multiple
-                    />
-                    <label
-                      htmlFor="product-images"
-                      className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 cursor-pointer"
-                    >
-                      <Image className="h-4 w-4" />
-                      Adicionar Imagens
-                    </label>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
-                      JPG ou PNG até 2MB. Sugerido: 1000 x 1000 px
-                    </p>
-                  </div>
-                  
-                  {images.length > 0 && (
-                    <div className="mt-4">
-                      <label className="text-sm font-medium mb-2 block">
-                        Imagens adicionadas ({images.length})
+            <Card>
+              <CardHeader>
+                <CardTitle>Imagens do Produto</CardTitle>
+                <CardDescription>
+                  Adicione imagens para seu produto. Recomendado: 1000 x 1000 px.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex flex-col gap-2">
+                    <FormLabel>
+                      Imagens do Produto *
+                    </FormLabel>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        type="file"
+                        accept=".jpg,.jpeg,.png"
+                        onChange={handleImageUpload}
+                        className="hidden"
+                        id="product-images"
+                        multiple
+                      />
+                      <label
+                        htmlFor="product-images"
+                        className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 cursor-pointer"
+                      >
+                        <Image className="h-4 w-4" />
+                        Adicionar Imagens
                       </label>
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2">
-                        {images.map((image, index) => (
-                          <div
-                            key={index}
-                            className={cn(
-                              "relative rounded-md overflow-hidden border-2 aspect-square",
-                              draggingIndex === index ? "opacity-50" : "",
-                              dropTargetIndex === index ? "border-primary" : "border-border"
-                            )}
-                            draggable
-                            onDragStart={() => handleDragStart(index)}
-                            onDragOver={(e) => {
-                              e.preventDefault();
-                              handleDragOver(index);
-                            }}
-                            onDragEnd={handleDrop}
-                            onDrop={(e) => {
-                              e.preventDefault();
-                              handleDrop();
-                            }}
-                          >
-                            <img
-                              src={image.url}
-                              alt={`Product image ${index + 1}`}
-                              className="w-full h-full object-cover"
-                            />
-                            <button
-                              type="button"
-                              onClick={() => removeImage(index)}
-                              className="absolute top-2 right-2 bg-black bg-opacity-60 rounded-full p-1 text-white hover:bg-opacity-80 transition-all"
-                            >
-                              <X className="h-4 w-4" />
-                            </button>
-                            {index === 0 && (
-                              <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-60 text-white text-xs p-1 text-center">
-                                Principal
-                              </div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                        Arraste para reordenar. A primeira imagem será a principal.
+                      <p className="text-xs text-muted-foreground">
+                        JPG ou PNG até 2MB. Sugerido: 1000 x 1000 px
                       </p>
                     </div>
-                  )}
+                    
+                    {images.length > 0 && (
+                      <div className="mt-4">
+                        <FormLabel className="mb-2 block">
+                          Imagens adicionadas ({images.length})
+                        </FormLabel>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2">
+                          {images.map((image, index) => (
+                            <div
+                              key={index}
+                              className={cn(
+                                "relative rounded-md overflow-hidden border-2 aspect-square",
+                                draggingIndex === index ? "opacity-50" : "",
+                                dropTargetIndex === index ? "border-primary" : "border-border"
+                              )}
+                              draggable
+                              onDragStart={() => handleDragStart(index)}
+                              onDragOver={(e) => {
+                                e.preventDefault();
+                                handleDragOver(index);
+                              }}
+                              onDragEnd={handleDrop}
+                              onDrop={(e) => {
+                                e.preventDefault();
+                                handleDrop();
+                              }}
+                            >
+                              <img
+                                src={image.url}
+                                alt={`Product image ${index + 1}`}
+                                className="w-full h-full object-cover"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => removeImage(index)}
+                                className="absolute top-2 right-2 bg-black bg-opacity-60 rounded-full p-1 text-white hover:bg-opacity-80 transition-all"
+                              >
+                                <X className="h-4 w-4" />
+                              </button>
+                              {index === 0 && (
+                                <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-60 text-white text-xs p-1 text-center">
+                                  Principal
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-2">
+                          Arraste para reordenar. A primeira imagem será a principal.
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
 
             {/* Variantes */}
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border shadow-sm">
-              <h2 className="text-xl font-semibold mb-4">Variantes do Produto</h2>
-              <div className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Variantes do Produto</CardTitle>
+                <CardDescription>
+                  Defina se o produto possui variações como tamanho, cor, etc.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
                 <FormField
                   control={form.control}
                   name="hasVariants"
@@ -570,128 +589,43 @@ const EditarProdutoFisico: React.FC = () => {
                     </div>
                   </div>
                 )}
-              </div>
-            </div>
+              </CardContent>
+            </Card>
 
             {/* Preços */}
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border shadow-sm">
-              <h2 className="text-xl font-semibold mb-4">Preços</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <FormField
-                  control={form.control}
-                  name="costPrice"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Preço de Custo</FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
-                            R$
-                          </span>
-                          <Input
-                            type="number"
-                            step="0.01"
-                            min="0"
-                            placeholder="0,00"
-                            className="pl-10"
-                            {...field}
-                            onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                          />
-                        </div>
-                      </FormControl>
-                      <FormDescription>
-                        Uso interno, não aparece para o cliente
-                      </FormDescription>
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="price"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Preço de Venda *</FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
-                            R$
-                          </span>
-                          <Input
-                            type="number"
-                            step="0.01"
-                            min="0"
-                            placeholder="0,00"
-                            className="pl-10"
-                            {...field}
-                            onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                          />
-                        </div>
-                      </FormControl>
-                      <FormDescription>
-                        Preço principal no checkout
-                      </FormDescription>
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="comparePrice"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Preço de Comparação</FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
-                            R$
-                          </span>
-                          <Input
-                            type="number"
-                            step="0.01"
-                            min="0"
-                            placeholder="0,00"
-                            className="pl-10"
-                            {...field}
-                            onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                          />
-                        </div>
-                      </FormControl>
-                      <FormDescription>
-                        Preço "de" riscado (promoção)
-                      </FormDescription>
-                    </FormItem>
-                  )}
-                />
-              </div>
-            </div>
-
-            {/* Estoque */}
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border shadow-sm">
-              <h2 className="text-xl font-semibold mb-4">Estoque</h2>
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Preços</CardTitle>
+                <CardDescription>
+                  Configure os preços do seu produto.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <FormField
                     control={form.control}
-                    name="sku"
+                    name="costPrice"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>SKU (Código do Produto)</FormLabel>
-                        <div className="flex space-x-2">
-                          <FormControl>
-                            <Input placeholder="Ex: CAM-PRETA-M" {...field} />
-                          </FormControl>
-                          <Button 
-                            type="button" 
-                            variant="outline" 
-                            onClick={generateSku}
-                            title="Gerar SKU automático"
-                          >
-                            <RefreshCw className="h-4 w-4" />
-                          </Button>
-                        </div>
+                        <FormLabel>Preço de Custo</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                              R$
+                            </span>
+                            <Input
+                              type="number"
+                              step="0.01"
+                              min="0"
+                              placeholder="0,00"
+                              className="pl-10"
+                              {...field}
+                              onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                            />
+                          </div>
+                        </FormControl>
                         <FormDescription>
-                          Código único para identificação do produto
+                          Uso interno, não aparece para o cliente
                         </FormDescription>
                       </FormItem>
                     )}
@@ -699,49 +633,200 @@ const EditarProdutoFisico: React.FC = () => {
 
                   <FormField
                     control={form.control}
-                    name="barcode"
+                    name="price"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Código de Barras (EAN/ISBN)</FormLabel>
+                        <FormLabel>Preço de Venda *</FormLabel>
                         <FormControl>
-                          <Input placeholder="Ex: 7898888888888" {...field} />
+                          <div className="relative">
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                              R$
+                            </span>
+                            <Input
+                              type="number"
+                              step="0.01"
+                              min="0"
+                              placeholder="0,00"
+                              className="pl-10"
+                              {...field}
+                              onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                            />
+                          </div>
                         </FormControl>
                         <FormDescription>
-                          Opcional, para controle de estoque
+                          Preço principal no checkout
+                        </FormDescription>
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="comparePrice"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Preço de Comparação</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                              R$
+                            </span>
+                            <Input
+                              type="number"
+                              step="0.01"
+                              min="0"
+                              placeholder="0,00"
+                              className="pl-10"
+                              {...field}
+                              onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                            />
+                          </div>
+                        </FormControl>
+                        <FormDescription>
+                          Preço "de" riscado (promoção)
                         </FormDescription>
                       </FormItem>
                     )}
                   />
                 </div>
+              </CardContent>
+            </Card>
 
-                <FormField
-                  control={form.control}
-                  name="manageStock"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
-                      <div className="space-y-0.5">
-                        <FormLabel>Gerenciar estoque?</FormLabel>
-                        <FormDescription>
-                          Controla quantidade disponível
-                        </FormDescription>
-                      </div>
-                      <FormControl>
-                        <Switch
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
+            {/* Estoque */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Estoque</CardTitle>
+                <CardDescription>
+                  Configure o estoque e identificadores do produto.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <FormField
+                      control={form.control}
+                      name="sku"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>SKU (Código do Produto)</FormLabel>
+                          <div className="flex space-x-2">
+                            <FormControl>
+                              <Input placeholder="Ex: CAM-PRETA-M" {...field} />
+                            </FormControl>
+                            <Button 
+                              type="button" 
+                              variant="outline" 
+                              onClick={generateSku}
+                              title="Gerar SKU automático"
+                            >
+                              <RefreshCw className="h-4 w-4" />
+                            </Button>
+                          </div>
+                          <FormDescription>
+                            Código único para identificação do produto
+                          </FormDescription>
+                        </FormItem>
+                      )}
+                    />
 
-                {form.watch('manageStock') && (
+                    <FormField
+                      control={form.control}
+                      name="barcode"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Código de Barras (EAN/ISBN)</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Ex: 7898888888888" {...field} />
+                          </FormControl>
+                          <FormDescription>
+                            Opcional, para controle de estoque
+                          </FormDescription>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
                   <FormField
                     control={form.control}
-                    name="stock"
+                    name="manageStock"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                        <div className="space-y-0.5">
+                          <FormLabel>Gerenciar estoque?</FormLabel>
+                          <FormDescription>
+                            Controla quantidade disponível
+                          </FormDescription>
+                        </div>
+                        <FormControl>
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+
+                  {form.watch('manageStock') && (
+                    <FormField
+                      control={form.control}
+                      name="stock"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Quantidade em Estoque</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              min="0"
+                              placeholder="0"
+                              {...field}
+                              onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Peso e Dimensões */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Peso e Dimensões</CardTitle>
+                <CardDescription>
+                  Informações úteis para cálculo de frete.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                  <FormField
+                    control={form.control}
+                    name="weight"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Quantidade em Estoque</FormLabel>
+                        <FormLabel>Peso (kg)</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            placeholder="0,00"
+                            {...field}
+                            onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="width"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Largura (cm)</FormLabel>
                         <FormControl>
                           <Input
                             type="number"
@@ -754,120 +839,74 @@ const EditarProdutoFisico: React.FC = () => {
                       </FormItem>
                     )}
                   />
-                )}
-              </div>
-            </div>
 
-            {/* Peso e Dimensões */}
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border shadow-sm">
-              <h2 className="text-xl font-semibold mb-4">Peso e Dimensões</h2>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <FormField
-                  control={form.control}
-                  name="weight"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Peso (kg)</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          placeholder="0,00"
-                          {...field}
-                          onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
+                  <FormField
+                    control={form.control}
+                    name="height"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Altura (cm)</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            min="0"
+                            placeholder="0"
+                            {...field}
+                            onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
 
-                <FormField
-                  control={form.control}
-                  name="width"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Largura (cm)</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          min="0"
-                          placeholder="0"
-                          {...field}
-                          onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="height"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Altura (cm)</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          min="0"
-                          placeholder="0"
-                          {...field}
-                          onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="length"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Comprimento (cm)</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          min="0"
-                          placeholder="0"
-                          {...field}
-                          onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-              </div>
-              <FormDescription className="mt-2">
-                Útil para cálculo de frete
-              </FormDescription>
-            </div>
+                  <FormField
+                    control={form.control}
+                    name="length"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Comprimento (cm)</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            min="0"
+                            placeholder="0"
+                            {...field}
+                            onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </CardContent>
+            </Card>
 
             {/* Form Actions */}
-            <div className="flex justify-between items-center pt-6 border-t">
-              <div>
-                <Button
-                  type="button"
-                  variant="destructive"
-                  onClick={() => setDeleteConfirmOpen(true)}
-                >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Excluir Produto
-                </Button>
-              </div>
-              <div className="flex gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => navigate('/produtos')}
-                >
-                  Cancelar
-                </Button>
-                <Button type="submit">
-                  <Save className="h-4 w-4 mr-2" />
-                  Salvar Alterações
-                </Button>
+            <div className="sticky bottom-0 pt-6 border-t bg-background">
+              <div className="flex justify-between items-center">
+                <div>
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    onClick={() => setDeleteConfirmOpen(true)}
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Excluir Produto
+                  </Button>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => navigate('/produtos')}
+                  >
+                    Cancelar
+                  </Button>
+                  <Button type="submit" className="bg-primary text-primary-foreground">
+                    <Save className="h-4 w-4 mr-2" />
+                    Salvar Alterações
+                  </Button>
+                </div>
               </div>
             </div>
           </form>
