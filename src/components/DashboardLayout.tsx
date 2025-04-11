@@ -45,6 +45,11 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   if (location.pathname.startsWith('/clientes/leads/perfil/') && params.id) {
     pageName = 'Perfil do Lead';
   }
+  
+  // Special case for purchase history
+  if (location.pathname.startsWith('/clientes/historico/') && params.id) {
+    pageName = 'Histórico de Compras';
+  }
 
   return (
     <SidebarLayout>

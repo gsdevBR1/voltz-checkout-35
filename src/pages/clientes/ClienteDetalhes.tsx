@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -26,10 +25,10 @@ import {
   Download,
   Star,
   MessageSquare,
-  Pencil
+  Pencil,
+  History
 } from "lucide-react";
 
-// Mock customer data
 const MOCK_CUSTOMERS = [
   {
     id: '1',
@@ -66,7 +65,6 @@ const ClienteDetalhes: React.FC = () => {
   const [isVip, setIsVip] = useState(false);
   
   useEffect(() => {
-    // In a real app, this would be an API call
     const foundCustomer = MOCK_CUSTOMERS.find(c => c.id === id);
     
     if (foundCustomer) {
@@ -88,7 +86,6 @@ const ClienteDetalhes: React.FC = () => {
   
   const toggleVipStatus = () => {
     setIsVip(!isVip);
-    // In a real app, this would trigger an API call to update the customer status
   };
   
   if (loading) {
@@ -148,6 +145,13 @@ const ClienteDetalhes: React.FC = () => {
             <Button variant="outline" size="sm">
               <MessageSquare className="mr-1 h-4 w-4" />
               Criar Nota
+            </Button>
+            
+            <Button variant="outline" size="sm" asChild>
+              <Link to={`/clientes/historico/${id}`}>
+                <History className="mr-1 h-4 w-4" />
+                Ver Histórico Completo
+              </Link>
             </Button>
           </div>
         </div>

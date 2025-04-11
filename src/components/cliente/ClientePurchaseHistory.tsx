@@ -13,6 +13,7 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
+  CardFooter,
 } from "@/components/ui/card";
 import {
   Accordion,
@@ -23,7 +24,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { formatCurrency, formatDateTime } from "@/lib/utils";
-import { FileText, Search, ExternalLink } from "lucide-react";
+import { FileText, Search, ExternalLink, ArrowRight } from "lucide-react";
 import { Link } from 'react-router-dom';
 
 // Mock data for customer orders
@@ -195,6 +196,14 @@ const ClientePurchaseHistory: React.FC<ClientePurchaseHistoryProps> = ({ custome
           </AccordionItem>
         </Accordion>
       </CardContent>
+      <CardFooter className="flex justify-end">
+        <Button variant="outline" asChild>
+          <Link to={`/clientes/historico/${customerId}`}>
+            Ver histórico completo
+            <ArrowRight className="ml-1 h-4 w-4" />
+          </Link>
+        </Button>
+      </CardFooter>
     </Card>
   );
 };
