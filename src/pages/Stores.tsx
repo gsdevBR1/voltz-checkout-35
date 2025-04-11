@@ -1,220 +1,164 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { useStores, Store } from '@/contexts/StoreContext';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { 
-  Card,
-  CardContent, 
-  CardDescription, 
-  CardFooter, 
-  CardHeader, 
-  CardTitle 
-} from '@/components/ui/card';
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogDescription, 
-  DialogFooter, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogTrigger 
-} from '@/components/ui/dialog';
-import { DeleteStoreDialog } from '@/components/DeleteStoreDialog';
-import { AlertTriangle, Plus, Store as StoreIcon, CheckCircle, X, Clock } from 'lucide-react';
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+import { Search, Store as StoreIcon, AlertTriangle } from 'lucide-react';
+import { CreateStoreDialog } from '@/components/stores/CreateStoreDialog';
+import { StoreCard } from '@/components/stores/StoreCard';
+import { StoreFilter, StoreStatusFilter, StoreSortOption } from '@/components/stores/StoreFilter';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 
 export default function Stores() {
-  const { stores, addStore, setCurrentStore } = useStores();
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [newStoreName, setNewStoreName] = useState('');
-  const [storeNameError, setStoreNameError] = useState('');
+  const { stores, currentStore, addStore } = useStores();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<StoreStatusFilter>('all');
+  const [sortOption, setSortOption] = useState<StoreSortOption>('name');
   const navigate = useNavigate();
 
-  const handleCreateStore = () => {
-    if (!newStoreName.trim()) {
-      setStoreNameError('O nome da loja é obrigatório');
-      return;
-    }
-    
-    addStore(newStoreName.trim());
-    setNewStoreName('');
-    setStoreNameError('');
-    setIsDialogOpen(false);
-  };
-
-  const handleStoreSelect = (store: Store) => {
-    setCurrentStore(store);
-    navigate('/pagina-inicial');
-  };
-
-  const getStoreCompletionPercentage = (store: Store) => {
-    const steps = [
-      store.status.billing,
-      store.status.domain,
-      store.status.gateway,
-      store.status.shipping
-    ];
-    
-    const completedSteps = steps.filter(Boolean).length;
-    return (completedSteps / steps.length) * 100;
-  };
-
-  const getStoreStatus = (store: Store) => {
+  const getStoreStatus = (store: Store): StoreStatusFilter => {
     if (store.isDemo) return "demo";
     
-    const completionPercentage = getStoreCompletionPercentage(store);
+    const steps = Object.values(store.status);
+    const completedSteps = steps.filter(Boolean).length;
     
-    if (completionPercentage === 0) return "not-started";
-    if (completionPercentage === 100) return "completed";
-    return "in-progress";
+    if (completedSteps === steps.length) return "active";
+    if (completedSteps > 0) return "incomplete";
+    return "new";
   };
 
-  const renderStoreStatusBadge = (store: Store) => {
-    const status = getStoreStatus(store);
-    
-    switch (status) {
-      case "demo":
-        return (
-          <div className="flex items-center rounded-full bg-amber-100 text-amber-800 px-2 py-0.5 text-xs">
-            <AlertTriangle className="w-3 h-3 mr-1" />
-            <span>Demo</span>
-          </div>
-        );
-      case "completed":
-        return (
-          <div className="flex items-center rounded-full bg-green-100 text-green-800 px-2 py-0.5 text-xs">
-            <CheckCircle className="w-3 h-3 mr-1" />
-            <span>Ativa</span>
-          </div>
-        );
-      case "in-progress":
-        return (
-          <div className="flex items-center rounded-full bg-blue-100 text-blue-800 px-2 py-0.5 text-xs">
-            <Clock className="w-3 h-3 mr-1" />
-            <span>Incompleta</span>
-          </div>
-        );
-      case "not-started":
-        return (
-          <div className="flex items-center rounded-full bg-gray-100 text-gray-800 px-2 py-0.5 text-xs">
-            <X className="w-3 h-3 mr-1" />
-            <span>Nova</span>
-          </div>
-        );
-    }
-  };
+  const filteredStores = useMemo(() => {
+    return stores
+      .filter(store => {
+        // Apply search filter
+        if (searchQuery && !store.name.toLowerCase().includes(searchQuery.toLowerCase())) {
+          return false;
+        }
+        
+        // Apply status filter
+        if (statusFilter !== 'all') {
+          const storeStatus = getStoreStatus(store);
+          if (storeStatus !== statusFilter) {
+            return false;
+          }
+        }
+        
+        return true;
+      })
+      .sort((a, b) => {
+        // Apply sorting
+        if (sortOption === 'name') {
+          return a.name.localeCompare(b.name);
+        } else if (sortOption === 'createdAt') {
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        } else if (sortOption === 'lastAccessed') {
+          return new Date(b.lastAccessed).getTime() - new Date(a.lastAccessed).getTime();
+        }
+        return 0;
+      });
+  }, [stores, searchQuery, statusFilter, sortOption]);
+
+  const nonDemoStores = stores.filter(store => !store.isDemo);
+  const isUsingDemoStore = currentStore?.isDemo;
 
   return (
     <DashboardLayout>
-      <div className="max-w-6xl mx-auto py-6">
-        <div className="flex justify-between items-center mb-6">
+      <div className="max-w-6xl mx-auto py-6 px-4 sm:px-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
           <div>
             <h1 className="text-2xl font-bold">Minhas Lojas</h1>
             <p className="text-muted-foreground">
-              Gerencie todas as suas lojas em um só lugar
+              Gerencie suas lojas conectadas ao voltz.checkout
             </p>
           </div>
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="flex items-center gap-2">
-                <Plus className="h-4 w-4" />
-                <span>Criar nova loja</span>
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Criar nova loja</DialogTitle>
-                <DialogDescription>
-                  Crie uma nova loja para seus produtos e configurações.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="store-name">Nome da loja</Label>
-                  <Input
-                    id="store-name"
-                    placeholder="Digite o nome da sua loja"
-                    value={newStoreName}
-                    onChange={(e) => {
-                      setNewStoreName(e.target.value);
-                      if (e.target.value.trim()) setStoreNameError('');
-                    }}
-                    className={storeNameError ? "border-destructive" : ""}
-                  />
-                  {storeNameError && (
-                    <p className="text-sm text-destructive">{storeNameError}</p>
-                  )}
-                </div>
-              </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-                  Cancelar
-                </Button>
-                <Button onClick={handleCreateStore}>
-                  Criar loja
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+          <CreateStoreDialog />
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {stores.map((store) => (
-            <Card key={store.id} className={store.isDemo ? "border-amber-200" : ""}>
-              <CardHeader className="pb-3">
-                <div className="flex justify-between items-start">
-                  <div className="w-full mr-4">
-                    <div className="flex items-center gap-2 mb-1">
-                      {store.isDemo ? (
-                        <AlertTriangle className="h-4 w-4 text-amber-500" />
-                      ) : (
-                        <StoreIcon className="h-4 w-4" />
-                      )}
-                      <CardTitle className="text-base truncate">{store.name}</CardTitle>
-                    </div>
-                    <CardDescription>
-                      Criada em {format(new Date(store.createdAt), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
-                    </CardDescription>
-                  </div>
-                  <DeleteStoreDialog store={store} />
+        {isUsingDemoStore && (
+          <Card className="mb-6 border-purple-200 bg-purple-50/50 dark:bg-purple-950/10">
+            <CardHeader className="pb-2">
+              <div className="flex items-start gap-2">
+                <AlertTriangle className="h-5 w-5 text-purple-500 mt-0.5" />
+                <div>
+                  <CardTitle className="text-lg">Você está utilizando uma loja de demonstração</CardTitle>
+                  <CardDescription>
+                    Para vender de verdade, crie uma nova loja clicando no botão acima.
+                  </CardDescription>
                 </div>
-              </CardHeader>
-              <CardContent className="pb-3">
-                <div className="flex justify-between items-center mb-2">
-                  <div className="text-sm">Status</div>
-                  {renderStoreStatusBadge(store)}
-                </div>
-                
-                <div className="space-y-1">
-                  <div className="flex justify-between text-xs">
-                    <span>Progresso</span>
-                    <span>{Math.round(getStoreCompletionPercentage(store))}%</span>
-                  </div>
-                  <div className="w-full h-2 bg-secondary/20 rounded-full overflow-hidden">
-                    <div 
-                      className="h-full bg-primary rounded-full transition-all duration-300 ease-in-out"
-                      style={{ width: `${getStoreCompletionPercentage(store)}%` }}
-                    />
-                  </div>
-                </div>
-              </CardContent>
-              <CardFooter>
-                <Button 
-                  className="w-full" 
-                  variant={store.isDemo ? "outline" : "default"}
-                  onClick={() => handleStoreSelect(store)}
-                >
-                  {store.isDemo ? "Ver Demonstração" : "Gerenciar Loja"}
-                </Button>
-              </CardFooter>
-            </Card>
-          ))}
+              </div>
+            </CardHeader>
+          </Card>
+        )}
+
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+          <div className="relative w-full sm:w-64">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Buscar lojas..."
+              className="pl-9"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          <StoreFilter 
+            statusFilter={statusFilter}
+            setStatusFilter={setStatusFilter}
+            sortOption={sortOption}
+            setSortOption={setSortOption}
+          />
         </div>
+
+        {filteredStores.length === 0 && (
+          <Card className="bg-muted/40">
+            <CardContent className="flex flex-col items-center justify-center py-10">
+              <StoreIcon className="h-12 w-12 text-muted stroke-[1.5px] mb-4" />
+              {stores.length > 0 ? (
+                <>
+                  <h3 className="text-lg font-semibold mb-1">Nenhuma loja encontrada</h3>
+                  <p className="text-muted-foreground text-center max-w-md mb-4">
+                    Tente ajustar os filtros ou a pesquisa para encontrar o que procura.
+                  </p>
+                  <Button variant="outline" onClick={() => {
+                    setSearchQuery('');
+                    setStatusFilter('all');
+                  }}>
+                    Limpar filtros
+                  </Button>
+                </>
+              ) : nonDemoStores.length === 0 ? (
+                <>
+                  <h3 className="text-lg font-semibold mb-1">Você ainda não criou nenhuma loja</h3>
+                  <p className="text-muted-foreground text-center max-w-md mb-4">
+                    Clique no botão acima para começar ou explore a Loja Demo.
+                  </p>
+                  <div className="flex gap-3">
+                    <CreateStoreDialog buttonVariant="default" />
+                    <Button variant="outline" onClick={() => navigate('/pagina-inicial')}>
+                      Explorar Loja Demo
+                    </Button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <h3 className="text-lg font-semibold mb-1">Nenhuma loja encontrada</h3>
+                  <p className="text-muted-foreground text-center max-w-md">
+                    Tente ajustar os filtros para encontrar suas lojas.
+                  </p>
+                </>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {filteredStores.length > 0 && (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {filteredStores.map((store) => (
+              <StoreCard key={store.id} store={store} />
+            ))}
+          </div>
+        )}
       </div>
     </DashboardLayout>
   );

@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 export interface Store {
   id: string;
   name: string;
+  domain: string;
   isDemo: boolean;
   status: {
     billing: boolean;
@@ -13,6 +14,7 @@ export interface Store {
     shipping: boolean;
   };
   createdAt: Date;
+  lastAccessed: Date;
 }
 
 interface StoreContextType {
@@ -21,6 +23,8 @@ interface StoreContextType {
   setCurrentStore: (store: Store) => void;
   addStore: (name: string) => void;
   deleteStore: (id: string) => void;
+  duplicateStore: (id: string) => void;
+  updateStore: (id: string, data: Partial<Omit<Store, 'id' | 'createdAt'>>) => void;
   isStoresLoading: boolean;
 }
 
@@ -37,6 +41,7 @@ export const useStores = () => {
 const DEMO_STORE: Store = {
   id: 'demo-store',
   name: 'Loja de Demonstração',
+  domain: 'demo.voltzcehckout.com',
   isDemo: true,
   status: {
     billing: true,
@@ -45,6 +50,7 @@ const DEMO_STORE: Store = {
     shipping: true,
   },
   createdAt: new Date(),
+  lastAccessed: new Date(),
 };
 
 export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -64,7 +70,9 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         try {
           parsedStores = JSON.parse(storedStores).map((store: any) => ({
             ...store,
-            createdAt: new Date(store.createdAt)
+            domain: store.domain || `${store.name.toLowerCase().replace(/\s+/g, '')}.voltzcheckout.com`,
+            createdAt: new Date(store.createdAt),
+            lastAccessed: store.lastAccessed ? new Date(store.lastAccessed) : new Date()
           }));
         } catch (error) {
           console.error('Error parsing stores:', error);
@@ -86,7 +94,14 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         setCurrentStore(parsedStores[0]);
       } else if (storedCurrentStoreId && parsedStores.some(store => store.id === storedCurrentStoreId)) {
         // User has previously selected a store, use that one
-        setCurrentStore(parsedStores.find(store => store.id === storedCurrentStoreId) || parsedStores[0]);
+        const selectedStore = parsedStores.find(store => store.id === storedCurrentStoreId);
+        if (selectedStore) {
+          // Update last accessed
+          selectedStore.lastAccessed = new Date();
+          setCurrentStore(selectedStore);
+        } else {
+          setCurrentStore(parsedStores[0]);
+        }
       } else {
         // Default to first non-demo store if available, otherwise use demo
         const firstNonDemoStore = parsedStores.find(store => !store.isDemo);
@@ -109,14 +124,25 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // Update localStorage when current store changes
   useEffect(() => {
     if (currentStore && !isStoresLoading) {
+      // Update last accessed time
+      const updatedStores = stores.map(store => 
+        store.id === currentStore.id 
+          ? { ...store, lastAccessed: new Date() } 
+          : store
+      );
+      setStores(updatedStores);
+      
       localStorage.setItem('voltz-current-store-id', currentStore.id);
     }
   }, [currentStore, isStoresLoading]);
 
   const addStore = (name: string) => {
+    const domain = `${name.toLowerCase().replace(/\s+/g, '')}.voltzcheckout.com`;
+    
     const newStore: Store = {
       id: `store-${Date.now()}`,
       name,
+      domain,
       isDemo: false,
       status: {
         billing: false,
@@ -125,12 +151,55 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         shipping: false,
       },
       createdAt: new Date(),
+      lastAccessed: new Date(),
     };
     
     setStores(prevStores => [...prevStores, newStore]);
     setCurrentStore(newStore);
     toast.success('Loja criada com sucesso', {
       description: `A loja "${name}" foi criada e selecionada.`,
+    });
+  };
+
+  const updateStore = (id: string, data: Partial<Omit<Store, 'id' | 'createdAt'>>) => {
+    setStores(prevStores => {
+      const updatedStores = prevStores.map(store => 
+        store.id === id ? { ...store, ...data } : store
+      );
+      
+      // If updating current store, update currentStore state
+      if (currentStore?.id === id) {
+        setCurrentStore({...currentStore, ...data});
+      }
+      
+      return updatedStores;
+    });
+    
+    toast.success('Loja atualizada', {
+      description: `As alterações foram salvas com sucesso.`,
+    });
+  };
+
+  const duplicateStore = (id: string) => {
+    const storeToDuplicate = stores.find(store => store.id === id);
+    if (!storeToDuplicate) return;
+    
+    // Create a new store with the same properties but a new ID
+    const newStore: Store = {
+      ...storeToDuplicate,
+      id: `store-${Date.now()}`,
+      name: `${storeToDuplicate.name} (cópia)`,
+      domain: `${storeToDuplicate.name.toLowerCase().replace(/\s+/g, '')}-copia.voltzcheckout.com`,
+      createdAt: new Date(),
+      lastAccessed: new Date(),
+      isDemo: false, // Never duplicate as demo
+    };
+    
+    setStores(prevStores => [...prevStores, newStore]);
+    setCurrentStore(newStore);
+    
+    toast.success('Loja duplicada', {
+      description: `A cópia de "${storeToDuplicate.name}" foi criada e selecionada.`,
     });
   };
 
@@ -169,6 +238,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         setCurrentStore,
         addStore,
         deleteStore,
+        duplicateStore,
+        updateStore,
         isStoresLoading,
       }}
     >
