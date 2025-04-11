@@ -33,7 +33,7 @@ const ShopifyStep: React.FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { updateStore, currentStore } = useStores();
-  const { updateStepStatus } = useActivationSteps();
+  const { updateStepCompletion } = useActivationSteps();
 
   const defaultValues: ShopifyFormValues = {
     shopUrl: '',
@@ -64,7 +64,7 @@ const ShopifyStep: React.FC = () => {
       });
       
       // Update the step status in the activation context
-      updateStepStatus('shopify', true);
+      updateStepCompletion('shopify', true);
       
       toast({
         title: "Integração Shopify configurada",
