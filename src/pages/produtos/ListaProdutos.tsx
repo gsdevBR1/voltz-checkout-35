@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -42,7 +43,8 @@ import {
   Search, 
   Link as LinkIcon, 
   Pencil, 
-  Power
+  Power,
+  Eye
 } from 'lucide-react';
 
 const mockProducts: Product[] = [
@@ -259,6 +261,15 @@ const ListaProdutos: React.FC = () => {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
+                        <Button 
+                          variant="ghost" 
+                          size="icon"
+                          onClick={() => navigate(`/produtos/${product.id}/ver`)}
+                          title="Ver detalhes"
+                        >
+                          <Eye className="h-4 w-4" />
+                          <span className="sr-only">Ver detalhes</span>
+                        </Button>
                         <Button 
                           variant="ghost" 
                           size="icon"
