@@ -1,3 +1,5 @@
+
+# Voltz.Checkout - Plataforma de checkout integrado
 User-agent: Googlebot
 Allow: /
 

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -155,7 +154,14 @@ export const AppSidebar: React.FC<SidebarProps> = ({ className }) => {
     <Sidebar className={className}>
       <SidebarHeader>
         <div className="flex items-center justify-between w-full px-4 py-6">
-          <h2 className="text-xl font-bold text-primary">voltz.checkout</h2>
+          <Link to="/" className="flex items-center gap-2">
+            <img 
+              src="/lovable-uploads/3aa07f77-7311-4155-8e6c-39abb8dca3df.png" 
+              alt="Voltz.Checkout Logo" 
+              className="h-8 w-8"
+            />
+            <span className="text-xl font-bold text-primary">Voltz.Checkout</span>
+          </Link>
           <Avatar className="h-8 w-8">
             <AvatarFallback className="bg-primary/10 text-primary">
               <User className="h-4 w-4" />
@@ -260,7 +266,6 @@ export const AppSidebar: React.FC<SidebarProps> = ({ className }) => {
   );
 };
 
-// The SidebarLayout component was not properly exported, let's fix that
 export const SidebarLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <SidebarProvider>

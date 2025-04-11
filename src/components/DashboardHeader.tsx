@@ -16,8 +16,13 @@ export function DashboardHeader({ onCustomizeClick }: { onCustomizeClick?: () =>
     <header className="sticky top-0 z-50 w-full border-b bg-background">
       <div className="container flex h-16 items-center justify-between">
         <div className="flex items-center gap-4">
-          <Link to="/" className="font-semibold text-lg">
-            Voltz.checkout
+          <Link to="/" className="flex items-center gap-2">
+            <img 
+              src="/lovable-uploads/3aa07f77-7311-4155-8e6c-39abb8dca3df.png" 
+              alt="Voltz.Checkout Logo" 
+              className="h-8 w-8"
+            />
+            <span className="font-semibold text-lg">Voltz.Checkout</span>
           </Link>
           
           {currentStore?.isDemo && (
