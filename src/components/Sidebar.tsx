@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, BarChart2 } from 'lucide-react';
+import { Home, BarChart2, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   Sidebar,
@@ -12,7 +12,8 @@ import {
   SidebarProvider,
   SidebarFooter,
 } from '@/components/ui/sidebar';
-import { ThemeToggle } from '@/components/ThemeToggle';
+import { StoreSelector } from '@/components/StoreSelector';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
 interface SidebarProps {
   className?: string;
@@ -58,7 +59,14 @@ export const AppSidebar: React.FC<SidebarProps> = ({ className }) => {
         </SidebarMenu>
       </SidebarContent>
       <SidebarFooter className="px-4 py-3 border-t border-border">
-        <ThemeToggle />
+        <div className="flex items-center justify-between">
+          <StoreSelector />
+          <Avatar className="h-9 w-9 ml-2">
+            <AvatarFallback className="bg-primary text-primary-foreground">
+              <User className="h-5 w-5" />
+            </AvatarFallback>
+          </Avatar>
+        </div>
       </SidebarFooter>
     </Sidebar>
   );
