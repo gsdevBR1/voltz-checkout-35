@@ -10,7 +10,17 @@ import { toast } from '@/hooks/use-toast';
 import { Drawer, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
-import { CreditCard, ExternalLink, Globe, Flag } from 'lucide-react';
+import { CreditCard, ExternalLink, Globe, Flag, HelpCircle, CreditCard as CardIcon, QrCode } from 'lucide-react';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
+import { Card, CardContent } from '@/components/ui/card';
+import { Switch } from '@/components/ui/switch';
+
+interface GatewayRule {
+  creditCardEnabled: boolean;
+  pixEnabled: boolean;
+  customInterestRate: boolean;
+}
 
 interface Gateway {
   id: string;
@@ -18,9 +28,8 @@ interface Gateway {
   logo: string;
   scopes: string[];
   isActive: boolean;
-  publicKey?: string;
   secretKey?: string;
-  token?: string;
+  rules?: GatewayRule;
 }
 
 const GatewaysPage = () => {
@@ -46,8 +55,12 @@ const GatewaysPage = () => {
       logo: "/placeholder.svg",
       scopes: ["Nacional", "Global"],
       isActive: true,
-      publicKey: "pk_test_123",
-      secretKey: "sk_test_***"
+      secretKey: "sk_test_***",
+      rules: {
+        creditCardEnabled: true,
+        pixEnabled: true,
+        customInterestRate: false
+      }
     },
     {
       id: "azcend",
@@ -62,7 +75,12 @@ const GatewaysPage = () => {
       logo: "/placeholder.svg",
       scopes: ["Nacional"],
       isActive: true,
-      token: "AXN_TOKEN_123"
+      secretKey: "AXN_SECRET_123",
+      rules: {
+        creditCardEnabled: true,
+        pixEnabled: false,
+        customInterestRate: true
+      }
     },
     {
       id: "bestfy",
@@ -77,17 +95,21 @@ const GatewaysPage = () => {
   const [openDialog, setOpenDialog] = useState(false);
   const [currentGateway, setCurrentGateway] = useState<Gateway | null>(null);
   const [formData, setFormData] = useState({
-    publicKey: "",
     secretKey: "",
-    token: ""
+    creditCardEnabled: false,
+    pixEnabled: false,
+    customInterestRate: false,
+    isActive: false
   });
   
   const handleOpenModal = (gateway: Gateway) => {
     setCurrentGateway(gateway);
     setFormData({
-      publicKey: gateway.publicKey || "",
       secretKey: gateway.secretKey || "",
-      token: gateway.token || ""
+      creditCardEnabled: gateway.rules?.creditCardEnabled || false,
+      pixEnabled: gateway.rules?.pixEnabled || false,
+      customInterestRate: gateway.rules?.customInterestRate || false,
+      isActive: gateway.isActive || false
     });
     
     if (isMobile) {
@@ -100,14 +122,26 @@ const GatewaysPage = () => {
   const handleSaveGateway = () => {
     if (!currentGateway) return;
     
+    if (!formData.secretKey) {
+      toast({
+        title: "Erro ao salvar",
+        description: "A chave secreta é obrigatória.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     const updatedGateways = gateways.map(g => 
       g.id === currentGateway.id 
         ? { 
             ...g, 
-            isActive: true,
-            publicKey: formData.publicKey,
+            isActive: formData.isActive,
             secretKey: formData.secretKey,
-            token: formData.token
+            rules: {
+              creditCardEnabled: formData.creditCardEnabled,
+              pixEnabled: formData.pixEnabled,
+              customInterestRate: formData.customInterestRate
+            }
           } 
         : g
     );
@@ -117,15 +151,24 @@ const GatewaysPage = () => {
     setOpenDrawer(false);
     
     toast({
-      title: "Gateway integrado",
-      description: `${currentGateway.name} foi integrado com sucesso.`
+      title: formData.isActive ? "Gateway integrado" : "Configurações salvas",
+      description: `${currentGateway.name} foi ${formData.isActive ? "integrado" : "configurado"} com sucesso.`
     });
   };
   
   const handleRemoveGateway = (id: string) => {
     const updatedGateways = gateways.map(g => 
       g.id === id 
-        ? { ...g, isActive: false, publicKey: undefined, secretKey: undefined, token: undefined } 
+        ? { 
+            ...g, 
+            isActive: false, 
+            secretKey: undefined, 
+            rules: {
+              creditCardEnabled: false,
+              pixEnabled: false,
+              customInterestRate: false
+            }
+          } 
         : g
     );
     
@@ -136,6 +179,155 @@ const GatewaysPage = () => {
       description: "O gateway foi removido com sucesso."
     });
   };
+
+  const renderGatewayModalContent = () => (
+    <>
+      <div className="flex items-start gap-4 mb-6">
+        <div className="flex h-12 w-12 items-center justify-center rounded-md bg-muted">
+          <CreditCard className="h-6 w-6" />
+        </div>
+        <div>
+          <h3 className="text-lg font-semibold">{currentGateway?.name.toUpperCase()}</h3>
+          <p className="text-sm text-muted-foreground">
+            Integre sua loja ao gateway {currentGateway?.name}.
+          </p>
+        </div>
+      </div>
+      
+      <div className="grid gap-6 md:grid-cols-[2fr_1fr]">
+        <div className="space-y-6">
+          {/* Informações básicas */}
+          <Card>
+            <CardContent className="pt-6">
+              <h4 className="text-base font-medium mb-4">Informações básicas</h4>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="secretKey" className="flex items-center">
+                    Chave Secreta: <span className="text-destructive ml-1">*</span>
+                  </Label>
+                  <Input 
+                    id="secretKey" 
+                    value={formData.secretKey}
+                    onChange={(e) => setFormData({...formData, secretKey: e.target.value})}
+                    placeholder="Cole aqui sua chave secreta" 
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Regras */}
+          <Card>
+            <CardContent className="pt-6">
+              <h4 className="text-base font-medium mb-4">Regras</h4>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <CardIcon className="h-4 w-4 text-muted-foreground" />
+                    <span>Ativar cartão de crédito</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className={cn("text-xs", formData.creditCardEnabled ? "text-primary" : "text-muted-foreground")}>
+                      {formData.creditCardEnabled ? "SIM" : "NÃO"}
+                    </span>
+                    <Switch 
+                      checked={formData.creditCardEnabled}
+                      onCheckedChange={(checked) => setFormData({...formData, creditCardEnabled: checked})}
+                    />
+                  </div>
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <QrCode className="h-4 w-4 text-muted-foreground" />
+                    <span>Ativar pix</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className={cn("text-xs", formData.pixEnabled ? "text-primary" : "text-muted-foreground")}>
+                      {formData.pixEnabled ? "SIM" : "NÃO"}
+                    </span>
+                    <Switch 
+                      checked={formData.pixEnabled}
+                      onCheckedChange={(checked) => setFormData({...formData, pixEnabled: checked})}
+                    />
+                  </div>
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span>Utilizar taxa de juros customizada</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className={cn("text-xs", formData.customInterestRate ? "text-primary" : "text-muted-foreground")}>
+                      {formData.customInterestRate ? "SIM" : "NÃO"}
+                    </span>
+                    <Switch 
+                      checked={formData.customInterestRate}
+                      onCheckedChange={(checked) => setFormData({...formData, customInterestRate: checked})}
+                    />
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+        
+        <div className="space-y-6">
+          {/* Status */}
+          <Card>
+            <CardContent className="pt-6">
+              <div className="space-y-4">
+                <Label htmlFor="status" className="flex items-center">
+                  Status <span className="text-destructive ml-1">*</span>
+                </Label>
+                <RadioGroup 
+                  value={formData.isActive ? "active" : "inactive"}
+                  onValueChange={(value) => setFormData({...formData, isActive: value === "active"})}
+                  className="flex flex-col space-y-2"
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="inactive" id="inactive" />
+                    <Label htmlFor="inactive" className="flex items-center">
+                      <span className="h-2 w-2 rounded-full bg-gray-400 mr-2"></span>
+                      Inativo
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="active" id="active" />
+                    <Label htmlFor="active" className="flex items-center">
+                      <span className="h-2 w-2 rounded-full bg-green-500 mr-2"></span>
+                      Ativo
+                    </Label>
+                  </div>
+                </RadioGroup>
+              </div>
+            </CardContent>
+          </Card>
+          
+          {/* Help Section */}
+          <Card className="border-primary/20 bg-primary/5">
+            <CardContent className="pt-6">
+              <div className="flex items-start space-x-3">
+                <HelpCircle className="h-5 w-5 text-primary mt-0.5" />
+                <div className="space-y-2">
+                  <p className="text-primary font-medium">Está com dúvidas?</p>
+                  <a 
+                    href={`https://${currentGateway?.id}.com/docs`} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-primary underline hover:text-primary/80 flex items-center"
+                  >
+                    Como integrar o gateway {currentGateway?.name}?
+                    <ExternalLink className="h-3 w-3 ml-1" />
+                  </a>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </>
+  );
 
   return (
     <CheckoutLayout 
@@ -222,132 +414,57 @@ const GatewaysPage = () => {
       
       {/* Dialog for desktop */}
       <Dialog open={openDialog} onOpenChange={setOpenDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Integrar {currentGateway?.name}</DialogTitle>
-            <DialogDescription>
-              Insira as informações de integração do gateway.
-            </DialogDescription>
-          </DialogHeader>
+        <DialogContent className="max-w-4xl">
+          {currentGateway && renderGatewayModalContent()}
           
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="publicKey">Chave Pública</Label>
-              <Input 
-                id="publicKey" 
-                value={formData.publicKey}
-                onChange={(e) => setFormData({...formData, publicKey: e.target.value})}
-                placeholder="pk_..." 
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="secretKey">Chave Secreta</Label>
-              <Input 
-                id="secretKey" 
-                value={formData.secretKey}
-                onChange={(e) => setFormData({...formData, secretKey: e.target.value})}
-                placeholder="sk_..." 
-                type="password"
-              />
-            </div>
-            
-            {currentGateway?.id === "axionpay" && (
-              <div className="space-y-2">
-                <Label htmlFor="token">Token</Label>
-                <Input 
-                  id="token" 
-                  value={formData.token}
-                  onChange={(e) => setFormData({...formData, token: e.target.value})}
-                  placeholder="AXN_..." 
-                />
-              </div>
-            )}
-            
-            <div className="flex items-center pt-2">
-              <ExternalLink className="h-4 w-4 mr-2 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">
-                <a 
-                  href={`https://${currentGateway?.id}.com/dashboard`} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="underline"
-                >
-                  Acessar dashboard do {currentGateway?.name}
-                </a>
-              </span>
-            </div>
-          </div>
-          
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setOpenDialog(false)}>Cancelar</Button>
-            <Button onClick={handleSaveGateway}>Salvar</Button>
+          <DialogFooter className="mt-6">
+            <Button 
+              variant="outline" 
+              onClick={() => setOpenDialog(false)}
+              className="border-primary text-primary hover:bg-primary/10"
+            >
+              Cancelar
+            </Button>
+            <Button 
+              onClick={handleSaveGateway} 
+              disabled={!formData.secretKey}
+              className="bg-primary text-white"
+            >
+              Salvar
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
       
       {/* Drawer for mobile */}
       <Drawer open={openDrawer} onOpenChange={setOpenDrawer}>
-        <DrawerContent>
-          <DrawerHeader>
-            <DrawerTitle>Integrar {currentGateway?.name}</DrawerTitle>
+        <DrawerContent className="px-4">
+          <DrawerHeader className="text-left">
+            <DrawerTitle>{currentGateway?.name}</DrawerTitle>
             <DrawerDescription>
-              Insira as informações de integração do gateway.
+              Integre sua loja ao gateway {currentGateway?.name}.
             </DrawerDescription>
           </DrawerHeader>
           
-          <div className="px-4 space-y-4 py-2">
-            <div className="space-y-2">
-              <Label htmlFor="publicKey-mobile">Chave Pública</Label>
-              <Input 
-                id="publicKey-mobile" 
-                value={formData.publicKey}
-                onChange={(e) => setFormData({...formData, publicKey: e.target.value})}
-                placeholder="pk_..." 
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="secretKey-mobile">Chave Secreta</Label>
-              <Input 
-                id="secretKey-mobile" 
-                value={formData.secretKey}
-                onChange={(e) => setFormData({...formData, secretKey: e.target.value})}
-                placeholder="sk_..." 
-                type="password"
-              />
-            </div>
-            
-            {currentGateway?.id === "axionpay" && (
-              <div className="space-y-2">
-                <Label htmlFor="token-mobile">Token</Label>
-                <Input 
-                  id="token-mobile" 
-                  value={formData.token}
-                  onChange={(e) => setFormData({...formData, token: e.target.value})}
-                  placeholder="AXN_..." 
-                />
-              </div>
-            )}
-            
-            <div className="flex items-center pt-2">
-              <ExternalLink className="h-4 w-4 mr-2 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">
-                <a 
-                  href={`https://${currentGateway?.id}.com/dashboard`} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="underline"
-                >
-                  Acessar dashboard do {currentGateway?.name}
-                </a>
-              </span>
-            </div>
+          <div className="px-4 py-2">
+            {currentGateway && renderGatewayModalContent()}
           </div>
           
-          <DrawerFooter>
-            <Button onClick={handleSaveGateway}>Salvar</Button>
-            <Button variant="outline" onClick={() => setOpenDrawer(false)}>Cancelar</Button>
+          <DrawerFooter className="pt-2">
+            <Button 
+              onClick={handleSaveGateway}
+              disabled={!formData.secretKey}
+              className="bg-primary text-white"
+            >
+              Salvar
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={() => setOpenDrawer(false)}
+              className="border-primary text-primary hover:bg-primary/10"
+            >
+              Cancelar
+            </Button>
           </DrawerFooter>
         </DrawerContent>
       </Drawer>
