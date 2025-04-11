@@ -5,13 +5,13 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-import { useActivationSteps } from '@/contexts/ActivationStepsContext';
+import { useActivationSteps } from '@/contexts/ActivationStepsContextWithStores';
 import DashboardLayout from '@/components/DashboardLayout';
 import { ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const BillingStep = () => {
-  const { updateStepStatus } = useActivationSteps();
+  const { updateStepCompletion } = useActivationSteps();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
@@ -21,7 +21,7 @@ const BillingStep = () => {
     
     // Simulate API call
     setTimeout(() => {
-      updateStepStatus('billing', 'completed');
+      updateStepCompletion('billing', true);
       setLoading(false);
       toast.success('Informações de faturamento salvas com sucesso!');
       navigate('/');
