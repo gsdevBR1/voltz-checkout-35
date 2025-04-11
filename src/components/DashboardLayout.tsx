@@ -40,6 +40,11 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   if (location.pathname.startsWith('/clientes/perfil/') && params.id) {
     pageName = 'Perfil do Cliente';
   }
+  
+  // Special case for lead profile pages
+  if (location.pathname.startsWith('/clientes/leads/perfil/') && params.id) {
+    pageName = 'Perfil do Lead';
+  }
 
   return (
     <SidebarLayout>

@@ -1,5 +1,5 @@
-
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -210,9 +210,11 @@ const Leads: React.FC = () => {
                     <TableCell className="text-right">{formatCurrency(lead.cartValue)}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
-                        <Button size="sm" variant="outline">
-                          <AlertCircle className="h-4 w-4 mr-1" />
-                          Ver
+                        <Button size="sm" variant="outline" asChild>
+                          <Link to={`/clientes/leads/perfil/${lead.id}`}>
+                            <AlertCircle className="h-4 w-4 mr-1" />
+                            Ver
+                          </Link>
                         </Button>
                         <Button size="sm" variant="outline">
                           <Mail className="h-4 w-4 mr-1" />

@@ -21,6 +21,7 @@ import DetalheCarrinhoAbandonado from "./pages/vendas/DetalheCarrinhoAbandonado"
 import TodosClientes from "./pages/clientes/TodosClientes";
 import Leads from "./pages/clientes/Leads";
 import ClienteDetalhes from "./pages/clientes/ClienteDetalhes";
+import LeadDetalhes from "./pages/clientes/LeadDetalhes";
 import { ActivationStepsProvider } from "./contexts/ActivationStepsContextWithStores";
 import { StoreProvider } from "./contexts/StoreContext";
 import { ThemeProvider } from "./providers/ThemeProvider";
@@ -57,6 +58,7 @@ const App: React.FC = () => {
                   <Route path="/clientes/todos" element={<TodosClientes />} />
                   <Route path="/clientes/leads" element={<Leads />} />
                   <Route path="/clientes/perfil/:id" element={<ClienteDetalhes />} />
+                  <Route path="/clientes/leads/perfil/:id" element={<LeadDetalhes />} />
                   <Route path="/steps/billing" element={<BillingStep />} />
                   <Route path="/steps/domain" element={<DomainStep />} />
                   <Route path="/steps/gateway" element={<GatewayStep />} />
