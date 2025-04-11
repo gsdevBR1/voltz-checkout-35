@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { ThemeToggle } from './ThemeToggle';
 import { StoreSelector } from './StoreSelector';
 import { useStores } from '@/contexts/StoreContext';
@@ -9,55 +9,30 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Link } from 'react-router-dom';
 import { Store, Settings } from 'lucide-react';
 import { useTheme } from '@/providers/ThemeProvider';
-import { cn } from '@/lib/utils';
 
 export function DashboardHeader({ onCustomizeClick }: { onCustomizeClick?: () => void }) {
   const { currentStore } = useStores();
   const { theme } = useTheme();
   const isDarkMode = theme === "dark";
-  
-  // State to handle logo transition
-  const [isLogoTransitioning, setIsLogoTransitioning] = useState(false);
-  const [visibleLogo, setVisibleLogo] = useState<"light" | "dark">(isDarkMode ? "dark" : "light");
-  
-  // Effect to handle logo transition when theme changes
-  useEffect(() => {
-    const targetLogo = isDarkMode ? "dark" : "light";
-    if (visibleLogo !== targetLogo) {
-      setIsLogoTransitioning(true);
-      const timer = setTimeout(() => {
-        setVisibleLogo(targetLogo);
-        setTimeout(() => {
-          setIsLogoTransitioning(false);
-        }, 50);
-      }, 200);
-      return () => clearTimeout(timer);
-    }
-  }, [isDarkMode, visibleLogo]);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background">
       <div className="container flex h-16 items-center justify-between">
         <div className="flex items-center gap-4">
-          <Link to="/" className="flex items-center gap-2 relative h-10 w-10">
-            <div className="relative w-full h-full">
-              <img 
-                src="/lovable-uploads/3aa07f77-7311-4155-8e6c-39abb8dca3df.png" 
-                alt="Voltz.Checkout Logo" 
-                className={cn(
-                  "h-10 w-10 absolute top-0 left-0 transition-opacity duration-300 ease-in-out",
-                  visibleLogo === "light" && !isLogoTransitioning ? "opacity-100" : "opacity-0"
-                )}
-              />
+          <Link to="/" className="flex items-center gap-2">
+            {isDarkMode ? (
               <img 
                 src="/lovable-uploads/6e7ee63b-0326-4a37-bc3f-0e31d8324441.png" 
                 alt="Voltz.Checkout Logo (Dark Mode)" 
-                className={cn(
-                  "h-10 w-10 absolute top-0 left-0 transition-opacity duration-300 ease-in-out",
-                  visibleLogo === "dark" && !isLogoTransitioning ? "opacity-100" : "opacity-0"
-                )}
+                className="h-10 w-10"
               />
-            </div>
+            ) : (
+              <img 
+                src="/lovable-uploads/3aa07f77-7311-4155-8e6c-39abb8dca3df.png" 
+                alt="Voltz.Checkout Logo" 
+                className="h-10 w-10"
+              />
+            )}
           </Link>
           
           {currentStore?.isDemo && (
