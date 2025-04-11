@@ -29,7 +29,7 @@ export function ThemeToggle() {
         <div className={cn(
           "flex justify-center items-center w-[26px] h-[26px] rounded-full transition-transform duration-250 ease-in-out",
           isDarkMode ? 
-            "translate-x-[30px] bg-[#60A5FA] text-white" :
+            "translate-x-[32px] bg-[#60A5FA] text-white" :
             "translate-x-0 bg-[#FACC15] text-white"
         )}>
           {isDarkMode ? (
