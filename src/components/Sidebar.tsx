@@ -8,7 +8,10 @@ import {
   Store as StoreIcon, 
   ChevronLeft, 
   ChevronRight, 
-  User 
+  User,
+  ShoppingCart,
+  FileText,
+  ShoppingBag
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { StoreSelector } from '@/components/StoreSelector';
@@ -23,6 +26,9 @@ import {
   SidebarFooter,
   SidebarHeader,
   SidebarTrigger,
+  SidebarMenuSub,
+  SidebarMenuSubItem,
+  SidebarMenuSubButton
 } from '@/components/ui/sidebar';
 
 interface SidebarProps {
@@ -42,6 +48,23 @@ export const AppSidebar: React.FC<SidebarProps> = ({ className }) => {
       title: 'Dashboard',
       path: '/dashboard',
       icon: BarChart2,
+    },
+    {
+      title: 'Vendas',
+      path: '/vendas',
+      icon: ShoppingCart,
+      subItems: [
+        {
+          title: 'Ver Todas',
+          path: '/vendas/todas',
+          icon: FileText,
+        },
+        {
+          title: 'Carrinhos Abandonados',
+          path: '/vendas/abandonados',
+          icon: ShoppingBag,
+        }
+      ]
     },
     {
       title: 'Minhas Lojas',
@@ -66,16 +89,43 @@ export const AppSidebar: React.FC<SidebarProps> = ({ className }) => {
         <SidebarMenu>
           {menuItems.map((item) => (
             <SidebarMenuItem key={item.path}>
-              <SidebarMenuButton
-                asChild
-                isActive={location.pathname === item.path}
-                tooltip={item.title}
-              >
-                <Link to={item.path} className="w-full">
-                  <item.icon className="h-5 w-5" />
-                  <span>{item.title}</span>
-                </Link>
-              </SidebarMenuButton>
+              {item.subItems ? (
+                <>
+                  <SidebarMenuButton
+                    isActive={location.pathname.startsWith(item.path)}
+                    tooltip={item.title}
+                  >
+                    <item.icon className="h-5 w-5" />
+                    <span>{item.title}</span>
+                  </SidebarMenuButton>
+                  <SidebarMenuSub>
+                    {item.subItems.map((subItem) => (
+                      <SidebarMenuSubItem key={subItem.path}>
+                        <SidebarMenuSubButton
+                          asChild
+                          isActive={location.pathname === subItem.path}
+                        >
+                          <Link to={subItem.path}>
+                            <subItem.icon className="h-4 w-4" />
+                            <span>{subItem.title}</span>
+                          </Link>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                    ))}
+                  </SidebarMenuSub>
+                </>
+              ) : (
+                <SidebarMenuButton
+                  asChild
+                  isActive={location.pathname === item.path}
+                  tooltip={item.title}
+                >
+                  <Link to={item.path} className="w-full">
+                    <item.icon className="h-5 w-5" />
+                    <span>{item.title}</span>
+                  </Link>
+                </SidebarMenuButton>
+              )}
             </SidebarMenuItem>
           ))}
         </SidebarMenu>
