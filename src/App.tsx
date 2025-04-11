@@ -11,27 +11,30 @@ import DomainStep from "./pages/steps/DomainStep";
 import GatewayStep from "./pages/steps/GatewayStep";
 import ShippingStep from "./pages/steps/ShippingStep";
 import { ActivationStepsProvider } from "./contexts/ActivationStepsContext";
+import { ThemeProvider } from "./providers/ThemeProvider";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <ActivationStepsProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/steps/billing" element={<BillingStep />} />
-            <Route path="/steps/domain" element={<DomainStep />} />
-            <Route path="/steps/gateway" element={<GatewayStep />} />
-            <Route path="/steps/shipping" element={<ShippingStep />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </ActivationStepsProvider>
-    </TooltipProvider>
+    <ThemeProvider defaultTheme="system">
+      <TooltipProvider>
+        <ActivationStepsProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/steps/billing" element={<BillingStep />} />
+              <Route path="/steps/domain" element={<DomainStep />} />
+              <Route path="/steps/gateway" element={<GatewayStep />} />
+              <Route path="/steps/shipping" element={<ShippingStep />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </ActivationStepsProvider>
+      </TooltipProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 
