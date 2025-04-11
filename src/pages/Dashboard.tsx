@@ -18,6 +18,7 @@ import { ThemeToggle } from '@/components/ThemeToggle';
 import { CustomizeDashboardDialog, availableKpis } from '@/components/dashboard/CustomizeDashboardDialog';
 import { useStores } from '@/contexts/StoreContext';
 import { FunnelChart } from '@/components/ui/funnel-chart';
+import { InsightsAdvanced } from '@/components/dashboard/InsightsAdvanced';
 
 const generateRandomData = (days: number, min: number, max: number) => {
   return Array.from({ length: days }).map((_, i) => {
@@ -813,6 +814,17 @@ const Dashboard = () => {
               </CardContent>
             </Card>
           </div>
+          
+          <Card className="mb-6">
+            <CardContent className="p-6">
+              <InsightsAdvanced 
+                dateRange={dateRange}
+                startDate={startDate}
+                endDate={endDate}
+                gateway={gateway}
+              />
+            </CardContent>
+          </Card>
         </main>
       </div>
       
