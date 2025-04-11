@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SidebarLayout } from '@/components/Sidebar';
 import { Calendar, CreditCard, DollarSign, BarChart2, PieChart, Users, ArrowUpRight, 
-         TrendingUp, Activity, Percent, Package, ShoppingCart, Circle } from 'lucide-react';
+         TrendingUp, Activity, Percent, Package, ShoppingCart, Circle, Settings } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
          BarChart, Bar, Legend, PieChart as RechartPieChart, Pie, Cell } from 'recharts';
 import { format, subDays } from 'date-fns';
@@ -15,6 +15,8 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { CustomizeDashboardDialog, availableKpis } from '@/components/dashboard/CustomizeDashboardDialog';
+import { useStores } from '@/contexts/StoreContext';
 
 const generateRandomData = (days: number, min: number, max: number) => {
   return Array.from({ length: days }).map((_, i) => {
@@ -104,13 +106,18 @@ const Dashboard = () => {
     ticketMedio: 0,
     conversaoCheckout: Math.floor(Math.random() * 20) + 60,
     conversaoGateway: Math.floor(Math.random() * 20) + 40,
+    reembolsos: Math.floor(Math.random() * 1000) + 500,
+    chargebacks: Math.floor(Math.random() * 500) + 100,
+    visitas: Math.floor(Math.random() * 500) + 1000,
   });
   const [realtimeData, setRealtimeData] = useState(generateFunnelData());
   const [funnelData, setFunnelData] = useState(generateFunnelData());
   const [paymentData, setPaymentData] = useState(generatePaymentMethodData());
   const [topProducts, setTopProducts] = useState(generateTopProducts());
   const [topUtms, setTopUtms] = useState(generateTopUtms());
-  
+  const [customizeDialogOpen, setCustomizeDialogOpen] = useState(false);
+  const { currentStore } = useStores();
+
   useEffect(() => {
     setKpiData(prev => ({
       ...prev,
@@ -153,6 +160,9 @@ const Dashboard = () => {
       conversaoCheckout: Math.floor(Math.random() * 20) + 60,
       conversaoGateway: Math.floor(Math.random() * 20) + 40,
       ticketMedio: 0,
+      reembolsos: Math.floor(Math.random() * 1000) + 500,
+      chargebacks: Math.floor(Math.random() * 500) + 100,
+      visitas: Math.floor(Math.random() * 500) + 1000,
     });
     
     setFunnelData(generateFunnelData());
@@ -236,13 +246,153 @@ const Dashboard = () => {
     return metrics[chartMetric] || 'Faturamento Líquido';
   };
   
+  const getActiveKpis = () => {
+    if (!currentStore || !currentStore.dashboardSettings?.kpis) {
+      // Return default active KPIs if store has no settings
+      return availableKpis.filter(kpi => kpi.default).map(kpi => kpi.id);
+    }
+    
+    // Otherwise return KPIs that are set to true in store settings
+    return Object.entries(currentStore.dashboardSettings.kpis)
+      .filter(([_, isActive]) => isActive)
+      .map(([kpiId]) => kpiId);
+  };
+  
+  const activeKpis = getActiveKpis();
+  
+  const kpiComponents = {
+    faturamento: (
+      <Card>
+        <CardHeader className="py-3">
+          <CardTitle className="text-sm flex items-center gap-2">
+            <DollarSign className="h-4 w-4 text-primary" />
+            Faturamento
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{formatCurrency(kpiData.faturamento)}</div>
+          <p className="text-xs text-muted-foreground">Vendas aprovadas</p>
+        </CardContent>
+      </Card>
+    ),
+    transacoes: (
+      <Card>
+        <CardHeader className="py-3">
+          <CardTitle className="text-sm flex items-center gap-2">
+            <ShoppingCart className="h-4 w-4 text-primary" />
+            Transações
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{kpiData.transacoes}</div>
+          <p className="text-xs text-muted-foreground">Vendas aprovadas</p>
+        </CardContent>
+      </Card>
+    ),
+    ticketMedio: (
+      <Card>
+        <CardHeader className="py-3">
+          <CardTitle className="text-sm flex items-center gap-2">
+            <CreditCard className="h-4 w-4 text-primary" />
+            Ticket Médio
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{formatCurrency(kpiData.ticketMedio)}</div>
+          <p className="text-xs text-muted-foreground">Valor médio por venda</p>
+        </CardContent>
+      </Card>
+    ),
+    conversaoCheckout: (
+      <Card>
+        <CardHeader className="py-3">
+          <CardTitle className="text-sm flex items-center gap-2">
+            <TrendingUp className="h-4 w-4 text-primary" />
+            Conversão Checkout
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{kpiData.conversaoCheckout}%</div>
+          <p className="text-xs text-muted-foreground">Pix gerados</p>
+        </CardContent>
+      </Card>
+    ),
+    conversaoGateway: (
+      <Card>
+        <CardHeader className="py-3">
+          <CardTitle className="text-sm flex items-center gap-2">
+            <Percent className="h-4 w-4 text-primary" />
+            Conversão Gateway
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{kpiData.conversaoGateway}%</div>
+          <p className="text-xs text-muted-foreground">Pix pagos</p>
+        </CardContent>
+      </Card>
+    ),
+    reembolsos: (
+      <Card>
+        <CardHeader className="py-3">
+          <CardTitle className="text-sm flex items-center gap-2">
+            <ArrowUpRight className="h-4 w-4 text-destructive" />
+            Reembolsos
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{formatCurrency(kpiData.reembolsos)}</div>
+          <p className="text-xs text-muted-foreground">Total reembolsado</p>
+        </CardContent>
+      </Card>
+    ),
+    chargebacks: (
+      <Card>
+        <CardHeader className="py-3">
+          <CardTitle className="text-sm flex items-center gap-2">
+            <ArrowUpRight className="h-4 w-4 text-destructive" />
+            Chargebacks
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{formatCurrency(kpiData.chargebacks)}</div>
+          <p className="text-xs text-muted-foreground">Total contestado</p>
+        </CardContent>
+      </Card>
+    ),
+    visitas: (
+      <Card>
+        <CardHeader className="py-3">
+          <CardTitle className="text-sm flex items-center gap-2">
+            <Users className="h-4 w-4 text-primary" />
+            Visitas
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{kpiData.visitas}</div>
+          <p className="text-xs text-muted-foreground">Visitas no checkout</p>
+        </CardContent>
+      </Card>
+    ),
+  };
+  
   return (
     <SidebarLayout>
       <div className="min-h-screen bg-background">
         <header className="bg-card border-b border-border sticky top-0 z-10">
           <div className="container mx-auto px-4 py-4">
             <div className="flex items-center justify-between">
-              <h1 className="text-xl font-bold text-primary">Dashboard</h1>
+              <div className="flex items-center gap-2">
+                <h1 className="text-xl font-bold text-primary">Dashboard</h1>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  onClick={() => setCustomizeDialogOpen(true)}
+                  className="rounded-full"
+                  title="Personalizar Dashboard"
+                >
+                  <Settings className="h-4 w-4" />
+                </Button>
+              </div>
               <div className="flex items-center gap-4">
                 <ThemeToggle />
               </div>
@@ -252,70 +402,13 @@ const Dashboard = () => {
         
         <main className="container mx-auto px-4 py-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
-            <Card>
-              <CardHeader className="py-3">
-                <CardTitle className="text-sm flex items-center gap-2">
-                  <DollarSign className="h-4 w-4 text-primary" />
-                  Faturamento
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{formatCurrency(kpiData.faturamento)}</div>
-                <p className="text-xs text-muted-foreground">Vendas aprovadas</p>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader className="py-3">
-                <CardTitle className="text-sm flex items-center gap-2">
-                  <ShoppingCart className="h-4 w-4 text-primary" />
-                  Transações
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{kpiData.transacoes}</div>
-                <p className="text-xs text-muted-foreground">Vendas aprovadas</p>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader className="py-3">
-                <CardTitle className="text-sm flex items-center gap-2">
-                  <CreditCard className="h-4 w-4 text-primary" />
-                  Ticket Médio
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{formatCurrency(kpiData.ticketMedio)}</div>
-                <p className="text-xs text-muted-foreground">Valor médio por venda</p>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader className="py-3">
-                <CardTitle className="text-sm flex items-center gap-2">
-                  <TrendingUp className="h-4 w-4 text-primary" />
-                  Conversão Checkout
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{kpiData.conversaoCheckout}%</div>
-                <p className="text-xs text-muted-foreground">Pix gerados</p>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader className="py-3">
-                <CardTitle className="text-sm flex items-center gap-2">
-                  <Percent className="h-4 w-4 text-primary" />
-                  Conversão Gateway
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{kpiData.conversaoGateway}%</div>
-                <p className="text-xs text-muted-foreground">Pix pagos</p>
-              </CardContent>
-            </Card>
+            {activeKpis.map(kpiId => (
+              kpiComponents[kpiId as keyof typeof kpiComponents] && (
+                <div key={kpiId} className="col-span-1">
+                  {kpiComponents[kpiId as keyof typeof kpiComponents]}
+                </div>
+              )
+            ))}
           </div>
           
           <Card className="mb-6">
@@ -636,143 +729,3 @@ const Dashboard = () => {
                         <span className="font-medium">{formatCurrency(paymentData.pix.total)}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-sm text-muted-foreground">Quantidade:</span>
-                        <span className="font-medium">{paymentData.pix.count}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-sm text-muted-foreground">Conversão:</span>
-                        <span className="font-medium text-success">
-                          {paymentData.pix.conversion}%
-                          <ArrowUpRight className="h-3 w-3 inline ml-1" />
-                        </span>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-                
-                <Card className="bg-card/50 shadow-none">
-                  <CardHeader className="py-3">
-                    <CardTitle className="text-base">Cartão de Crédito</CardTitle>
-                  </CardHeader>
-                  <CardContent className="pb-4">
-                    <div className="space-y-2">
-                      <div className="flex justify-between">
-                        <span className="text-sm text-muted-foreground">Valor vendido:</span>
-                        <span className="font-medium">{formatCurrency(paymentData.credit.total)}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-sm text-muted-foreground">Quantidade:</span>
-                        <span className="font-medium">{paymentData.credit.count}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-sm text-muted-foreground">Conversão:</span>
-                        <span className="font-medium text-success">
-                          {paymentData.credit.conversion}%
-                          <ArrowUpRight className="h-3 w-3 inline ml-1" />
-                        </span>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-                
-                <Card className="bg-card/50 shadow-none">
-                  <CardHeader className="py-3">
-                    <CardTitle className="text-base">Boleto</CardTitle>
-                  </CardHeader>
-                  <CardContent className="pb-4">
-                    <div className="space-y-2">
-                      <div className="flex justify-between">
-                        <span className="text-sm text-muted-foreground">Valor vendido:</span>
-                        <span className="font-medium">{formatCurrency(paymentData.boleto.total)}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-sm text-muted-foreground">Quantidade:</span>
-                        <span className="font-medium">{paymentData.boleto.count}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-sm text-muted-foreground">Conversão:</span>
-                        <span className="font-medium text-success">
-                          {paymentData.boleto.conversion}%
-                          <ArrowUpRight className="h-3 w-3 inline ml-1" />
-                        </span>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-            <Card>
-              <CardHeader className="py-4">
-                <CardTitle className="flex items-center gap-2">
-                  <Package className="h-5 w-5 text-primary" />
-                  Top Produtos
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-1">
-                  <div className="grid grid-cols-3 gap-2 text-sm font-medium mb-2 text-muted-foreground">
-                    <div>Produto</div>
-                    <div>Tipo</div>
-                    <div className="text-right">Total</div>
-                  </div>
-                  {topProducts.map((product, index) => (
-                    <div 
-                      key={index} 
-                      className="grid grid-cols-3 gap-2 py-2 border-t border-border text-sm"
-                    >
-                      <div className="truncate">{product.name}</div>
-                      <div className="capitalize">
-                        <span 
-                          className={cn(
-                            "inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium",
-                            product.type === 'principal' ? "bg-blue-100 text-blue-800 dark:bg-blue-800/30 dark:text-blue-300" :
-                            product.type === 'upsell' ? "bg-green-100 text-green-800 dark:bg-green-800/30 dark:text-green-300" :
-                            "bg-purple-100 text-purple-800 dark:bg-purple-800/30 dark:text-purple-300"
-                          )}
-                        >
-                          {product.type}
-                        </span>
-                      </div>
-                      <div className="text-right">{formatCurrency(product.total)}</div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader className="py-4">
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="h-5 w-5 text-primary" />
-                  Top UTMs
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-1">
-                  <div className="grid grid-cols-2 gap-2 text-sm font-medium mb-2 text-muted-foreground">
-                    <div>Campanha</div>
-                    <div className="text-right">Conversões</div>
-                  </div>
-                  {topUtms.map((utm, index) => (
-                    <div 
-                      key={index} 
-                      className="grid grid-cols-2 gap-2 py-2 border-t border-border text-sm"
-                    >
-                      <div className="truncate">{utm.campaign}</div>
-                      <div className="text-right">{utm.total}</div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </main>
-      </div>
-    </SidebarLayout>
-  );
-};
-
-export default Dashboard;

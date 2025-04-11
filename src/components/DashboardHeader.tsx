@@ -7,9 +7,9 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Link } from 'react-router-dom';
-import { Store } from 'lucide-react';
+import { Store, Settings } from 'lucide-react';
 
-export function DashboardHeader() {
+export function DashboardHeader({ onCustomizeClick }: { onCustomizeClick?: () => void }) {
   const { currentStore } = useStores();
 
   return (

@@ -18,6 +18,9 @@ export interface Store {
     shopUrl: string;
     // In a real app, we would store additional encrypted credentials
   };
+  dashboardSettings?: {
+    kpis?: Record<string, boolean>;
+  };
   createdAt: Date;
   lastAccessed: Date;
 }
@@ -53,6 +56,18 @@ const DEMO_STORE: Store = {
     domain: true,
     gateway: true,
     shipping: true,
+  },
+  dashboardSettings: {
+    kpis: {
+      faturamento: true,
+      transacoes: true,
+      ticketMedio: true,
+      conversaoCheckout: true,
+      conversaoGateway: true,
+      reembolsos: true,
+      chargebacks: false,
+      visitas: true,
+    }
   },
   createdAt: new Date(),
   lastAccessed: new Date(),
@@ -154,6 +169,18 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         domain: false,
         gateway: false,
         shipping: false,
+      },
+      dashboardSettings: {
+        kpis: {
+          faturamento: true,
+          transacoes: true,
+          ticketMedio: true,
+          conversaoCheckout: true,
+          conversaoGateway: true,
+          reembolsos: true,
+          chargebacks: false,
+          visitas: true,
+        }
       },
       createdAt: new Date(),
       lastAccessed: new Date(),
