@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -22,14 +21,12 @@ export function InsightsAdvanced({
   endDate,
   gateway 
 }: InsightsAdvancedProps) {
-  // Generate random data based on date filters
   const generateRandomData = () => {
     const seed = startDate.getTime() + endDate.getTime();
     const rng = () => {
       return ((Math.sin(seed * 9999) + 1) / 2) * Math.random();
     };
     
-    // Intelligence data
     const projectedRevenue = Math.floor(rng() * 20000) + 5000;
     const previousMonthAverage = Math.floor(rng() * 18000) + 5000;
     const isProjectedHigher = projectedRevenue > previousMonthAverage;
@@ -43,7 +40,6 @@ export function InsightsAdvanced({
       { name: 'Pacote Completo Avançado', qty: Math.floor(rng() * 12) + 1 },
     ].sort((a, b) => a.qty - b.qty).slice(0, 2);
     
-    // User behavior
     const averageConversionTime = Math.floor(rng() * 15) + 3; // 3-18 minutes
     const abandonmentStages = [
       { stage: 'Dados Pessoais', percentage: Math.floor(rng() * 30) + 10 },
@@ -52,7 +48,6 @@ export function InsightsAdvanced({
     ].sort((a, b) => b.percentage - a.percentage);
     const repeatCustomers = Math.floor(rng() * 15) + 5; // 5-20%
     
-    // Origin performance
     const topCampaigns = [
       { name: 'black_friday', conversions: Math.floor(rng() * 100) + 50 },
       { name: 'instagram_stories', conversions: Math.floor(rng() * 90) + 40 },
@@ -66,7 +61,6 @@ export function InsightsAdvanced({
     };
     const abWinner = abTestResults.variantA.rate > abTestResults.variantB.rate ? 'A' : 'B';
     
-    // Audience and device
     const topRegions = [
       { name: 'São Paulo', sales: Math.floor(rng() * 300) + 200 },
       { name: 'Rio de Janeiro', sales: Math.floor(rng() * 200) + 150 },
@@ -81,13 +75,11 @@ export function InsightsAdvanced({
       tablet: Math.floor(rng() * 15) + 2, // 2-17%
     };
     
-    // Normalize device percentages to sum 100%
     const deviceTotal = deviceData.mobile + deviceData.desktop + deviceData.tablet;
     deviceData.mobile = Math.round((deviceData.mobile / deviceTotal) * 100);
     deviceData.desktop = Math.round((deviceData.desktop / deviceTotal) * 100);
     deviceData.tablet = 100 - deviceData.mobile - deviceData.desktop;
     
-    // Security
     const declinedCards = Math.floor(rng() * 50) + 10;
     const declinedReasons = [
       { reason: 'Saldo Insuficiente', count: Math.floor(rng() * 30) + 5 },
@@ -158,7 +150,6 @@ export function InsightsAdvanced({
         </h2>
       </div>
       
-      {/* Inteligência Comercial */}
       <div className="space-y-3">
         <h3 className="text-lg font-semibold flex items-center gap-2">
           <BrainCircuit className="h-5 w-5 text-primary" />
@@ -166,7 +157,6 @@ export function InsightsAdvanced({
         </h3>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {/* Projeção de Faturamento */}
           <Card>
             <CardHeader className="py-3">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -204,7 +194,6 @@ export function InsightsAdvanced({
             </CardContent>
           </Card>
           
-          {/* Variação Percentual */}
           <Card>
             <CardHeader className="py-3">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -257,7 +246,6 @@ export function InsightsAdvanced({
             </CardContent>
           </Card>
           
-          {/* Estoque Crítico */}
           <Card>
             <CardHeader className="py-3">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -290,7 +278,6 @@ export function InsightsAdvanced({
         </div>
       </div>
       
-      {/* Comportamento de Usuário */}
       <div className="space-y-3">
         <h3 className="text-lg font-semibold flex items-center gap-2">
           <Users className="h-5 w-5 text-primary" />
@@ -298,7 +285,6 @@ export function InsightsAdvanced({
         </h3>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {/* Tempo Médio até Conversão */}
           <Card>
             <CardHeader className="py-3">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -330,7 +316,6 @@ export function InsightsAdvanced({
             </CardContent>
           </Card>
           
-          {/* Etapa de Abandono */}
           <Card>
             <CardHeader className="py-3">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -371,7 +356,6 @@ export function InsightsAdvanced({
             </CardContent>
           </Card>
           
-          {/* Clientes com Recompra */}
           <Card>
             <CardHeader className="py-3">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -413,7 +397,6 @@ export function InsightsAdvanced({
         </div>
       </div>
       
-      {/* Performance por Origem */}
       <div className="space-y-3">
         <h3 className="text-lg font-semibold flex items-center gap-2">
           <Search className="h-5 w-5 text-primary" />
@@ -421,7 +404,6 @@ export function InsightsAdvanced({
         </h3>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Melhor Campanha */}
           <Card>
             <CardHeader className="py-3">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -456,7 +438,6 @@ export function InsightsAdvanced({
             </CardContent>
           </Card>
           
-          {/* Teste A/B */}
           <Card>
             <CardHeader className="py-3">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -509,7 +490,6 @@ export function InsightsAdvanced({
         </div>
       </div>
       
-      {/* Público & Dispositivo */}
       <div className="space-y-3">
         <h3 className="text-lg font-semibold flex items-center gap-2">
           <Users className="h-5 w-5 text-primary" />
@@ -517,7 +497,6 @@ export function InsightsAdvanced({
         </h3>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Regiões */}
           <Card>
             <CardHeader className="py-3">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -551,7 +530,6 @@ export function InsightsAdvanced({
             </CardContent>
           </Card>
           
-          {/* Dispositivo */}
           <Card>
             <CardHeader className="py-3">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -577,7 +555,7 @@ export function InsightsAdvanced({
                 
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Desktop className="h-4 w-4 text-blue-600" />
+                    <Monitor className="h-4 w-4 text-blue-600" />
                     <span>Desktop</span>
                   </div>
                   <span className="font-bold">{data.audience.deviceData.desktop}%</span>
@@ -608,7 +586,6 @@ export function InsightsAdvanced({
         </div>
       </div>
       
-      {/* Segurança */}
       <div className="space-y-3">
         <h3 className="text-lg font-semibold flex items-center gap-2">
           <Shield className="h-5 w-5 text-primary" />
@@ -616,7 +593,6 @@ export function InsightsAdvanced({
         </h3>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Cartões Recusados */}
           <Card>
             <CardHeader className="py-3">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -643,7 +619,6 @@ export function InsightsAdvanced({
             </CardContent>
           </Card>
           
-          {/* Alertas de Chargeback */}
           <Card>
             <CardHeader className="py-3">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
