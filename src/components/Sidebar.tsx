@@ -94,7 +94,8 @@ export const AppSidebar: React.FC<SidebarProps> = ({ className }) => {
   );
 };
 
-export const SidebarLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+// The SidebarLayout component was not properly exported, let's fix that
+export const SidebarLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <SidebarProvider>
       <div className="flex min-h-screen w-full">
