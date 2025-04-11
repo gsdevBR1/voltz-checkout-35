@@ -45,7 +45,6 @@ export const AppSidebar: React.FC<SidebarProps> = ({ className }) => {
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
   const { state } = useSidebar();
   
-  // Add styles for smooth transition
   useEffect(() => {
     const style = document.createElement('style');
     style.textContent = `
@@ -132,7 +131,6 @@ export const AppSidebar: React.FC<SidebarProps> = ({ className }) => {
     },
   ];
 
-  // Initialize or update open sections based on current path
   useEffect(() => {
     menuItems.forEach(item => {
       if (item.subItems && location.pathname.startsWith(item.path)) {
@@ -145,7 +143,6 @@ export const AppSidebar: React.FC<SidebarProps> = ({ className }) => {
     setOpenSections(prev => ({ ...prev, [path]: !prev[path] }));
   };
 
-  // Check if a menu item is active
   const isActive = (path: string): boolean => {
     return location.pathname === path || location.pathname.startsWith(path);
   };
@@ -154,13 +151,12 @@ export const AppSidebar: React.FC<SidebarProps> = ({ className }) => {
     <Sidebar className={className}>
       <SidebarHeader>
         <div className="flex items-center justify-between w-full px-4 py-6">
-          <Link to="/" className="flex items-center gap-2">
+          <Link to="/" className="flex items-center">
             <img 
               src="/lovable-uploads/3aa07f77-7311-4155-8e6c-39abb8dca3df.png" 
               alt="Voltz.Checkout Logo" 
               className="h-8 w-8"
             />
-            <span className="text-xl font-bold text-primary">Voltz.Checkout</span>
           </Link>
           <Avatar className="h-8 w-8">
             <AvatarFallback className="bg-primary/10 text-primary">
