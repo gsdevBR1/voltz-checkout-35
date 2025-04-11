@@ -469,19 +469,31 @@ const Dashboard = () => {
               </Select>
             </CardHeader>
             <CardContent className="pt-0">
-              <div className="h-80">
+              <div className="h-80 w-full overflow-hidden">
                 <ChartContainer config={{ data: { theme: { light: '#3b82f6', dark: '#60a5fa' } } }}>
                   <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                    <AreaChart 
+                      data={chartData} 
+                      margin={{ top: 10, right: 30, left: 0, bottom: 5 }}
+                    >
                       <defs>
                         <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
                           <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.8}/>
                           <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
                         </linearGradient>
                       </defs>
-                      <XAxis dataKey="date" />
-                      <YAxis />
-                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                      <XAxis 
+                        dataKey="date" 
+                        axisLine={false}
+                        tickLine={false}
+                        dy={10}
+                      />
+                      <YAxis 
+                        axisLine={false}
+                        tickLine={false}
+                        dx={-10}
+                      />
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" vertical={false} />
                       <ChartTooltip content={<ChartTooltipContent />} />
                       <Area 
                         type="monotone" 
@@ -489,6 +501,7 @@ const Dashboard = () => {
                         stroke="hsl(var(--primary))" 
                         fillOpacity={1} 
                         fill="url(#colorValue)" 
+                        strokeWidth={2}
                       />
                     </AreaChart>
                   </ResponsiveContainer>
