@@ -30,9 +30,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
 import { Product, ProductStatus, ProductType } from '@/types/product';
 import { ProductTypeBadge, ShopifyBadge } from '@/components/produtos/ProductBadge';
-import { formatCurrency } from '@/lib/utils';
+import { formatCurrency, cn } from '@/lib/utils';
 import { 
   Plus, 
   Package, 

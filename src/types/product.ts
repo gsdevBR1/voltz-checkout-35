@@ -14,6 +14,7 @@ export interface Product {
   fromShopify?: boolean;
   createdAt: Date;
   updatedAt: Date;
+  downloadUrl?: string;
 }
 
 export interface ProductFormData {
@@ -24,4 +25,5 @@ export interface ProductFormData {
   stock?: number | null;
   status: ProductStatus;
   imageUrl?: string;
+  downloadUrl?: string;
 }
