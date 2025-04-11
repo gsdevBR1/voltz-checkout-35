@@ -7,12 +7,16 @@ import { CheckCircle, Circle, ShoppingBag, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
 import { useActivationSteps } from '@/contexts/ActivationStepsContextWithStores';
+import { useStores } from '@/contexts/StoreContext';
 
 const ShopifyCard = () => {
   const navigate = useNavigate();
   const { steps } = useActivationSteps();
+  const { currentStore } = useStores();
+  
+  // Check connection status from both contexts
   const shopifyStep = steps.find(step => step.id === 'shopify');
-  const isConnected = shopifyStep?.isCompleted || false;
+  const isConnected = shopifyStep?.isCompleted || (currentStore?.shopifyIntegration?.connected || false);
 
   return (
     <Card className={cn(
@@ -45,7 +49,11 @@ const ShopifyCard = () => {
         <div className="flex items-center space-x-3 text-muted-foreground">
           <ShoppingBag className="h-6 w-6" />
           <span className="text-sm">
-            {isConnected ? 'Conectado' : 'Desconectado'}
+            {isConnected ? (
+              currentStore?.shopifyIntegration?.shopUrl || 'Conectado'
+            ) : (
+              'Desconectado'
+            )}
           </span>
         </div>
       </CardContent>

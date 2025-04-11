@@ -13,6 +13,11 @@ export interface Store {
     gateway: boolean;
     shipping: boolean;
   };
+  shopifyIntegration?: {
+    connected: boolean;
+    shopUrl: string;
+    // In a real app, we would store additional encrypted credentials
+  };
   createdAt: Date;
   lastAccessed: Date;
 }
