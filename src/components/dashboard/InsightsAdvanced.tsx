@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   TrendingUp, TrendingDown, Package, Clock, Users,
-  Map, Smartphone, Desktop, Tablet, Shield, CreditCard, AlertTriangle,
+  Map, Smartphone, Monitor, Tablet, Shield, CreditCard, AlertTriangle,
   CircleDollarSign, Activity, Search, ArrowUp, ArrowDown, BrainCircuit
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
