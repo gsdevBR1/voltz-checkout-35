@@ -4,8 +4,9 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
+import HomePage from "./pages/HomePage";
 import Stores from "./pages/Stores";
 import NotFound from "./pages/NotFound";
 import BillingStep from "./pages/steps/BillingStep";
@@ -37,7 +38,9 @@ const App: React.FC = () => {
               <Sonner />
               <BrowserRouter>
                 <Routes>
-                  <Route path="/" element={<Stores />} />
+                  <Route path="/" element={<Navigate to="/pagina-inicial" replace />} />
+                  <Route path="/pagina-inicial" element={<HomePage />} />
+                  <Route path="/lojas" element={<Stores />} />
                   <Route path="/dashboard" element={<Dashboard />} />
                   <Route path="/steps/billing" element={<BillingStep />} />
                   <Route path="/steps/domain" element={<DomainStep />} />

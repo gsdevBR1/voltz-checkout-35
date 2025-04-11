@@ -1,13 +1,13 @@
 
 import React, { useState } from 'react';
-import { useStores } from '@/contexts/StoreContext';
+import { useStores, Store as StoreType } from '@/contexts/StoreContext';
 import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from '@/components/ui/select';
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { 
   Plus, 
   Store, 
@@ -29,24 +29,18 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Link } from 'react-router-dom';
-import { Store as StoreType } from '@/contexts/StoreContext';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { Link, useNavigate } from 'react-router-dom';
 
 export function StoreSelector() {
   const { stores, currentStore, setCurrentStore, addStore } = useStores();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newStoreName, setNewStoreName] = useState('');
   const [storeNameError, setStoreNameError] = useState('');
+  const navigate = useNavigate();
 
   const handleStoreChange = (store: StoreType) => {
     setCurrentStore(store);
+    navigate('/pagina-inicial');
   };
 
   const handleCreateStore = () => {
@@ -59,6 +53,7 @@ export function StoreSelector() {
     setNewStoreName('');
     setStoreNameError('');
     setIsDialogOpen(false);
+    navigate('/pagina-inicial');
   };
 
   const getStoreStatusIcon = (store: StoreType) => {
@@ -173,7 +168,7 @@ export function StoreSelector() {
               </DialogFooter>
             </DialogContent>
           </Dialog>
-          <Link to="/stores" className="block">
+          <Link to="/lojas" className="block">
             <DropdownMenuItem className="cursor-pointer flex items-center gap-2 py-2">
               <ExternalLink className="h-4 w-4 shrink-0" />
               <span>Ver todas as lojas</span>

@@ -6,7 +6,7 @@ const Index = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    navigate('/');
+    navigate('/pagina-inicial');
   }, [navigate]);
 
   return <div>Redirecionando...</div>;

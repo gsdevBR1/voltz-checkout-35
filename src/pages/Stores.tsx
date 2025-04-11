@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { useStores, Store } from '@/contexts/StoreContext';
 import { Button } from '@/components/ui/button';
@@ -30,9 +30,9 @@ import { useNavigate } from 'react-router-dom';
 
 export default function Stores() {
   const { stores, addStore, setCurrentStore } = useStores();
-  const [isDialogOpen, setIsDialogOpen] = React.useState(false);
-  const [newStoreName, setNewStoreName] = React.useState('');
-  const [storeNameError, setStoreNameError] = React.useState('');
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [newStoreName, setNewStoreName] = useState('');
+  const [storeNameError, setStoreNameError] = useState('');
   const navigate = useNavigate();
 
   const handleCreateStore = () => {
@@ -47,9 +47,9 @@ export default function Stores() {
     setIsDialogOpen(false);
   };
 
-  const handleStoreSelect = (store) => {
+  const handleStoreSelect = (store: Store) => {
     setCurrentStore(store);
-    navigate('/dashboard');
+    navigate('/pagina-inicial');
   };
 
   const getStoreCompletionPercentage = (store: Store) => {
@@ -89,21 +89,21 @@ export default function Stores() {
         return (
           <div className="flex items-center rounded-full bg-green-100 text-green-800 px-2 py-0.5 text-xs">
             <CheckCircle className="w-3 h-3 mr-1" />
-            <span>Concluído</span>
+            <span>Ativa</span>
           </div>
         );
       case "in-progress":
         return (
           <div className="flex items-center rounded-full bg-blue-100 text-blue-800 px-2 py-0.5 text-xs">
             <Clock className="w-3 h-3 mr-1" />
-            <span>Em andamento</span>
+            <span>Incompleta</span>
           </div>
         );
       case "not-started":
         return (
           <div className="flex items-center rounded-full bg-gray-100 text-gray-800 px-2 py-0.5 text-xs">
             <X className="w-3 h-3 mr-1" />
-            <span>Não iniciado</span>
+            <span>Nova</span>
           </div>
         );
     }
@@ -114,7 +114,7 @@ export default function Stores() {
       <div className="max-w-6xl mx-auto py-6">
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h1 className="text-2xl font-bold">Suas Lojas</h1>
+            <h1 className="text-2xl font-bold">Minhas Lojas</h1>
             <p className="text-muted-foreground">
               Gerencie todas as suas lojas em um só lugar
             </p>
@@ -178,7 +178,7 @@ export default function Stores() {
                       <CardTitle className="text-base truncate">{store.name}</CardTitle>
                     </div>
                     <CardDescription>
-                      Criada em {format(store.createdAt, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+                      Criada em {format(new Date(store.createdAt), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
                     </CardDescription>
                   </div>
                   <DeleteStoreDialog store={store} />

@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, BarChart2, User } from 'lucide-react';
+import { Home, BarChart2, User, Store as StoreIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   Sidebar,
@@ -26,13 +26,18 @@ export const AppSidebar: React.FC<SidebarProps> = ({ className }) => {
   const menuItems = [
     {
       title: 'Página Inicial',
-      path: '/',
+      path: '/pagina-inicial',
       icon: Home,
     },
     {
       title: 'Dashboard',
       path: '/dashboard',
       icon: BarChart2,
+    },
+    {
+      title: 'Minhas Lojas',
+      path: '/lojas',
+      icon: StoreIcon,
     },
   ];
   
