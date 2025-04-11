@@ -15,8 +15,7 @@ import {
   CheckCircle, 
   Clock, 
   X, 
-  ExternalLink,
-  ChevronDown 
+  ExternalLink 
 } from 'lucide-react';
 import {
   Dialog,
@@ -97,9 +96,9 @@ export function StoreSelector() {
     <div className="relative">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" className="border rounded-lg px-3 py-2 flex items-center justify-between min-w-[180px] group">
-            <span className="font-medium truncate max-w-[140px]">{currentStore.name}</span>
-            <ChevronDown className="ml-2 h-4 w-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
+          <Button variant="outline" className="border rounded-lg px-3 py-2 flex items-center justify-between min-w-[180px]">
+            <span className="font-medium truncate">{currentStore.name}</span>
+            <span className="ml-2 opacity-50">▼</span>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-[220px]">
