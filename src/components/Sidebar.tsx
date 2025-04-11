@@ -49,6 +49,23 @@ export const AppSidebar: React.FC<SidebarProps> = ({ className }) => {
   const { theme } = useTheme();
   const isDarkMode = theme === "dark";
   
+  const [isLogoTransitioning, setIsLogoTransitioning] = useState(false);
+  const [visibleLogo, setVisibleLogo] = useState<"light" | "dark">(isDarkMode ? "dark" : "light");
+  
+  useEffect(() => {
+    const targetLogo = isDarkMode ? "dark" : "light";
+    if (visibleLogo !== targetLogo) {
+      setIsLogoTransitioning(true);
+      const timer = setTimeout(() => {
+        setVisibleLogo(targetLogo);
+        setTimeout(() => {
+          setIsLogoTransitioning(false);
+        }, 50);
+      }, 200);
+      return () => clearTimeout(timer);
+    }
+  }, [isDarkMode, visibleLogo]);
+  
   useEffect(() => {
     const style = document.createElement('style');
     style.textContent = `
@@ -159,21 +176,26 @@ export const AppSidebar: React.FC<SidebarProps> = ({ className }) => {
   return (
     <Sidebar className={className}>
       <SidebarHeader>
-        <div className="flex items-center justify-center w-full px-4 py-6">
+        <div className="flex items-center justify-center w-full px-4 py-6 relative">
           <Link to="/" className="flex items-center justify-center w-full h-full">
-            {isDarkMode ? (
-              <img 
-                src="/lovable-uploads/6e7ee63b-0326-4a37-bc3f-0e31d8324441.png" 
-                alt="Voltz.Checkout Logo (Dark Mode)" 
-                className="w-full h-full object-contain"
-              />
-            ) : (
+            <div className="relative w-full h-full">
               <img 
                 src="/lovable-uploads/3aa07f77-7311-4155-8e6c-39abb8dca3df.png" 
                 alt="Voltz.Checkout Logo" 
-                className="w-full h-full object-contain"
+                className={cn(
+                  "w-full h-full object-contain absolute top-0 left-0 transition-opacity duration-300 ease-in-out",
+                  visibleLogo === "light" && !isLogoTransitioning ? "opacity-100" : "opacity-0"
+                )}
               />
-            )}
+              <img 
+                src="/lovable-uploads/6e7ee63b-0326-4a37-bc3f-0e31d8324441.png" 
+                alt="Voltz.Checkout Logo (Dark Mode)" 
+                className={cn(
+                  "w-full h-full object-contain absolute top-0 left-0 transition-opacity duration-300 ease-in-out",
+                  visibleLogo === "dark" && !isLogoTransitioning ? "opacity-100" : "opacity-0"
+                )}
+              />
+            </div>
           </Link>
         </div>
       </SidebarHeader>

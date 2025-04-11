@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -106,6 +107,19 @@
   body {
     @apply bg-background text-foreground transition-colors duration-300;
   }
+}
+
+/* Logo transition utilities */
+.logo-transition {
+  @apply transition-opacity duration-300 ease-in-out;
+}
+
+.logo-visible {
+  @apply opacity-100;
+}
+
+.logo-hidden {
+  @apply opacity-0;
 }
 
 /* Theme Toggle Switch Custom Styles */
