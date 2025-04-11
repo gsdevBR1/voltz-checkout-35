@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -716,4 +717,27 @@ const Dashboard = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-1">
-                  <div className="grid grid-cols-2 gap-2 text-sm font-medium mb-2 text-muted
+                  <div className="grid grid-cols-2 gap-2 text-sm font-medium mb-2 text-muted-foreground">
+                    <div>Campanha</div>
+                    <div className="text-right">Conversões</div>
+                  </div>
+                  {topUtms.map((utm, index) => (
+                    <div 
+                      key={index} 
+                      className="grid grid-cols-2 gap-2 py-2 border-t border-border text-sm"
+                    >
+                      <div className="truncate">{utm.campaign}</div>
+                      <div className="text-right">{utm.total}</div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </main>
+      </div>
+    </SidebarLayout>
+  );
+};
+
+export default Dashboard;
