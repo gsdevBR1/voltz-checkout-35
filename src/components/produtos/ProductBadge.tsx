@@ -45,7 +45,7 @@ export const ShopifyBadge: React.FC<ShopifyBadgeProps> = ({ className }) => {
       )}
     >
       <ShoppingBag className="h-3 w-3" />
-      Shopify (Físico)
+      Shopify
     </Badge>
   );
 };
