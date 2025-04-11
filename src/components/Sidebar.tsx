@@ -36,6 +36,7 @@ import {
   SidebarMenuSubButton,
   useSidebar
 } from '@/components/ui/sidebar';
+import { useTheme } from '@/providers/ThemeProvider';
 
 interface SidebarProps {
   className?: string;
@@ -45,6 +46,8 @@ export const AppSidebar: React.FC<SidebarProps> = ({ className }) => {
   const location = useLocation();
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
   const { state } = useSidebar();
+  const { theme } = useTheme();
+  const isDarkMode = theme === "dark";
   
   useEffect(() => {
     const style = document.createElement('style');
@@ -158,11 +161,19 @@ export const AppSidebar: React.FC<SidebarProps> = ({ className }) => {
       <SidebarHeader>
         <div className="flex items-center justify-center w-full px-4 py-6">
           <Link to="/" className="flex items-center justify-center w-full h-full">
-            <img 
-              src="/lovable-uploads/3aa07f77-7311-4155-8e6c-39abb8dca3df.png" 
-              alt="Voltz.Checkout Logo" 
-              className="w-full h-full object-contain"
-            />
+            {isDarkMode ? (
+              <img 
+                src="/lovable-uploads/6e7ee63b-0326-4a37-bc3f-0e31d8324441.png" 
+                alt="Voltz.Checkout Logo (Dark Mode)" 
+                className="w-full h-full object-contain"
+              />
+            ) : (
+              <img 
+                src="/lovable-uploads/3aa07f77-7311-4155-8e6c-39abb8dca3df.png" 
+                alt="Voltz.Checkout Logo" 
+                className="w-full h-full object-contain"
+              />
+            )}
           </Link>
         </div>
       </SidebarHeader>
