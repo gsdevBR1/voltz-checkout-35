@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { CheckCircle, Circle, ShoppingBag, ArrowRight } from 'lucide-react';
+import { CheckCircle, Circle, ShoppingBag, ArrowRight, Package } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
 import { useActivationSteps } from '@/contexts/ActivationStepsContextWithStores';
@@ -41,7 +41,7 @@ const ShopifyCard = () => {
           </div>
         </div>
         <CardDescription className="mt-2">
-          Sincronize seus produtos e tema diretamente com a Shopify.
+          Sincronize seus produtos físicos e tema diretamente com a Shopify.
         </CardDescription>
       </CardHeader>
       
@@ -55,6 +55,11 @@ const ShopifyCard = () => {
               'Desconectado'
             )}
           </span>
+        </div>
+        
+        <div className="mt-3 text-sm text-muted-foreground flex items-center gap-2">
+          <Package className="h-4 w-4" />
+          <span>Importa apenas produtos físicos</span>
         </div>
       </CardContent>
       

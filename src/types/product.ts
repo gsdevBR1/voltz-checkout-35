@@ -11,7 +11,7 @@ export interface Product {
   stock?: number;
   status: ProductStatus;
   imageUrl?: string;
-  fromShopify?: boolean;
+  fromShopify?: boolean; // When true, type must be 'physical'
   createdAt: Date;
   updatedAt: Date;
   downloadUrl?: string;

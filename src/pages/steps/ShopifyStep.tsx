@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
-import { Lock, Save, ArrowLeft } from 'lucide-react';
+import { Lock, Save, ArrowLeft, Info } from 'lucide-react';
 
 const shopifyFormSchema = z.object({
   shopUrl: z.string()
@@ -92,6 +92,14 @@ const ShopifyStep: React.FC = () => {
         <p className="text-muted-foreground mb-8">
           Configure a integração da sua loja Shopify com o voltz.checkout para sincronizar produtos e tema automaticamente.
         </p>
+        
+        <Alert className="mb-6 bg-blue-50 border-blue-200 text-blue-800 dark:bg-blue-950 dark:border-blue-800 dark:text-blue-300">
+          <Info className="h-4 w-4 mr-2" />
+          <AlertDescription>
+            Produtos importados do Shopify serão tratados como produtos físicos no voltz.checkout.
+            Produtos digitais devem ser criados diretamente na plataforma.
+          </AlertDescription>
+        </Alert>
         
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
