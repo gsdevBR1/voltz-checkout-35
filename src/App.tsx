@@ -31,6 +31,11 @@ import EditarProduto from "./pages/produtos/EditarProduto";
 import NovoFisico from "./pages/produtos/NovoFisico";
 import EditarProdutoFisico from "./pages/produtos/EditarProdutoFisico";
 import VerProduto from "./pages/produtos/VerProduto";
+import DescontosPage from "./pages/checkouts/DescontosPage";
+import PersonalizarCheckoutPage from "./pages/checkouts/PersonalizarCheckoutPage";
+import ProvasSociaisPage from "./pages/checkouts/ProvasSociaisPage";
+import GatewaysPage from "./pages/checkouts/GatewaysPage";
+import RedirecionamentoPage from "./pages/checkouts/RedirecionamentoPage";
 import { ActivationStepsProvider } from "./contexts/ActivationStepsContextWithStores";
 import { StoreProvider } from "./contexts/StoreContext";
 import { ThemeProvider } from "./providers/ThemeProvider";
@@ -77,6 +82,11 @@ const App: React.FC = () => {
                   <Route path="/produtos/editar/:id" element={<EditarProduto />} />
                   <Route path="/produtos/:id/editar" element={<EditarProdutoFisico />} />
                   <Route path="/produtos/:id/ver" element={<VerProduto />} />
+                  <Route path="/checkouts/descontos" element={<DescontosPage />} />
+                  <Route path="/checkouts/personalizar" element={<PersonalizarCheckoutPage />} />
+                  <Route path="/checkouts/provas-sociais" element={<ProvasSociaisPage />} />
+                  <Route path="/checkouts/gateways" element={<GatewaysPage />} />
+                  <Route path="/checkouts/redirecionamento" element={<RedirecionamentoPage />} />
                   <Route path="/steps/billing" element={<BillingStep />} />
                   <Route path="/steps/domain" element={<DomainStep />} />
                   <Route path="/steps/gateway" element={<GatewayStep />} />

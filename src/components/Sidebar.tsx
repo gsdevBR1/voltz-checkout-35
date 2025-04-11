@@ -15,7 +15,13 @@ import {
   Users,
   UserCheck,
   UserX,
-  Package
+  Package,
+  CreditCard,
+  Palette,
+  MessageSquare,
+  Link as LinkIcon,
+  ArrowRight,
+  Percent
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { StoreSelector } from '@/components/StoreSelector';
@@ -132,6 +138,38 @@ export const AppSidebar: React.FC<SidebarProps> = ({ className }) => {
       title: 'Produtos',
       path: '/produtos',
       icon: Package,
+    },
+    {
+      title: 'Checkouts',
+      path: '/checkouts',
+      icon: CreditCard,
+      subItems: [
+        {
+          title: 'Descontos por Pagamento',
+          path: '/checkouts/descontos',
+          icon: Percent,
+        },
+        {
+          title: 'Personalizar Checkout',
+          path: '/checkouts/personalizar',
+          icon: Palette,
+        },
+        {
+          title: 'Provas Sociais',
+          path: '/checkouts/provas-sociais',
+          icon: MessageSquare,
+        },
+        {
+          title: 'Gateways',
+          path: '/checkouts/gateways',
+          icon: LinkIcon,
+        },
+        {
+          title: 'Redirecionamento',
+          path: '/checkouts/redirecionamento',
+          icon: ArrowRight,
+        }
+      ]
     },
     {
       title: 'Minhas Lojas',
