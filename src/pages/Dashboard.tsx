@@ -600,7 +600,7 @@ const Dashboard = () => {
                 >
                   <AreaChart 
                     data={chartData} 
-                    margin={{ top: 20, right: 30, left: 10, bottom: 24 }}
+                    margin={{ top: 20, right: 30, left: 10, bottom: 30 }}
                   >
                     <defs>
                       <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
@@ -618,10 +618,11 @@ const Dashboard = () => {
                       tickMargin={10}
                       label={{ 
                         value: isHourlyView ? 'Hora' : 'Período', 
-                        position: 'insideBottomRight', 
-                        offset: -10,
+                        position: 'insideBottom', 
+                        offset: -15,
                         fill: 'hsl(var(--muted-foreground))'
                       }}
+                      height={50}
                     />
                     <YAxis 
                       axisLine={false}
