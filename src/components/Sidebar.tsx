@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -14,7 +15,8 @@ import {
   ChevronDown,
   Users,
   UserCheck,
-  UserX
+  UserX,
+  Package
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { StoreSelector } from '@/components/StoreSelector';
@@ -123,6 +125,11 @@ export const AppSidebar: React.FC<SidebarProps> = ({ className }) => {
           icon: UserX,
         }
       ]
+    },
+    {
+      title: 'Produtos',
+      path: '/produtos',
+      icon: Package,
     },
     {
       title: 'Minhas Lojas',

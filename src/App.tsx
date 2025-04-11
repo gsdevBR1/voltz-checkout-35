@@ -23,6 +23,10 @@ import Leads from "./pages/clientes/Leads";
 import ClienteDetalhes from "./pages/clientes/ClienteDetalhes";
 import LeadDetalhes from "./pages/clientes/LeadDetalhes";
 import HistoricoCompras from "./pages/clientes/HistoricoCompras";
+import ListaProdutos from "./pages/produtos/ListaProdutos";
+import NovoProdutoFisico from "./pages/produtos/NovoProdutoFisico";
+import NovoProdutoDigital from "./pages/produtos/NovoProdutoDigital";
+import EditarProduto from "./pages/produtos/EditarProduto";
 import { ActivationStepsProvider } from "./contexts/ActivationStepsContextWithStores";
 import { StoreProvider } from "./contexts/StoreContext";
 import { ThemeProvider } from "./providers/ThemeProvider";
@@ -61,6 +65,10 @@ const App: React.FC = () => {
                   <Route path="/clientes/perfil/:id" element={<ClienteDetalhes />} />
                   <Route path="/clientes/historico/:id" element={<HistoricoCompras />} />
                   <Route path="/clientes/leads/perfil/:id" element={<LeadDetalhes />} />
+                  <Route path="/produtos" element={<ListaProdutos />} />
+                  <Route path="/produtos/novo/fisico" element={<NovoProdutoFisico />} />
+                  <Route path="/produtos/novo/digital" element={<NovoProdutoDigital />} />
+                  <Route path="/produtos/editar/:id" element={<EditarProduto />} />
                   <Route path="/steps/billing" element={<BillingStep />} />
                   <Route path="/steps/domain" element={<DomainStep />} />
                   <Route path="/steps/gateway" element={<GatewayStep />} />
