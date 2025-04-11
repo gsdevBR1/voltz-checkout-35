@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -411,6 +412,7 @@ const Dashboard = () => {
             ))}
           </div>
           
+          {/* Filter Card */}
           <Card className="mb-6">
             <CardContent className="py-4">
               <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
@@ -524,6 +526,7 @@ const Dashboard = () => {
             </CardContent>
           </Card>
           
+          {/* Chart Card */}
           <Card className="mb-6">
             <CardHeader className="py-4 flex flex-row items-center justify-between">
               <CardTitle className="flex items-center gap-2">
@@ -634,6 +637,7 @@ const Dashboard = () => {
             </CardContent>
           </Card>
           
+          {/* Customer Behavior Card */}
           <Card className="mb-6">
             <CardHeader className="py-4">
               <div className="flex items-center justify-between">
@@ -650,7 +654,7 @@ const Dashboard = () => {
               <div className="flex flex-col space-y-8">
                 <div className="relative flex justify-between items-center">
                   <div className="absolute left-0 right-0 h-[2px] bg-gray-200 dark:bg-gray-700 top-1/2 transform -translate-y-1/2"></div>
-                  {realtimeData.map((step, index) => (
+                  {realtimeData.map((step) => (
                     <div key={step.name} className="relative flex flex-col items-center z-10">
                       <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
                         <Circle className="h-8 w-8 text-muted-foreground" />
@@ -666,6 +670,7 @@ const Dashboard = () => {
             </CardContent>
           </Card>
           
+          {/* Conversion Funnel Card */}
           <Card className="mb-6">
             <CardHeader className="py-4">
               <CardTitle className="flex items-center gap-2">
@@ -709,6 +714,7 @@ const Dashboard = () => {
             </CardContent>
           </Card>
           
+          {/* Payment Method Card */}
           <Card className="mb-6">
             <CardHeader className="py-4">
               <CardTitle className="flex items-center gap-2">
@@ -729,3 +735,75 @@ const Dashboard = () => {
                         <span className="font-medium">{formatCurrency(paymentData.pix.total)}</span>
                       </div>
                       <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">Quantidade:</span>
+                        <span className="font-medium">{paymentData.pix.count}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">Conversão:</span>
+                        <span className="font-medium">{paymentData.pix.conversion}%</span>
+                      </div>
+                      <Progress value={paymentData.pix.conversion} className="h-2 mt-2" />
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card className="bg-card/50 shadow-none">
+                  <CardHeader className="py-3">
+                    <CardTitle className="text-base">Cartão de Crédito</CardTitle>
+                  </CardHeader>
+                  <CardContent className="pb-4">
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">Valor vendido:</span>
+                        <span className="font-medium">{formatCurrency(paymentData.credit.total)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">Quantidade:</span>
+                        <span className="font-medium">{paymentData.credit.count}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">Conversão:</span>
+                        <span className="font-medium">{paymentData.credit.conversion}%</span>
+                      </div>
+                      <Progress value={paymentData.credit.conversion} className="h-2 mt-2" />
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card className="bg-card/50 shadow-none">
+                  <CardHeader className="py-3">
+                    <CardTitle className="text-base">Boleto</CardTitle>
+                  </CardHeader>
+                  <CardContent className="pb-4">
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">Valor vendido:</span>
+                        <span className="font-medium">{formatCurrency(paymentData.boleto.total)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">Quantidade:</span>
+                        <span className="font-medium">{paymentData.boleto.count}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">Conversão:</span>
+                        <span className="font-medium">{paymentData.boleto.conversion}%</span>
+                      </div>
+                      <Progress value={paymentData.boleto.conversion} className="h-2 mt-2" />
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </CardContent>
+          </Card>
+        </main>
+      </div>
+      
+      <CustomizeDashboardDialog 
+        open={customizeDialogOpen}
+        onOpenChange={setCustomizeDialogOpen}
+      />
+    </SidebarLayout>
+  );
+};
+
+export default Dashboard;
