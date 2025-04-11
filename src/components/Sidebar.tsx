@@ -1,8 +1,18 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, BarChart2, User, Store as StoreIcon } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { 
+  Home, 
+  BarChart2, 
+  Store as StoreIcon, 
+  ChevronLeft, 
+  ChevronRight, 
+  User 
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { StoreSelector } from '@/components/StoreSelector';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
   Sidebar,
   SidebarContent,
@@ -12,9 +22,8 @@ import {
   SidebarProvider,
   SidebarFooter,
   SidebarHeader,
+  SidebarTrigger,
 } from '@/components/ui/sidebar';
-import { StoreSelector } from '@/components/StoreSelector';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
 interface SidebarProps {
   className?: string;
