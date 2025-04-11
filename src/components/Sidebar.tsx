@@ -159,7 +159,7 @@ export const AppSidebar: React.FC<SidebarProps> = ({ className }) => {
             />
           </Link>
           <Avatar className="h-8 w-8">
-            <AvatarFallback className="bg-primary/10 text-primary">
+            <AvatarFallback>
               <User className="h-4 w-4" />
             </AvatarFallback>
           </Avatar>
@@ -252,7 +252,7 @@ export const AppSidebar: React.FC<SidebarProps> = ({ className }) => {
         <div className="flex items-center justify-between">
           <StoreSelector />
           <Avatar className="h-9 w-9 ml-2">
-            <AvatarFallback className="bg-primary text-primary-foreground">
+            <AvatarFallback>
               <User className="h-5 w-5" />
             </AvatarFallback>
           </Avatar>
