@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { useActivationSteps } from '@/contexts/ActivationStepsContext';
+import { useActivationSteps } from '@/contexts/ActivationStepsContextWithStores';
 import DashboardLayout from '@/components/DashboardLayout';
 import { ArrowLeft, Plus, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -23,7 +23,7 @@ interface ShippingMethod {
 }
 
 const ShippingStep = () => {
-  const { updateStepStatus } = useActivationSteps();
+  const { updateStepCompletion } = useActivationSteps();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [shippingMethods, setShippingMethods] = useState<ShippingMethod[]>([]);
@@ -48,7 +48,7 @@ const ShippingStep = () => {
     
     // Simulate API call
     setTimeout(() => {
-      updateStepStatus('shipping', 'completed');
+      updateStepCompletion('shipping', true);
       setLoading(false);
       toast.success('Métodos de entrega configurados com sucesso!');
       navigate('/');

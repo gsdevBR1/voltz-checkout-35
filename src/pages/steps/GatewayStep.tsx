@@ -6,14 +6,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { useActivationSteps } from '@/contexts/ActivationStepsContext';
+import { useActivationSteps } from '@/contexts/ActivationStepsContextWithStores';
 import DashboardLayout from '@/components/DashboardLayout';
 import { AlertCircle, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const GatewayStep = () => {
-  const { updateStepStatus } = useActivationSteps();
+  const { updateStepCompletion } = useActivationSteps();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [selectedGateway, setSelectedGateway] = useState('');
@@ -30,7 +30,7 @@ const GatewayStep = () => {
     
     // Simulate API call
     setTimeout(() => {
-      updateStepStatus('gateway', 'completed');
+      updateStepCompletion('gateway', true);
       setLoading(false);
       toast.success('Gateway de pagamento configurado com sucesso!');
       navigate('/');

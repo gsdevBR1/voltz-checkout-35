@@ -6,14 +6,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { toast } from 'sonner';
-import { useActivationSteps } from '@/contexts/ActivationStepsContext';
+import { useActivationSteps } from '@/contexts/ActivationStepsContextWithStores';
 import DashboardLayout from '@/components/DashboardLayout';
 import { ArrowLeft, Copy } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const DomainStep = () => {
-  const { updateStepStatus } = useActivationSteps();
+  const { updateStepCompletion } = useActivationSteps();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [subdomainPrefix, setSubdomainPrefix] = useState('checkout');
@@ -38,7 +38,7 @@ const DomainStep = () => {
     
     // Simulate API call
     setTimeout(() => {
-      updateStepStatus('domain', 'completed');
+      updateStepCompletion('domain', true);
       setLoading(false);
       toast.success('Domínio configurado com sucesso!');
       navigate('/');
