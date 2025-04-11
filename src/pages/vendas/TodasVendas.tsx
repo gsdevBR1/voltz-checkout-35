@@ -10,7 +10,6 @@ import { Badge } from '@/components/ui/badge';
 import { Eye, Search, Calendar, Download } from 'lucide-react';
 import { formatCurrency, formatDateTime } from '@/lib/utils';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const mockOrders = [
@@ -324,71 +323,69 @@ const TodasVendas: React.FC = () => {
             <CardTitle>Pedidos</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="overflow-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[100px]">Transação</TableHead>
-                    <TableHead className="min-w-[180px]">Descrição</TableHead>
-                    <TableHead className="min-w-[180px]">Cliente</TableHead>
-                    <TableHead className="min-w-[120px]">Forma</TableHead>
-                    <TableHead className="min-w-[120px]">Adquirente</TableHead>
-                    <TableHead className="min-w-[100px]">Status</TableHead>
-                    <TableHead className="min-w-[150px]">Data e Hora</TableHead>
-                    <TableHead className="min-w-[100px]">Valor</TableHead>
-                    <TableHead className="min-w-[120px]">Ações</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {currentItems.length > 0 ? (
-                    currentItems.map((order) => (
-                      <TableRow key={order.id}>
-                        <TableCell className="font-medium">
-                          #{order.id}
-                          <TransactionTag isRecurring={order.isRecurring} isManual={order.isManual} />
-                        </TableCell>
-                        <TableCell className="max-w-[180px]">
-                          <div className="flex flex-col">
-                            {order.products.map((product, idx) => (
-                              <div key={idx} className="flex flex-wrap items-center">
-                                <span className="truncate" title={product.name}>{product.name}</span>
-                                {product.isUpsell && <ProductTag type="upsell" />}
-                                {product.isOrderBump && <ProductTag type="orderbump" />}
-                              </div>
-                            ))}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="font-medium">{order.customer}</div>
-                          <div className="text-sm text-muted-foreground truncate">{order.email}</div>
-                        </TableCell>
-                        <TableCell>{order.paymentMethod}</TableCell>
-                        <TableCell>{order.gateway}</TableCell>
-                        <TableCell>{getStatusBadge(order.status)}</TableCell>
-                        <TableCell>{getDateTimeDisplay(order)}</TableCell>
-                        <TableCell>{formatCurrency(order.total)}</TableCell>
-                        <TableCell>
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => handleViewDetails(order.id)}
-                          >
-                            <Eye className="h-3.5 w-3.5 mr-1" />
-                            Ver detalhes
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  ) : (
-                    <TableRow>
-                      <TableCell colSpan={9} className="text-center py-6 text-muted-foreground">
-                        Nenhuma venda encontrada com os filtros aplicados.
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[100px]">Transação</TableHead>
+                  <TableHead className="min-w-[180px]">Descrição</TableHead>
+                  <TableHead className="min-w-[180px]">Cliente</TableHead>
+                  <TableHead className="min-w-[120px]">Forma</TableHead>
+                  <TableHead className="min-w-[120px]">Adquirente</TableHead>
+                  <TableHead className="min-w-[100px]">Status</TableHead>
+                  <TableHead className="min-w-[150px]">Data e Hora</TableHead>
+                  <TableHead className="min-w-[100px]">Valor</TableHead>
+                  <TableHead className="min-w-[120px]">Ações</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {currentItems.length > 0 ? (
+                  currentItems.map((order) => (
+                    <TableRow key={order.id}>
+                      <TableCell className="font-medium">
+                        #{order.id}
+                        <TransactionTag isRecurring={order.isRecurring} isManual={order.isManual} />
+                      </TableCell>
+                      <TableCell className="max-w-[180px]">
+                        <div className="flex flex-col">
+                          {order.products.map((product, idx) => (
+                            <div key={idx} className="flex flex-wrap items-center">
+                              <span className="truncate" title={product.name}>{product.name}</span>
+                              {product.isUpsell && <ProductTag type="upsell" />}
+                              {product.isOrderBump && <ProductTag type="orderbump" />}
+                            </div>
+                          ))}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="font-medium">{order.customer}</div>
+                        <div className="text-sm text-muted-foreground truncate">{order.email}</div>
+                      </TableCell>
+                      <TableCell>{order.paymentMethod}</TableCell>
+                      <TableCell>{order.gateway}</TableCell>
+                      <TableCell>{getStatusBadge(order.status)}</TableCell>
+                      <TableCell>{getDateTimeDisplay(order)}</TableCell>
+                      <TableCell>{formatCurrency(order.total)}</TableCell>
+                      <TableCell>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleViewDetails(order.id)}
+                        >
+                          <Eye className="h-3.5 w-3.5 mr-1" />
+                          Ver detalhes
+                        </Button>
                       </TableCell>
                     </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </div>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={9} className="text-center py-6 text-muted-foreground">
+                      Nenhuma venda encontrada com os filtros aplicados.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
             
             {totalPages > 1 && (
               <div className="mt-4 flex justify-center">
