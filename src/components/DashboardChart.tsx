@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from '@/components/ui/chart';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, LineChart, Line } from 'recharts';
@@ -234,6 +235,13 @@ const DashboardChart: React.FC<DashboardChartProps> = ({
     }
   };
 
+  // The main chart configuration used by the ChartContainer
+  const chartConfig = {
+    value: { theme: { light: '#2BBA00', dark: '#2BBA00' } },
+    pixValue: { theme: { light: '#3B82F6', dark: '#3B82F6' } },
+    abandonedValue: { theme: { light: '#F87171', dark: '#F87171' } },
+  };
+
   return (
     <div className="space-y-4">
       {/* Controles de métrica e visualização */}
@@ -292,11 +300,7 @@ const DashboardChart: React.FC<DashboardChartProps> = ({
       {/* Gráfico com controles de scroll */}
       <div className="relative h-80 w-full overflow-hidden rounded-md">
         <div className="absolute w-full h-full mb-5">
-          <ChartContainer config={{ 
-            value: { theme: { light: '#2BBA00', dark: '#2BBA00' } },
-            pixValue: { theme: { light: '#3B82F6', dark: '#3B82F6' } },
-            abandonedValue: { theme: { light: '#F87171', dark: '#F87171' } },
-          }}>
+          <ChartContainer config={chartConfig}>
             <ResponsiveContainer width="100%" height="100%">
               {renderChart()}
             </ResponsiveContainer>
@@ -328,16 +332,18 @@ const DashboardChart: React.FC<DashboardChartProps> = ({
         )}
       </div>
       
-      {/* Legenda */}
+      {/* Legenda - Wrapped in ChartContainer for context */}
       <div className="flex justify-center">
-        <ChartLegend 
-          payload={activeMetrics.map(metric => ({
-            value: metric.name,
-            color: metric.color,
-            dataKey: metric.id
-          }))}
-          content={<ChartLegendContent className="gap-6" />}
-        />
+        <ChartContainer config={chartConfig}>
+          <ChartLegend 
+            payload={activeMetrics.map(metric => ({
+              value: metric.name,
+              color: metric.color,
+              dataKey: metric.id
+            }))}
+            content={<ChartLegendContent className="gap-6" />}
+          />
+        </ChartContainer>
       </div>
     </div>
   );
