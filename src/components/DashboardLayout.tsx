@@ -3,7 +3,7 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 import { ThemeToggle } from './ThemeToggle';
 import { SidebarLayout } from '@/components/Sidebar';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -31,7 +31,15 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   className,
 }) => {
   const location = useLocation();
-  const currentPageName = routeNames[location.pathname] || 'voltz.checkout';
+  const params = useParams();
+  
+  // Handle dynamic routes like cliente/perfil/:id
+  let pageName = routeNames[location.pathname] || 'voltz.checkout';
+  
+  // Special case for customer profile pages
+  if (location.pathname.startsWith('/clientes/perfil/') && params.id) {
+    pageName = 'Perfil do Cliente';
+  }
 
   return (
     <SidebarLayout>
@@ -39,7 +47,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         <header className="bg-card border-b border-border">
           <div className="container mx-auto px-4 py-4">
             <div className="flex items-center justify-between">
-              <h1 className="text-xl font-bold text-primary">{currentPageName}</h1>
+              <h1 className="text-xl font-bold text-primary">{pageName}</h1>
               <ThemeToggle />
             </div>
           </div>

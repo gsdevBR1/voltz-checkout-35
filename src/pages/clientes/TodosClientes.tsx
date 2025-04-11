@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -194,9 +195,11 @@ const TodosClientes: React.FC = () => {
                     <TableCell>{formatDate(customer.lastPurchase)}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
-                        <Button size="sm" variant="outline">
-                          <User className="h-4 w-4 mr-1" />
-                          Perfil
+                        <Button size="sm" variant="outline" asChild>
+                          <Link to={`/clientes/perfil/${customer.id}`}>
+                            <User className="h-4 w-4 mr-1" />
+                            Perfil
+                          </Link>
                         </Button>
                         <Button size="sm" variant="outline">
                           <FileText className="h-4 w-4 mr-1" />
