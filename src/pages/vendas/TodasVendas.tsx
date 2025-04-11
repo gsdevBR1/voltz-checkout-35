@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -8,12 +7,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Eye, Search, Filter, Download, Calendar } from 'lucide-react';
+import { Eye, Search, Calendar, Download } from 'lucide-react';
 import { formatCurrency, formatDateTime } from '@/lib/utils';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { useIsMobile } from "@/hooks/use-mobile";
 
-// Extended mock data with more fields
 const mockOrders = [
   {
     id: '000123',
@@ -157,7 +156,6 @@ const getStatusBadge = (status: string) => {
   );
 };
 
-// Component to display product tags
 const ProductTag = ({ type }: { type: string }) => {
   if (type === 'upsell') {
     return <Badge variant="outline" className="ml-1 text-xs bg-blue-50 text-blue-700 border-blue-200">Upsell</Badge>;
@@ -167,7 +165,6 @@ const ProductTag = ({ type }: { type: string }) => {
   return null;
 };
 
-// Component to display transaction tags
 const TransactionTag = ({ isRecurring, isManual }: { isRecurring: boolean; isManual: boolean }) => {
   if (isRecurring) {
     return <Badge variant="outline" className="ml-1 text-xs bg-green-50 text-green-700 border-green-200">Recorrente</Badge>;
@@ -186,8 +183,8 @@ const TodasVendas: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   
-  // Apply all filters
   const filteredOrders = mockOrders.filter(order => {
     const matchesSearch = 
       order.id.includes(searchTerm) || 
@@ -199,7 +196,6 @@ const TodasVendas: React.FC = () => {
     const matchesPayment = paymentFilter === 'all' || order.paymentMethod === paymentFilter;
     const matchesGateway = gatewayFilter === 'all' || order.gateway === gatewayFilter;
     
-    // Period filter logic would go here (today, yesterday, 7 days, 30 days)
     let matchesPeriod = true;
     const now = new Date();
     
@@ -229,7 +225,6 @@ const TodasVendas: React.FC = () => {
     return matchesSearch && matchesStatus && matchesPayment && matchesGateway && matchesPeriod;
   });
 
-  // Pagination
   const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -240,9 +235,7 @@ const TodasVendas: React.FC = () => {
   };
 
   const handleExportData = () => {
-    // Logic to export data would go here
     console.log("Exporting data...");
-    // In a real implementation, we would generate and download a CSV/Excel file
   };
   
   return (
@@ -323,76 +316,78 @@ const TodasVendas: React.FC = () => {
             <CardTitle>Vendas Finalizadas</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Transação</TableHead>
-                    <TableHead>Descrição</TableHead>
-                    <TableHead>Cliente</TableHead>
-                    <TableHead>Forma</TableHead>
-                    <TableHead>Adquirente</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Iniciada em</TableHead>
-                    <TableHead>Pagamento</TableHead>
-                    <TableHead>Valor</TableHead>
-                    <TableHead>Ações</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {currentItems.length > 0 ? (
-                    currentItems.map((order) => (
-                      <TableRow key={order.id}>
-                        <TableCell className="font-medium">
-                          #{order.id}
-                          <TransactionTag isRecurring={order.isRecurring} isManual={order.isManual} />
-                        </TableCell>
-                        <TableCell className="max-w-[180px]">
-                          <div className="flex flex-col">
-                            {order.products.map((product, idx) => (
-                              <div key={idx} className="flex flex-wrap items-center">
-                                <span className="truncate" title={product.name}>{product.name}</span>
-                                {product.isUpsell && <ProductTag type="upsell" />}
-                                {product.isOrderBump && <ProductTag type="orderbump" />}
-                              </div>
-                            ))}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="font-medium">{order.customer}</div>
-                          <div className="text-sm text-muted-foreground truncate">{order.email}</div>
-                        </TableCell>
-                        <TableCell>{order.paymentMethod}</TableCell>
-                        <TableCell>{order.gateway}</TableCell>
-                        <TableCell>{getStatusBadge(order.status)}</TableCell>
-                        <TableCell>{formatDateTime(order.createdAt)}</TableCell>
-                        <TableCell>
-                          {order.paidAt ? formatDateTime(order.paidAt) : 
-                           <span className="text-muted-foreground">Não pago</span>}
-                        </TableCell>
-                        <TableCell>{formatCurrency(order.total)}</TableCell>
-                        <TableCell>
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => handleViewDetails(order.id)}
-                          >
-                            <Eye className="h-3.5 w-3.5 mr-1" />
-                            Ver detalhes
-                          </Button>
+            <ScrollArea className="rounded-md border" orientation="horizontal">
+              <div className={isMobile ? "min-w-[1000px]" : "w-full"}>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-[100px]">Transação</TableHead>
+                      <TableHead className="min-w-[180px]">Descrição</TableHead>
+                      <TableHead className="min-w-[180px]">Cliente</TableHead>
+                      <TableHead className="min-w-[120px]">Forma</TableHead>
+                      <TableHead className="min-w-[120px]">Adquirente</TableHead>
+                      <TableHead className="min-w-[100px]">Status</TableHead>
+                      <TableHead className="min-w-[150px]">Iniciada em</TableHead>
+                      <TableHead className="min-w-[150px]">Pagamento</TableHead>
+                      <TableHead className="min-w-[100px]">Valor</TableHead>
+                      <TableHead className="min-w-[120px]">Ações</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {currentItems.length > 0 ? (
+                      currentItems.map((order) => (
+                        <TableRow key={order.id}>
+                          <TableCell className="font-medium">
+                            #{order.id}
+                            <TransactionTag isRecurring={order.isRecurring} isManual={order.isManual} />
+                          </TableCell>
+                          <TableCell className="max-w-[180px]">
+                            <div className="flex flex-col">
+                              {order.products.map((product, idx) => (
+                                <div key={idx} className="flex flex-wrap items-center">
+                                  <span className="truncate" title={product.name}>{product.name}</span>
+                                  {product.isUpsell && <ProductTag type="upsell" />}
+                                  {product.isOrderBump && <ProductTag type="orderbump" />}
+                                </div>
+                              ))}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="font-medium">{order.customer}</div>
+                            <div className="text-sm text-muted-foreground truncate">{order.email}</div>
+                          </TableCell>
+                          <TableCell>{order.paymentMethod}</TableCell>
+                          <TableCell>{order.gateway}</TableCell>
+                          <TableCell>{getStatusBadge(order.status)}</TableCell>
+                          <TableCell>{formatDateTime(order.createdAt)}</TableCell>
+                          <TableCell>
+                            {order.paidAt ? formatDateTime(order.paidAt) : 
+                             <span className="text-muted-foreground">Não pago</span>}
+                          </TableCell>
+                          <TableCell>{formatCurrency(order.total)}</TableCell>
+                          <TableCell>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => handleViewDetails(order.id)}
+                            >
+                              <Eye className="h-3.5 w-3.5 mr-1" />
+                              Ver detalhes
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={10} className="text-center py-6 text-muted-foreground">
+                          Nenhuma venda encontrada com os filtros aplicados.
                         </TableCell>
                       </TableRow>
-                    ))
-                  ) : (
-                    <TableRow>
-                      <TableCell colSpan={10} className="text-center py-6 text-muted-foreground">
-                        Nenhuma venda encontrada com os filtros aplicados.
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </div>
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            </ScrollArea>
             
             {totalPages > 1 && (
               <div className="mt-4 flex justify-center">
