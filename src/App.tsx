@@ -22,17 +22,17 @@ import { ActivationStepsProvider } from "./contexts/ActivationStepsContextWithSt
 import { StoreProvider } from "./contexts/StoreContext";
 import { ThemeProvider } from "./providers/ThemeProvider";
 
-// Create a client
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 1000 * 60 * 5, // 5 minutes
-      retry: 1
-    },
-  },
-});
-
 const App: React.FC = () => {
+  // Create a new QueryClient instance for each render to avoid shared state issues
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        staleTime: 1000 * 60 * 5, // 5 minutes
+        retry: 1
+      },
+    },
+  });
+
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="system">
