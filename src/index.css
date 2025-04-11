@@ -88,3 +88,36 @@
     @apply bg-background text-foreground transition-colors duration-300;
   }
 }
+
+/* Theme Toggle Switch Custom Styles */
+.theme-toggle-switch[data-state="checked"] .theme-toggle-thumb {
+  transform: translateX(30px);
+}
+
+.theme-toggle-switch[data-state="unchecked"] .theme-toggle-thumb {
+  transform: translateX(0);
+}
+
+.theme-toggle-switch {
+  transition: background-color 0.25s ease-in-out;
+}
+
+.theme-toggle-switch:focus-visible {
+  @apply ring-2 ring-primary ring-offset-2 ring-offset-background;
+}
+
+/* Animated bounce effect */
+@keyframes bounce {
+  0%, 100% { transform: translateX(var(--translateX)) scale(1); }
+  50% { transform: translateX(var(--translateX)) scale(1.05); }
+}
+
+.theme-toggle-switch[data-state="checked"] div,
+.theme-toggle-switch[data-state="unchecked"] div {
+  --translateX: 0;
+  animation: bounce 0.3s ease-in-out;
+}
+
+.theme-toggle-switch[data-state="checked"] div {
+  --translateX: 30px;
+}

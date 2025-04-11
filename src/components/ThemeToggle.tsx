@@ -1,32 +1,47 @@
 
-import { Moon, Sun } from "lucide-react";
+import React from "react";
 import { useTheme } from "@/providers/ThemeProvider";
-import { Button } from "@/components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
+import { Moon, Sun } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
+  const isDarkMode = theme === "dark";
+
+  const toggleTheme = () => {
+    setTheme(isDarkMode ? "light" : "dark");
+  };
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="icon" className="rounded-full">
-          <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-          <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-          <span className="sr-only">Toggle theme</span>
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => setTheme("light")}>
-          Light
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("dark")}>
-          Dark
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("system")}>
-          System
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <div className="flex items-center gap-2">
+      <Switch
+        id="theme-toggle"
+        checked={isDarkMode}
+        onCheckedChange={toggleTheme}
+        className={cn(
+          "theme-toggle-switch",
+          isDarkMode ? "bg-[#1A1A1A]" : "bg-[#F4F4F4]",
+          "w-[62px] h-[30px] transition-colors duration-250 ease-in-out"
+        )}
+        aria-label={`Switch to ${isDarkMode ? 'light' : 'dark'} mode`}
+      >
+        <div className={cn(
+          "flex justify-center items-center w-[26px] h-[26px] rounded-full transition-transform duration-250 ease-in-out",
+          isDarkMode ? 
+            "translate-x-[30px] bg-[#60A5FA] text-white" :
+            "translate-x-0 bg-[#FACC15] text-white"
+        )}>
+          {isDarkMode ? (
+            <Moon className="h-4 w-4 transition-opacity" />
+          ) : (
+            <Sun className="h-4 w-4 transition-opacity" />
+          )}
+        </div>
+      </Switch>
+      <span className="sr-only md:not-sr-only text-sm">
+        {isDarkMode ? "Dark" : "Light"} Mode
+      </span>
+    </div>
   );
 }
