@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -251,9 +250,11 @@ export const AppSidebar: React.FC<SidebarProps> = ({ className }) => {
         </SidebarMenu>
       </SidebarContent>
       <SidebarFooter className="px-4 py-3 border-t border-border">
-        <div className="flex items-center justify-between">
-          <StoreSelector />
-          <Avatar className="h-9 w-9 ml-2">
+        <div className="flex items-center justify-between w-full">
+          <div className="flex-1 min-w-0 mr-2">
+            <StoreSelector />
+          </div>
+          <Avatar className="h-9 w-9 flex-shrink-0">
             <AvatarFallback>
               <User className="h-5 w-5" />
             </AvatarFallback>
