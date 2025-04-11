@@ -17,6 +17,7 @@ import { cn } from '@/lib/utils';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { CustomizeDashboardDialog, availableKpis } from '@/components/dashboard/CustomizeDashboardDialog';
 import { useStores } from '@/contexts/StoreContext';
+import { FunnelChart } from '@/components/ui/funnel-chart';
 
 const generateRandomData = (days: number, min: number, max: number) => {
   return Array.from({ length: days }).map((_, i) => {
@@ -442,7 +443,6 @@ const Dashboard = () => {
             ))}
           </div>
           
-          {/* Filter Card */}
           <Card className="mb-6">
             <CardContent className="py-4">
               <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
@@ -558,7 +558,6 @@ const Dashboard = () => {
             </CardContent>
           </Card>
           
-          {/* Chart Card */}
           <Card className="mb-6">
             <CardHeader className="py-4 flex flex-row items-center justify-between">
               <CardTitle className="flex items-center gap-2">
@@ -679,7 +678,6 @@ const Dashboard = () => {
             </CardContent>
           </Card>
           
-          {/* Customer Behavior Card */}
           <Card className="mb-6">
             <CardHeader className="py-4">
               <div className="flex items-center justify-between">
@@ -712,7 +710,6 @@ const Dashboard = () => {
             </CardContent>
           </Card>
           
-          {/* Conversion Funnel Card */}
           <Card className="mb-6">
             <CardHeader className="py-4">
               <CardTitle className="flex items-center gap-2">
@@ -721,42 +718,12 @@ const Dashboard = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="flex flex-col">
-                  <div className="grid grid-cols-3 gap-2 text-sm font-medium mb-3 text-muted-foreground">
-                    <div>Etapa</div>
-                    <div className="text-right">Quantidade</div>
-                    <div className="text-right">Conversão</div>
-                  </div>
-                  {funnelData.map((step) => (
-                    <div key={step.name} className="grid grid-cols-3 gap-2 py-2 border-t border-border text-sm">
-                      <div>{step.name}</div>
-                      <div className="text-right">{step.value}</div>
-                      <div className="text-right">{step.percentage}%</div>
-                    </div>
-                  ))}
-                </div>
-                
-                <div className="h-80 flex items-center justify-center">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart
-                      layout="vertical"
-                      data={[...funnelData].reverse()}
-                      margin={{ top: 20, right: 30, left: 50, bottom: 5 }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                      <XAxis type="number" />
-                      <YAxis type="category" dataKey="name" />
-                      <Tooltip formatter={(value) => [`${value}`, 'Quantidade']} />
-                      <Bar dataKey="value" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
+              <div className="grid grid-cols-1 gap-6">
+                <FunnelChart data={funnelData} />
               </div>
             </CardContent>
           </Card>
           
-          {/* Payment Method Card */}
           <Card className="mb-6">
             <CardHeader className="py-4">
               <CardTitle className="flex items-center gap-2">
