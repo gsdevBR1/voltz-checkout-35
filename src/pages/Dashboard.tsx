@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -7,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SidebarLayout } from '@/components/Sidebar';
 import { Calendar, CreditCard, DollarSign, BarChart2, PieChart, Users, ArrowUpRight, 
          TrendingUp, Activity, Percent, Package, ShoppingCart, Circle } from 'lucide-react';
-import { BarChart, Bar, Legend, PieChart as RechartPieChart, Pie, Cell } from 'recharts';
+import { BarChart, Bar, Legend, PieChart as RechartPieChart, Pie, Cell, ResponsiveContainer, CartesianGrid, XAxis, YAxis, Tooltip } from 'recharts';
 import { format, subDays } from 'date-fns';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
