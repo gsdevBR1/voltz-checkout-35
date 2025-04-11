@@ -15,6 +15,7 @@ import GatewayStep from "./pages/steps/GatewayStep";
 import ShippingStep from "./pages/steps/ShippingStep";
 import ShopifyStep from "./pages/steps/ShopifyStep";
 import TodasVendas from "./pages/vendas/TodasVendas";
+import DetalheVenda from "./pages/vendas/DetalheVenda";
 import CarrinhosAbandonados from "./pages/vendas/CarrinhosAbandonados";
 import { ActivationStepsProvider } from "./contexts/ActivationStepsContextWithStores";
 import { StoreProvider } from "./contexts/StoreContext";
@@ -46,6 +47,7 @@ const App: React.FC = () => {
                   <Route path="/lojas" element={<Stores />} />
                   <Route path="/dashboard" element={<Dashboard />} />
                   <Route path="/vendas/todas" element={<TodasVendas />} />
+                  <Route path="/vendas/detalhe/:id" element={<DetalheVenda />} />
                   <Route path="/vendas/abandonados" element={<CarrinhosAbandonados />} />
                   <Route path="/steps/billing" element={<BillingStep />} />
                   <Route path="/steps/domain" element={<DomainStep />} />

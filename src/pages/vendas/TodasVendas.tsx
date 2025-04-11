@@ -1,4 +1,6 @@
+
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -83,6 +85,7 @@ const TodasVendas: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [paymentFilter, setPaymentFilter] = useState('all');
+  const navigate = useNavigate();
   
   const filteredOrders = mockOrders.filter(order => {
     const matchesSearch = 
@@ -96,6 +99,10 @@ const TodasVendas: React.FC = () => {
     
     return matchesSearch && matchesStatus && matchesPayment;
   });
+
+  const handleViewDetails = (orderId: string) => {
+    navigate(`/vendas/detalhe/${orderId}`);
+  };
   
   return (
     <DashboardLayout>
@@ -179,7 +186,11 @@ const TodasVendas: React.FC = () => {
                         <TableCell>{getStatusBadge(order.status)}</TableCell>
                         <TableCell>{formatDateTime(order.date)}</TableCell>
                         <TableCell>
-                          <Button variant="outline" size="sm">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleViewDetails(order.id)}
+                          >
                             <Eye className="h-3.5 w-3.5 mr-1" />
                             Ver detalhes
                           </Button>
