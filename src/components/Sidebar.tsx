@@ -43,6 +43,41 @@ export const AppSidebar: React.FC<SidebarProps> = ({ className }) => {
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
   const { state } = useSidebar();
   
+  // Add styles for smooth transition
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.textContent = `
+      .sidebar-icon {
+        color: var(--icon-inactive-color);
+        transition: color 0.3s ease-in-out;
+      }
+      
+      .sidebar-icon.active {
+        color: #2BBA00;
+      }
+      
+      .sidebar-icon:hover:not(.active) {
+        color: #666666;
+      }
+      
+      @media (prefers-color-scheme: dark) {
+        .sidebar-icon {
+          --icon-inactive-color: #BBBBBB;
+        }
+      }
+      
+      @media (prefers-color-scheme: light) {
+        .sidebar-icon {
+          --icon-inactive-color: #999999;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
+  
   const menuItems = [
     {
       title: 'Página Inicial',
@@ -96,12 +131,6 @@ export const AppSidebar: React.FC<SidebarProps> = ({ className }) => {
     return location.pathname === path || location.pathname.startsWith(path);
   };
   
-  // Style for active icon
-  const activeIconClass = "text-primary transition-all duration-200 ease-in-out transform scale-110";
-  
-  // Style for inactive icon
-  const inactiveIconClass = "text-muted-foreground transition-all duration-200 ease-in-out";
-  
   return (
     <Sidebar className={className}>
       <SidebarHeader>
@@ -133,9 +162,8 @@ export const AppSidebar: React.FC<SidebarProps> = ({ className }) => {
                         <div className="flex items-center">
                           <item.icon 
                             className={cn(
-                              "h-5 w-5 mr-2",
-                              isActive(item.path) ? activeIconClass : inactiveIconClass,
-                              "group-hover:scale-110 group-hover:text-primary/80"
+                              "h-5 w-5 mr-2 sidebar-icon",
+                              isActive(item.path) && "active"
                             )} 
                             aria-current={isActive(item.path) ? "page" : undefined}
                           />
@@ -162,9 +190,8 @@ export const AppSidebar: React.FC<SidebarProps> = ({ className }) => {
                             <Link to={subItem.path} className="group">
                               <subItem.icon 
                                 className={cn(
-                                  "h-4 w-4",
-                                  location.pathname === subItem.path ? activeIconClass : inactiveIconClass,
-                                  "group-hover:scale-110 group-hover:text-primary/80"
+                                  "h-4 w-4 sidebar-icon",
+                                  location.pathname === subItem.path && "active"
                                 )}
                                 aria-current={location.pathname === subItem.path ? "page" : undefined}
                               />
@@ -185,9 +212,8 @@ export const AppSidebar: React.FC<SidebarProps> = ({ className }) => {
                   <Link to={item.path} className="w-full group">
                     <item.icon 
                       className={cn(
-                        "h-5 w-5",
-                        location.pathname === item.path ? activeIconClass : inactiveIconClass,
-                        "group-hover:scale-110 group-hover:text-primary/80",
+                        "h-5 w-5 sidebar-icon",
+                        location.pathname === item.path && "active",
                         state === "collapsed" && "mx-auto"
                       )}
                       aria-current={location.pathname === item.path ? "page" : undefined}
