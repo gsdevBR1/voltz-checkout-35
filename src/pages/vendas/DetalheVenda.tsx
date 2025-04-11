@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Receipt, User, MapPin, Package, Clock, Mail, 
   DollarSign, Link as LinkIcon, FileText, Copy, ExternalLink, 
-  CheckCircle, AlertCircle, CreditCard, Truck, Tag
+  CheckCircle, AlertCircle, CreditCard, Truck, Tag, MessageSquare
 } from 'lucide-react';
 import { formatCurrency, formatDateTime } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
@@ -129,6 +129,15 @@ const DetalheVenda: React.FC = () => {
       title: "Copiado!",
       description: message,
     });
+  };
+
+  const handleWhatsAppContact = () => {
+    // Format phone number by removing non-numeric characters
+    const phoneNumber = order.phone.replace(/\D/g, '');
+    // Create WhatsApp URL with the phone number (assuming Brazilian number)
+    const whatsappUrl = `https://wa.me/55${phoneNumber}`;
+    // Open WhatsApp in a new tab
+    window.open(whatsappUrl, '_blank');
   };
   
   return (
@@ -254,10 +263,20 @@ const DetalheVenda: React.FC = () => {
           <TabsContent value="cliente" className="space-y-4">
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <User className="h-5 w-5 text-primary" />
-                  Informações do Cliente
-                </CardTitle>
+                <div className="flex justify-between items-center">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <User className="h-5 w-5 text-primary" />
+                    Informações do Cliente
+                  </CardTitle>
+                  <Button 
+                    variant="default" 
+                    className="bg-green-500 hover:bg-green-600"
+                    onClick={handleWhatsAppContact}
+                  >
+                    <MessageSquare className="h-4 w-4 mr-2" />
+                    Entrar em contato
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
