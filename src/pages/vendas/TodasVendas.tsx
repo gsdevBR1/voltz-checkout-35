@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -238,6 +239,15 @@ const TodasVendas: React.FC = () => {
     console.log("Exporting data...");
   };
   
+  // Helper function to get the appropriate date/time display
+  const getDateTimeDisplay = (order: any) => {
+    if (order.status === 'Pendente' || !order.paidAt) {
+      return `Gerado em: ${formatDateTime(order.createdAt)}`;
+    } else {
+      return `Pago em: ${formatDateTime(order.paidAt)}`;
+    }
+  };
+  
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -313,7 +323,7 @@ const TodasVendas: React.FC = () => {
         
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle>Vendas Finalizadas</CardTitle>
+            <CardTitle>Pedidos</CardTitle>
           </CardHeader>
           <CardContent>
             <ScrollArea className="rounded-md border" orientation="horizontal">
@@ -327,8 +337,7 @@ const TodasVendas: React.FC = () => {
                       <TableHead className="min-w-[120px]">Forma</TableHead>
                       <TableHead className="min-w-[120px]">Adquirente</TableHead>
                       <TableHead className="min-w-[100px]">Status</TableHead>
-                      <TableHead className="min-w-[150px]">Iniciada em</TableHead>
-                      <TableHead className="min-w-[150px]">Pagamento</TableHead>
+                      <TableHead className="min-w-[150px]">Data e Hora</TableHead>
                       <TableHead className="min-w-[100px]">Valor</TableHead>
                       <TableHead className="min-w-[120px]">Ações</TableHead>
                     </TableRow>
@@ -359,11 +368,7 @@ const TodasVendas: React.FC = () => {
                           <TableCell>{order.paymentMethod}</TableCell>
                           <TableCell>{order.gateway}</TableCell>
                           <TableCell>{getStatusBadge(order.status)}</TableCell>
-                          <TableCell>{formatDateTime(order.createdAt)}</TableCell>
-                          <TableCell>
-                            {order.paidAt ? formatDateTime(order.paidAt) : 
-                             <span className="text-muted-foreground">Não pago</span>}
-                          </TableCell>
+                          <TableCell>{getDateTimeDisplay(order)}</TableCell>
                           <TableCell>{formatCurrency(order.total)}</TableCell>
                           <TableCell>
                             <Button 
@@ -379,7 +384,7 @@ const TodasVendas: React.FC = () => {
                       ))
                     ) : (
                       <TableRow>
-                        <TableCell colSpan={10} className="text-center py-6 text-muted-foreground">
+                        <TableCell colSpan={9} className="text-center py-6 text-muted-foreground">
                           Nenhuma venda encontrada com os filtros aplicados.
                         </TableCell>
                       </TableRow>
