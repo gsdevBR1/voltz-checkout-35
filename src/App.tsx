@@ -37,8 +37,8 @@ const App: React.FC = () => {
               <Sonner />
               <BrowserRouter>
                 <Routes>
-                  <Route path="/" element={<Dashboard />} />
-                  <Route path="/stores" element={<Stores />} />
+                  <Route path="/" element={<Stores />} />
+                  <Route path="/dashboard" element={<Dashboard />} />
                   <Route path="/steps/billing" element={<BillingStep />} />
                   <Route path="/steps/domain" element={<DomainStep />} />
                   <Route path="/steps/gateway" element={<GatewayStep />} />
