@@ -16,7 +16,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, className }) =
       className={cn(
         status === 'active' 
           ? "bg-green-100 text-green-800 hover:bg-green-200 dark:bg-green-900 dark:text-green-100 dark:hover:bg-green-800" 
-          : "text-gray-500 border-gray-300 dark:text-gray-400 dark:border-gray-600",
+          : "text-red-500 border-red-300 dark:text-red-400 dark:border-red-600",
         className
       )}
     >

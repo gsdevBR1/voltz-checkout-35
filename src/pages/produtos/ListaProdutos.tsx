@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/DashboardLayout';
 import {
@@ -33,7 +33,9 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Product, ProductStatus, ProductType } from '@/types/product';
 import { ProductTypeBadge, ShopifyBadge } from '@/components/produtos/ProductBadge';
+import { StatusBadge } from '@/components/produtos/StatusBadge';
 import { formatCurrency, cn } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
 import { 
   Plus, 
   Package, 
@@ -94,12 +96,14 @@ const mockProducts: Product[] = [
 
 const ListaProdutos: React.FC = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [products, setProducts] = useState<Product[]>(mockProducts);
 
   const filteredProducts = useMemo(() => {
-    return mockProducts
+    return products
       .filter(product => {
         const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
         const matchesType = typeFilter === 'all' || product.type === typeFilter;
@@ -107,12 +111,28 @@ const ListaProdutos: React.FC = () => {
         return matchesSearch && matchesType && matchesStatus;
       })
       .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
-  }, [searchTerm, typeFilter, statusFilter]);
+  }, [searchTerm, typeFilter, statusFilter, products]);
 
-  const handleStatusToggle = (product: Product) => {
-    // This would update the product's status in a real application
-    console.log(`Toggling status for product ${product.id} from ${product.status} to ${product.status === 'active' ? 'inactive' : 'active'}`);
-  };
+  const handleStatusToggle = useCallback((product: Product) => {
+    // Toggle the product status
+    const newStatus: ProductStatus = product.status === 'active' ? 'inactive' : 'active';
+    
+    // In a real app, this would be an API call
+    console.log(`Toggling status for product ${product.id} from ${product.status} to ${newStatus}`);
+    
+    // Update the local state
+    setProducts(prevProducts => 
+      prevProducts.map(p => 
+        p.id === product.id ? { ...p, status: newStatus } : p
+      )
+    );
+    
+    // Show a toast notification
+    toast({
+      title: `Produto ${newStatus === 'active' ? 'ativado' : 'desativado'}`,
+      description: `${product.name} foi ${newStatus === 'active' ? 'ativado' : 'desativado'} com sucesso.`,
+    });
+  }, [toast]);
 
   return (
     <DashboardLayout>
@@ -244,14 +264,7 @@ const ListaProdutos: React.FC = () => {
                         : '—'}
                     </TableCell>
                     <TableCell>
-                      <Badge 
-                        variant={product.status === 'active' ? 'default' : 'outline'}
-                        className={product.status === 'active' 
-                          ? "bg-green-100 text-green-800 hover:bg-green-200 dark:bg-green-900 dark:text-green-100 dark:hover:bg-green-800" 
-                          : "text-gray-500 border-gray-300 dark:text-gray-400 dark:border-gray-600"}
-                      >
-                        {product.status === 'active' ? 'Ativo' : 'Inativo'}
-                      </Badge>
+                      <StatusBadge status={product.status} />
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
@@ -267,12 +280,13 @@ const ListaProdutos: React.FC = () => {
                           variant="ghost" 
                           size="icon"
                           onClick={() => handleStatusToggle(product)}
+                          title={product.status === 'active' ? 'Desativar produto' : 'Ativar produto'}
                         >
                           <Power className={cn(
                             "h-4 w-4",
                             product.status === 'active' 
-                              ? "text-red-500 hover:text-red-600" 
-                              : "text-green-500 hover:text-green-600"
+                              ? "text-green-500 hover:text-green-600" 
+                              : "text-red-500 hover:text-red-600"
                           )} />
                           <span className="sr-only">
                             {product.status === 'active' ? 'Desativar' : 'Ativar'}
