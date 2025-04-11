@@ -12,7 +12,10 @@ import {
   ShoppingCart,
   FileText,
   ShoppingBag,
-  ChevronDown
+  ChevronDown,
+  Users,
+  UserCheck,
+  UserX
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { StoreSelector } from '@/components/StoreSelector';
@@ -103,6 +106,23 @@ export const AppSidebar: React.FC<SidebarProps> = ({ className }) => {
           title: 'Carrinhos Abandonados',
           path: '/vendas/abandonados',
           icon: ShoppingBag,
+        }
+      ]
+    },
+    {
+      title: 'Clientes',
+      path: '/clientes',
+      icon: Users,
+      subItems: [
+        {
+          title: 'Ver Todos',
+          path: '/clientes/todos',
+          icon: UserCheck,
+        },
+        {
+          title: 'Leads',
+          path: '/clientes/leads',
+          icon: UserX,
         }
       ]
     },
