@@ -33,6 +33,20 @@ import {
   SidebarMenuSubButton
 } from '@/components/ui/sidebar';
 
+// Define keyframe animation in a style block at the top of the file
+// instead of using styled-jsx
+const iconPulseAnimation = `
+  @keyframes iconClickPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+    100% { transform: scale(1); }
+  }
+  
+  .icon-pulse {
+    animation: iconClickPulse 0.2s ease-out;
+  }
+`;
+
 interface SidebarProps {
   className?: string;
 }
@@ -100,6 +114,19 @@ export const AppSidebar: React.FC<SidebarProps> = ({ className }) => {
     }, 300); // 300ms to ensure animation completes
   };
   
+  // Add global styles using a regular style tag
+  useEffect(() => {
+    // Create a style element
+    const styleEl = document.createElement('style');
+    styleEl.textContent = iconPulseAnimation;
+    document.head.appendChild(styleEl);
+    
+    // Cleanup function to remove the style element when component unmounts
+    return () => {
+      document.head.removeChild(styleEl);
+    };
+  }, []);
+  
   return (
     <Sidebar className={className}>
       <SidebarHeader>
@@ -113,17 +140,6 @@ export const AppSidebar: React.FC<SidebarProps> = ({ className }) => {
         </div>
       </SidebarHeader>
       <SidebarContent>
-        <style jsx global>{`
-          @keyframes iconClickPulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.15); }
-            100% { transform: scale(1); }
-          }
-          
-          .icon-pulse {
-            animation: iconClickPulse 0.2s ease-out;
-          }
-        `}</style>
         <SidebarMenu>
           {menuItems.map((item) => (
             <SidebarMenuItem key={item.path}>
