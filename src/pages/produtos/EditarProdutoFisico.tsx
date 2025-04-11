@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -882,7 +881,7 @@ const EditarProdutoFisico: React.FC = () => {
             </Card>
 
             {/* Form Actions */}
-            <div className="sticky bottom-0 pt-6 border-t bg-background">
+            <div className="pt-6 border-t bg-background">
               <div className="flex justify-between items-center">
                 <div>
                   <Button
