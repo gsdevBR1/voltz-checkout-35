@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -46,7 +45,6 @@ import {
   Power
 } from 'lucide-react';
 
-// Mock data for demonstration purposes
 const mockProducts: Product[] = [
   {
     id: '1',
@@ -114,20 +112,13 @@ const ListaProdutos: React.FC = () => {
   }, [searchTerm, typeFilter, statusFilter, products]);
 
   const handleStatusToggle = useCallback((product: Product) => {
-    // Toggle the product status
     const newStatus: ProductStatus = product.status === 'active' ? 'inactive' : 'active';
-    
-    // In a real app, this would be an API call
     console.log(`Toggling status for product ${product.id} from ${product.status} to ${newStatus}`);
-    
-    // Update the local state
     setProducts(prevProducts => 
       prevProducts.map(p => 
         p.id === product.id ? { ...p, status: newStatus } : p
       )
     );
-    
-    // Show a toast notification
     toast({
       title: `Produto ${newStatus === 'active' ? 'ativado' : 'desativado'}`,
       description: `${product.name} foi ${newStatus === 'active' ? 'ativado' : 'desativado'} com sucesso.`,
@@ -271,7 +262,7 @@ const ListaProdutos: React.FC = () => {
                         <Button 
                           variant="ghost" 
                           size="icon"
-                          onClick={() => navigate(`/produtos/editar/${product.id}`)}
+                          onClick={() => navigate(`/produtos/${product.id}/editar`)}
                         >
                           <Pencil className="h-4 w-4" />
                           <span className="sr-only">Editar</span>
