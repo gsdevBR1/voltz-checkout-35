@@ -4,14 +4,14 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from '@/components/ui/button';
 import { CheckCircle, Circle, Clock, ArrowRight, CreditCard, Globe, CreditCard as PaymentIcon, Truck } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { ActivationStep, StepStatus } from '@/contexts/ActivationStepsContext';
+import { ActivationStep } from '@/contexts/ActivationStepsContextWithStores';
 
 interface ActivationStepCardProps {
   step: ActivationStep;
   onClick: () => void;
 }
 
-const StepIcon = ({ id }: { id: ActivationStep['id'] }) => {
+const StepIcon = ({ id }: { id: string }) => {
   switch (id) {
     case 'billing':
       return <CreditCard className="h-6 w-6" />;
@@ -26,36 +26,22 @@ const StepIcon = ({ id }: { id: ActivationStep['id'] }) => {
   }
 };
 
-const StatusIcon = ({ status }: { status: StepStatus }) => {
-  switch (status) {
-    case 'completed':
-      return <CheckCircle className="h-5 w-5 text-success" />;
-    case 'in-progress':
-      return <Clock className="h-5 w-5 text-amber-500 animate-pulse" />;
-    default:
-      return <Circle className="h-5 w-5 text-gray-300" />;
-  }
+const StatusIcon = ({ isCompleted }: { isCompleted: boolean }) => {
+  return isCompleted ? 
+    <CheckCircle className="h-5 w-5 text-success" /> : 
+    <Circle className="h-5 w-5 text-gray-300" />;
 };
 
 const ActivationStepCard: React.FC<ActivationStepCardProps> = ({ step, onClick }) => {
   return (
     <Card className={cn(
       "transition-all duration-200 hover:shadow-md",
-      step.status === 'completed' && "border-success/30 bg-success/5",
-      step.status === 'in-progress' && "border-amber-500/30 bg-amber-500/5"
+      step.isCompleted && "border-success/30 bg-success/5"
     )}>
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className={cn(
-              "flex items-center justify-center w-8 h-8 rounded-full text-white",
-              step.status === 'completed' ? "bg-success" : "bg-primary"
-            )}>
-              <span>{step.order}</span>
-            </div>
-            <CardTitle className="text-lg">{step.title}</CardTitle>
-          </div>
-          <StatusIcon status={step.status} />
+          <CardTitle className="text-lg">{step.name}</CardTitle>
+          <StatusIcon isCompleted={step.isCompleted} />
         </div>
         <CardDescription className="mt-2">{step.description}</CardDescription>
       </CardHeader>
@@ -63,24 +49,20 @@ const ActivationStepCard: React.FC<ActivationStepCardProps> = ({ step, onClick }
         <div className="flex items-center space-x-3 text-muted-foreground">
           <StepIcon id={step.id} />
           <span className="text-sm">
-            {step.status === 'completed' 
-              ? 'Concluído' 
-              : step.status === 'in-progress' 
-                ? 'Em andamento' 
-                : 'Não iniciado'}
+            {step.isCompleted ? 'Concluído' : 'Não iniciado'}
           </span>
         </div>
       </CardContent>
       <CardFooter>
         <Button 
-          variant={step.status === 'completed' ? "outline" : "default"} 
+          variant={step.isCompleted ? "outline" : "default"} 
           className={cn(
             "w-full",
-            step.status === 'completed' && "border-success text-success hover:bg-success/10"
+            step.isCompleted && "border-success text-success hover:bg-success/10"
           )}
           onClick={onClick}
         >
-          <span>{step.status === 'completed' ? 'Revisar' : 'Configurar'}</span>
+          <span>{step.isCompleted ? 'Revisar' : 'Configurar'}</span>
           <ArrowRight className="ml-2 h-4 w-4" />
         </Button>
       </CardFooter>
