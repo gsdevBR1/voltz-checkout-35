@@ -157,7 +157,7 @@ const ListaProdutos: React.FC = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => navigate("/produtos/novo/fisico")}>
+                <DropdownMenuItem onClick={() => navigate("/produtos/novo-fisico")}>
                   <Package className="mr-2 h-4 w-4" />
                   <span>Novo Produto Físico</span>
                 </DropdownMenuItem>

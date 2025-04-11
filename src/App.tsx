@@ -1,10 +1,10 @@
-
 import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+
 import Dashboard from "./pages/Dashboard";
 import HomePage from "./pages/HomePage";
 import Stores from "./pages/Stores";
@@ -67,6 +67,7 @@ const App: React.FC = () => {
                   <Route path="/clientes/leads/perfil/:id" element={<LeadDetalhes />} />
                   <Route path="/produtos" element={<ListaProdutos />} />
                   <Route path="/produtos/novo/fisico" element={<NovoProdutoFisico />} />
+                  <Route path="/produtos/novo-fisico" element={<NovoFisico />} />
                   <Route path="/produtos/novo/digital" element={<NovoProdutoDigital />} />
                   <Route path="/produtos/editar/:id" element={<EditarProduto />} />
                   <Route path="/steps/billing" element={<BillingStep />} />
