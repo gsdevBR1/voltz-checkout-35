@@ -73,9 +73,13 @@ const NovoProdutoFisico: React.FC = () => {
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     // Convert price to cents for storage
     const productData: ProductFormData = {
-      ...values,
+      name: values.name,
       type: 'physical',
       price: Math.round(values.price * 100),
+      description: values.description,
+      stock: values.stock,
+      status: values.status,
+      imageUrl: values.imageUrl,
     };
     
     console.log('Form submitted:', productData);
