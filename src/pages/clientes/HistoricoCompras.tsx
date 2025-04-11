@@ -49,7 +49,6 @@ import {
   AlertCircle,
 } from "lucide-react";
 
-// Mock customer data
 const MOCK_CUSTOMERS = [
   {
     id: '1',
@@ -63,7 +62,6 @@ const MOCK_CUSTOMERS = [
   }
 ];
 
-// Mock data for orders with more details
 const MOCK_ORDERS = [
   {
     id: "00123",
@@ -157,12 +155,10 @@ const HistoricoCompras: React.FC = () => {
   const [filteredOrders, setFilteredOrders] = useState<typeof MOCK_ORDERS>([]);
   const [loading, setLoading] = useState(true);
   
-  // Filter state
   const [searchTerm, setSearchTerm] = useState('');
   const [dateFilter, setDateFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
   
-  // Calculate statistics
   const totalSpent = filteredOrders.reduce((sum, order) => {
     if (order.status !== 'Reembolsado' && order.status !== 'Chargeback') {
       return sum + order.total;
@@ -175,12 +171,10 @@ const HistoricoCompras: React.FC = () => {
   ).length;
   
   useEffect(() => {
-    // In a real app, this would be API calls
     const foundCustomer = MOCK_CUSTOMERS.find(c => c.id === id);
     
     if (foundCustomer) {
       setCustomer(foundCustomer);
-      // In a real app, this would filter orders based on customer ID
       setOrders(MOCK_ORDERS);
       setFilteredOrders(MOCK_ORDERS);
     } else {
@@ -191,11 +185,9 @@ const HistoricoCompras: React.FC = () => {
     setLoading(false);
   }, [id]);
   
-  // Apply all filters
   useEffect(() => {
     let result = [...orders];
     
-    // Apply search filter
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
       result = result.filter(order => 
@@ -206,7 +198,6 @@ const HistoricoCompras: React.FC = () => {
       );
     }
     
-    // Apply date filter
     const now = new Date();
     if (dateFilter !== 'all') {
       result = result.filter(order => {
@@ -228,7 +219,6 @@ const HistoricoCompras: React.FC = () => {
       });
     }
     
-    // Apply status filter
     if (statusFilter !== 'all') {
       result = result.filter(order => order.status.toLowerCase() === statusFilter.toLowerCase());
     }
@@ -263,15 +253,10 @@ const HistoricoCompras: React.FC = () => {
   };
   
   const exportData = () => {
-    // In a real app, this would generate and download a CSV/Excel file
     alert('Exportando dados para CSV/Excel');
   };
 
   const handleRepurchase = (order: typeof MOCK_ORDERS[0]) => {
-    // In a real app, we would check stock availability and create a new checkout
-    // For now, we'll simulate this with mock data
-    
-    // Check if any products are unavailable (randomly for demo)
     const unavailableProduct = Math.random() > 0.8 
       ? order.products[Math.floor(Math.random() * order.products.length)]
       : null;
@@ -290,14 +275,11 @@ const HistoricoCompras: React.FC = () => {
       return;
     }
     
-    // Success path: create checkout and redirect
     toast({
       title: "Carrinho recriado com sucesso!",
       description: `${order.products.length} produto(s) adicionados ao seu carrinho.`,
     });
     
-    // In a real app, this would create a checkout and redirect to it
-    // For now, we'll just show another toast
     setTimeout(() => {
       toast({
         title: "Redirecionando para o checkout...",
@@ -307,7 +289,7 @@ const HistoricoCompras: React.FC = () => {
   };
   
   const canRepurchase = (status: string) => {
-    return status === 'Aprovado' || status === 'Entregue';
+    return status === 'Aprovado';
   };
   
   if (loading) {

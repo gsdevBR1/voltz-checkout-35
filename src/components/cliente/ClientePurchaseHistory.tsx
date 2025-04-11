@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import {
   Table,
@@ -28,7 +27,6 @@ import { FileText, Search, ExternalLink, ArrowRight, RefreshCw } from "lucide-re
 import { Link, useNavigate } from 'react-router-dom';
 import { useToast } from "@/hooks/use-toast";
 
-// Mock data for customer orders
 const MOCK_ORDERS = [
   {
     id: "00123",
@@ -122,10 +120,6 @@ const ClientePurchaseHistory: React.FC<ClientePurchaseHistoryProps> = ({ custome
   };
 
   const handleRepurchase = (order: typeof MOCK_ORDERS[0]) => {
-    // In a real app, we would check stock availability and create a new checkout
-    // For now, we'll simulate this with mock data
-    
-    // Check if the product is unavailable (randomly for demo)
     const isProductAvailable = Math.random() > 0.2;
     
     if (!isProductAvailable) {
@@ -142,20 +136,21 @@ const ClientePurchaseHistory: React.FC<ClientePurchaseHistoryProps> = ({ custome
       return;
     }
     
-    // Success path: create checkout and redirect
     toast({
       title: "Carrinho recriado com sucesso!",
       description: `${order.product} adicionado ao seu carrinho.`,
     });
     
-    // In a real app, this would create a checkout and redirect to it
-    // For now, we'll just show another toast
     setTimeout(() => {
       toast({
         title: "Redirecionando para o checkout...",
         description: "Em um app real, isso abriria uma nova página de checkout.",
       });
     }, 1500);
+  };
+
+  const canRepurchase = (status: string) => {
+    return status === 'Aprovado';
   };
 
   return (
@@ -210,15 +205,17 @@ const ClientePurchaseHistory: React.FC<ClientePurchaseHistoryProps> = ({ custome
                           </TableCell>
                           <TableCell className="text-right">
                             <div className="flex justify-end gap-2">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-950"
-                                onClick={() => handleRepurchase(order)}
-                              >
-                                <RefreshCw className="h-4 w-4 mr-1" />
-                                Recomprar
-                              </Button>
+                              {canRepurchase(order.status) && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-950"
+                                  onClick={() => handleRepurchase(order)}
+                                >
+                                  <RefreshCw className="h-4 w-4 mr-1" />
+                                  Recomprar
+                                </Button>
+                              )}
                               <Button 
                                 variant="ghost" 
                                 size="sm" 

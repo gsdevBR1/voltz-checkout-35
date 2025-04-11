@@ -163,7 +163,7 @@ const DetalheVenda: React.FC = () => {
     }, 1500);
   };
   
-  const canRepurchase = order.status === 'Aprovado' || order.status === 'Entregue';
+  const canRepurchase = order.status === 'Aprovado';
   
   return (
     <DashboardLayout>
