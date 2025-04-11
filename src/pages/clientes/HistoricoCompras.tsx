@@ -306,6 +306,10 @@ const HistoricoCompras: React.FC = () => {
     }, 1500);
   };
   
+  const canRepurchase = (status: string) => {
+    return status === 'Aprovado' || status === 'Entregue';
+  };
+  
   if (loading) {
     return (
       <DashboardLayout>
@@ -492,15 +496,18 @@ const HistoricoCompras: React.FC = () => {
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-950"
-                            onClick={() => handleRepurchase(order)}
-                          >
-                            <RefreshCw className="h-4 w-4 mr-1" />
-                            Recomprar
-                          </Button>
+                          {canRepurchase(order.status) && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="text-green-600 hover:text-green-700 hover:bg-green-50 border-green-200 dark:border-green-800 dark:hover:bg-green-950"
+                              onClick={() => handleRepurchase(order)}
+                            >
+                              <RefreshCw className="h-4 w-4 mr-1" />
+                              Recomprar
+                            </Button>
+                          )}
+                          
                           <Button 
                             variant="ghost" 
                             size="sm" 

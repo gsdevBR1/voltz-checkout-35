@@ -7,10 +7,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Eye, Search, Calendar, Download } from 'lucide-react';
+import { Eye, Search, Calendar, Download, RefreshCw } from 'lucide-react';
 import { formatCurrency, formatDateTime } from '@/lib/utils';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useToast } from "@/hooks/use-toast";
 
 const mockOrders = [
   {
@@ -183,6 +184,7 @@ const TodasVendas: React.FC = () => {
   const itemsPerPage = 5;
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  const { toast } = useToast();
   
   const filteredOrders = mockOrders.filter(order => {
     const matchesSearch = 
@@ -243,6 +245,37 @@ const TodasVendas: React.FC = () => {
     } else {
       return `Pago em: ${formatDateTime(order.paidAt)}`;
     }
+  };
+  
+  const handleRepurchase = (order: any) => {
+    const hasUnavailableProduct = Math.random() > 0.8;
+    
+    if (hasUnavailableProduct) {
+      const productIndex = Math.floor(Math.random() * order.products.length);
+      const unavailableProduct = order.products[productIndex];
+      
+      toast({
+        variant: "destructive",
+        title: "Produto indisponível",
+        description: `${unavailableProduct.name} não está mais disponível em estoque. Você pode ajustar o carrinho antes de finalizar.`,
+      });
+    } else {
+      toast({
+        title: "Carrinho criado com sucesso!",
+        description: `${order.products.length} produto(s) adicionados ao seu carrinho.`,
+      });
+    }
+    
+    setTimeout(() => {
+      toast({
+        title: "Redirecionando para o checkout...",
+        description: "Em um app real, isso abriria uma nova página de checkout.",
+      });
+    }, 1500);
+  };
+  
+  const canRepurchase = (status: string) => {
+    return status === 'Aprovado' || status === 'Entregue';
   };
   
   return (
@@ -334,7 +367,7 @@ const TodasVendas: React.FC = () => {
                   <TableHead className="min-w-[100px]">Status</TableHead>
                   <TableHead className="min-w-[150px]">Data e Hora</TableHead>
                   <TableHead className="min-w-[100px]">Valor</TableHead>
-                  <TableHead className="min-w-[120px]">Ações</TableHead>
+                  <TableHead className="min-w-[170px]">Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -366,14 +399,28 @@ const TodasVendas: React.FC = () => {
                       <TableCell>{getDateTimeDisplay(order)}</TableCell>
                       <TableCell>{formatCurrency(order.total)}</TableCell>
                       <TableCell>
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => handleViewDetails(order.id)}
-                        >
-                          <Eye className="h-3.5 w-3.5 mr-1" />
-                          Ver detalhes
-                        </Button>
+                        <div className="flex flex-wrap gap-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleViewDetails(order.id)}
+                          >
+                            <Eye className="h-3.5 w-3.5 mr-1" />
+                            Ver detalhes
+                          </Button>
+                          
+                          {canRepurchase(order.status) && (
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              className="text-green-600 border-green-200 hover:bg-green-50 hover:text-green-700 dark:border-green-800 dark:hover:bg-green-950"
+                              onClick={() => handleRepurchase(order)}
+                            >
+                              <RefreshCw className="h-3.5 w-3.5 mr-1" />
+                              Recomprar
+                            </Button>
+                          )}
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))

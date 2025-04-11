@@ -9,10 +9,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Receipt, User, MapPin, Package, Clock, Mail, 
   DollarSign, Link as LinkIcon, FileText, Copy, ExternalLink, 
-  CheckCircle, AlertCircle, CreditCard, Truck, Tag, MessageSquare
+  CheckCircle, AlertCircle, CreditCard, Truck, Tag, MessageSquare,
+  RefreshCw
 } from 'lucide-react';
 import { formatCurrency, formatDateTime } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
 
 const mockOrder = {
   id: '000123',
@@ -117,6 +119,7 @@ const getTypeTag = (type: string) => {
 const DetalheVenda: React.FC = () => {
   const { id } = useParams();
   const { toast } = useToast();
+  const navigate = useNavigate();
   
   const order = mockOrder;
   
@@ -133,6 +136,34 @@ const DetalheVenda: React.FC = () => {
     const whatsappUrl = `https://wa.me/55${phoneNumber}`;
     window.open(whatsappUrl, '_blank');
   };
+  
+  const handleRepurchase = () => {
+    const unavailableProductIndex = Math.random() > 0.8 ? 
+      Math.floor(Math.random() * order.items.length) : -1;
+    
+    if (unavailableProductIndex >= 0) {
+      const unavailableProduct = order.items[unavailableProductIndex];
+      toast({
+        variant: "destructive",
+        title: "Produto indisponível",
+        description: `${unavailableProduct.name} não está mais disponível em estoque. Você pode ajustar o carrinho antes de finalizar.`,
+      });
+    } else {
+      toast({
+        title: "Carrinho criado com sucesso!",
+        description: `${order.items.length} produto(s) adicionados ao seu carrinho.`,
+      });
+    }
+    
+    setTimeout(() => {
+      toast({
+        title: "Redirecionando para o checkout...",
+        description: "Em um app real, isso abriria uma nova página de checkout.",
+      });
+    }, 1500);
+  };
+  
+  const canRepurchase = order.status === 'Aprovado' || order.status === 'Entregue';
   
   return (
     <DashboardLayout>
@@ -412,6 +443,29 @@ const DetalheVenda: React.FC = () => {
             </Card>
           </TabsContent>
         </Tabs>
+        
+        {canRepurchase && (
+          <Card className="border-green-100 dark:border-green-800">
+            <CardContent className="pt-6 pb-6">
+              <div className="flex flex-col items-center text-center gap-3">
+                <div className="h-12 w-12 rounded-full bg-green-100 dark:bg-green-800/30 flex items-center justify-center">
+                  <RefreshCw className="h-6 w-6 text-green-600 dark:text-green-400" />
+                </div>
+                <h3 className="text-xl font-semibold">Repetir esta compra?</h3>
+                <p className="text-muted-foreground max-w-md">
+                  Clique abaixo para criar um novo pedido com os mesmos produtos.
+                </p>
+                <Button 
+                  className="mt-2 bg-green-600 hover:bg-green-700"
+                  onClick={handleRepurchase}
+                >
+                  <RefreshCw className="mr-2 h-4 w-4" />
+                  Recomprar Agora
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </DashboardLayout>
   );
