@@ -8,20 +8,31 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Link } from 'react-router-dom';
 import { Store, Settings } from 'lucide-react';
+import { useTheme } from '@/providers/ThemeProvider';
 
 export function DashboardHeader({ onCustomizeClick }: { onCustomizeClick?: () => void }) {
   const { currentStore } = useStores();
+  const { theme } = useTheme();
+  const isDarkMode = theme === "dark";
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background">
       <div className="container flex h-16 items-center justify-between">
         <div className="flex items-center gap-4">
           <Link to="/" className="flex items-center gap-2">
-            <img 
-              src="/lovable-uploads/3aa07f77-7311-4155-8e6c-39abb8dca3df.png" 
-              alt="Voltz.Checkout Logo" 
-              className="h-10 w-10"
-            />
+            {isDarkMode ? (
+              <img 
+                src="/lovable-uploads/6e7ee63b-0326-4a37-bc3f-0e31d8324441.png" 
+                alt="Voltz.Checkout Logo (Dark Mode)" 
+                className="h-10 w-10"
+              />
+            ) : (
+              <img 
+                src="/lovable-uploads/3aa07f77-7311-4155-8e6c-39abb8dca3df.png" 
+                alt="Voltz.Checkout Logo" 
+                className="h-10 w-10"
+              />
+            )}
           </Link>
           
           {currentStore?.isDemo && (
