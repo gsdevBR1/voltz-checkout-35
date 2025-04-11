@@ -5,6 +5,7 @@ import { StoreSelector } from './StoreSelector';
 import { useStores } from '@/contexts/StoreContext';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Link } from 'react-router-dom';
 import { Store } from 'lucide-react';
 
@@ -19,8 +20,6 @@ export function DashboardHeader() {
             Voltz.checkout
           </Link>
           
-          <StoreSelector />
-          
           {currentStore?.isDemo && (
             <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
               Demonstração
@@ -29,19 +28,31 @@ export function DashboardHeader() {
         </div>
         
         <div className="flex items-center gap-4">
+          <StoreSelector />
+          
           <Button variant="ghost" asChild>
             <Link to="/stores" className="flex items-center gap-2">
               <Store className="h-4 w-4" />
               <span className="hidden sm:inline">Gerenciar Lojas</span>
             </Link>
           </Button>
+          
           <ThemeToggle />
+          
+          <Avatar>
+            <AvatarFallback className="bg-primary/10 text-primary">
+              {currentStore?.name.substring(0, 2).toUpperCase() || "LC"}
+            </AvatarFallback>
+          </Avatar>
         </div>
       </div>
       
       {currentStore?.isDemo && (
         <div className="w-full bg-amber-50 border-b border-amber-200 py-2 px-4 text-amber-800 text-sm text-center">
-          ⚠️ Esta é uma loja de demonstração. Nenhuma transação real será realizada.
+          ⚠️ Esta é uma loja de demonstração. Nenhuma transação real será realizada. 
+          <Link to="/stores" className="underline font-medium ml-1">
+            Crie sua loja real clicando aqui
+          </Link>.
         </div>
       )}
     </header>

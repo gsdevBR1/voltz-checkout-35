@@ -71,21 +71,26 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         }
       }
       
-      // Check if demo store exists
+      // Always ensure the demo store exists
       const demoStoreExists = parsedStores.some(store => store.isDemo);
       
-      // If no demo store, add it
       if (!demoStoreExists) {
         parsedStores = [DEMO_STORE, ...parsedStores];
       }
       
       setStores(parsedStores);
       
-      // Set current store
-      if (storedCurrentStoreId && parsedStores.some(store => store.id === storedCurrentStoreId)) {
+      // Set current store - if user has no stores, always use demo store
+      if (parsedStores.length === 1 && parsedStores[0].isDemo) {
+        // Only demo store exists, force using it
+        setCurrentStore(parsedStores[0]);
+      } else if (storedCurrentStoreId && parsedStores.some(store => store.id === storedCurrentStoreId)) {
+        // User has previously selected a store, use that one
         setCurrentStore(parsedStores.find(store => store.id === storedCurrentStoreId) || parsedStores[0]);
       } else {
-        setCurrentStore(parsedStores[0]);
+        // Default to first non-demo store if available, otherwise use demo
+        const firstNonDemoStore = parsedStores.find(store => !store.isDemo);
+        setCurrentStore(firstNonDemoStore || parsedStores[0]);
       }
       
       setIsStoresLoading(false);
@@ -130,6 +135,12 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   const deleteStore = (id: string) => {
+    // Prevent deletion of the demo store
+    if (id === DEMO_STORE.id) {
+      toast.error('A loja de demonstração não pode ser excluída.');
+      return;
+    }
+    
     const storeToDelete = stores.find(store => store.id === id);
     if (!storeToDelete) return;
     
@@ -138,7 +149,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       
       // If deleting current store, set first available store as current
       if (currentStore?.id === id && updatedStores.length > 0) {
-        setCurrentStore(updatedStores[0]);
+        const firstNonDemoStore = updatedStores.find(store => !store.isDemo);
+        setCurrentStore(firstNonDemoStore || updatedStores[0]);
       }
       
       return updatedStores;
