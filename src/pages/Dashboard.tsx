@@ -4,14 +4,17 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/DashboardLayout';
+import { DashboardHeader } from '@/components/DashboardHeader';
 import ActivationStepCard from '@/components/ActivationStepCard';
-import { useActivationSteps, useCheckActivationStatus } from '@/contexts/ActivationStepsContext';
+import { useActivationSteps, useCheckActivationStatus } from '@/contexts/ActivationStepsContextWithStores';
+import { useStores } from '@/contexts/StoreContext';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { CheckCircle, ArrowRightCircle } from 'lucide-react';
+import { CheckCircle, ArrowRightCircle, AlertTriangle } from 'lucide-react';
 
 const Dashboard = () => {
   const { steps } = useActivationSteps();
-  const { isAllCompleted } = useCheckActivationStatus();
+  const { isAllCompleted, isPublishingAllowed } = useCheckActivationStatus();
+  const { currentStore } = useStores();
   const navigate = useNavigate();
   const [isPublishing, setIsPublishing] = useState(false);
 
@@ -35,10 +38,16 @@ const Dashboard = () => {
   };
 
   const handlePublish = () => {
-    if (!isAllCompleted) {
-      toast.error('Complete todos os passos obrigatórios antes de publicar', {
-        description: 'Você precisa concluir todas as etapas de ativação.',
-      });
+    if (!isPublishingAllowed) {
+      if (currentStore?.isDemo) {
+        toast.error('Não é possível publicar a loja de demonstração', {
+          description: 'Crie uma loja real para publicar seu checkout.',
+        });
+      } else {
+        toast.error('Complete todos os passos obrigatórios antes de publicar', {
+          description: 'Você precisa concluir todas as etapas de ativação.',
+        });
+      }
       return;
     }
 
@@ -54,12 +63,40 @@ const Dashboard = () => {
   return (
     <DashboardLayout>
       <div className="max-w-5xl mx-auto">
+        {currentStore?.isDemo && (
+          <Card className="mb-6 border-amber-200 bg-amber-50/50">
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center text-amber-700">
+                <AlertTriangle className="mr-2 h-5 w-5 text-amber-500" />
+                Loja de Demonstração
+              </CardTitle>
+              <CardDescription>
+                Esta é uma loja de demonstração para você conhecer a plataforma. 
+                Nenhuma transação real será processada aqui.
+              </CardDescription>
+            </CardHeader>
+            <CardFooter>
+              <Button 
+                variant="outline" 
+                className="w-full border-amber-200 hover:bg-amber-100 text-amber-700"
+                onClick={() => navigate('/stores')}
+              >
+                Criar uma loja real
+              </Button>
+            </CardFooter>
+          </Card>
+        )}
+
         <div className="mb-8 text-center">
           <h1 className="text-2xl font-bold mb-2">
-            Para ativar seu checkout você precisa concluir todos os passos abaixo:
+            {currentStore?.isDemo 
+              ? "Conheça os recursos disponíveis na plataforma" 
+              : "Para ativar seu checkout você precisa concluir todos os passos abaixo:"}
           </h1>
           <p className="text-muted-foreground">
-            Complete todos os passos obrigatórios para desbloquear as funcionalidades completas do checkout.
+            {currentStore?.isDemo 
+              ? "Todas as funcionalidades estão habilitadas nesta demonstração para você explorar" 
+              : "Complete todos os passos obrigatórios para desbloquear as funcionalidades completas do checkout."}
           </p>
         </div>
 
@@ -90,14 +127,16 @@ const Dashboard = () => {
             </CardTitle>
             <CardDescription>
               {isAllCompleted
-                ? 'Todos os passos obrigatórios foram concluídos. Seu checkout está pronto para ser publicado.'
+                ? currentStore?.isDemo
+                  ? 'Todos os passos foram concluídos automaticamente nesta demonstração. Em uma loja real, você precisaria completar cada etapa.'
+                  : 'Todos os passos obrigatórios foram concluídos. Seu checkout está pronto para ser publicado.'
                 : 'Complete todos os passos obrigatórios listados acima para habilitar a publicação.'}
             </CardDescription>
           </CardHeader>
           <CardFooter>
             <Button
-              className={`w-full ${isAllCompleted ? 'bg-success hover:bg-success/90' : ''}`}
-              disabled={!isAllCompleted || isPublishing}
+              className={`w-full ${isPublishingAllowed ? 'bg-success hover:bg-success/90' : ''}`}
+              disabled={!isPublishingAllowed || isPublishing}
               onClick={handlePublish}
             >
               {isPublishing ? 'Publicando...' : 'Publicar Checkout'}
