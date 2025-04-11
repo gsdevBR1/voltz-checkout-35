@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -8,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SidebarLayout } from '@/components/Sidebar';
 import { Calendar, CreditCard, DollarSign, BarChart2, PieChart, Users, ArrowUpRight, 
-         TrendingUp, Activity, Percent, Package, ShoppingCart } from 'lucide-react';
+         TrendingUp, Activity, Percent, Package, ShoppingCart, Circle } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
          BarChart, Bar, Legend, PieChart as RechartPieChart, Pie, Cell } from 'recharts';
 import { format, subDays } from 'date-fns';
@@ -500,25 +499,37 @@ const Dashboard = () => {
           {/* Section 4: Realtime Behavior */}
           <Card className="mb-6">
             <CardHeader className="py-4">
-              <CardTitle className="flex items-center gap-2">
-                <Activity className="h-5 w-5 text-primary" />
-                Comportamento em Tempo Real
-                <span className="text-xs font-normal text-muted-foreground ml-2">
-                  Últimos 10 minutos
-                </span>
-              </CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
+                  <Activity className="h-5 w-5 text-primary" />
+                  Comportamento do Cliente
+                </CardTitle>
+                <div className="bg-secondary/50 text-muted-foreground px-4 py-1 rounded-full text-sm">
+                  10 minutos
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {realtimeData.map((step) => (
-                  <div key={step.name} className="space-y-1">
-                    <div className="flex justify-between text-sm">
-                      <span>{step.name}</span>
-                      <span className="font-medium">{step.value}</span>
+              <div className="flex flex-col space-y-8">
+                {/* Progress tracker */}
+                <div className="relative flex justify-between items-center">
+                  {/* Connector line */}
+                  <div className="absolute left-0 right-0 h-[2px] bg-gray-200 dark:bg-gray-700 top-1/2 transform -translate-y-1/2"></div>
+                  
+                  {/* Steps */}
+                  {realtimeData.map((step, index) => (
+                    <div key={step.name} className="relative flex flex-col items-center z-10">
+                      <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                        <Circle className="h-8 w-8 text-muted-foreground" />
+                      </div>
+                      
+                      <div className="mt-6 flex flex-col items-center">
+                        <span className="text-3xl font-bold">{step.value}</span>
+                        <span className="text-sm text-center mt-1 max-w-[100px]">{step.name}</span>
+                      </div>
                     </div>
-                    <Progress value={step.percentage} className="h-2" />
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -705,27 +716,4 @@ const Dashboard = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-1">
-                  <div className="grid grid-cols-2 gap-2 text-sm font-medium mb-2 text-muted-foreground">
-                    <div>Campanha</div>
-                    <div className="text-right">Conversões</div>
-                  </div>
-                  {topUtms.map((utm, index) => (
-                    <div 
-                      key={index} 
-                      className="grid grid-cols-2 gap-2 py-2 border-t border-border text-sm"
-                    >
-                      <div className="truncate">{utm.campaign}</div>
-                      <div className="text-right">{utm.total}</div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </main>
-      </div>
-    </SidebarLayout>
-  );
-};
-
-export default Dashboard;
+                  <div className="grid grid-cols-2 gap-2 text-sm font-medium mb-2 text-muted
