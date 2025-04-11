@@ -13,6 +13,7 @@ import BillingStep from "./pages/steps/BillingStep";
 import DomainStep from "./pages/steps/DomainStep";
 import GatewayStep from "./pages/steps/GatewayStep";
 import ShippingStep from "./pages/steps/ShippingStep";
+import ShopifyStep from "./pages/steps/ShopifyStep";
 import { ActivationStepsProvider } from "./contexts/ActivationStepsContextWithStores";
 import { StoreProvider } from "./contexts/StoreContext";
 import { ThemeProvider } from "./providers/ThemeProvider";
@@ -46,6 +47,7 @@ const App: React.FC = () => {
                   <Route path="/steps/domain" element={<DomainStep />} />
                   <Route path="/steps/gateway" element={<GatewayStep />} />
                   <Route path="/steps/shipping" element={<ShippingStep />} />
+                  <Route path="/steps/shopify" element={<ShopifyStep />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </BrowserRouter>

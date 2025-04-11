@@ -10,6 +10,7 @@ import { Progress } from '@/components/ui/progress';
 import { AlertTriangle, Plus } from 'lucide-react';
 import DashboardLayout from '@/components/DashboardLayout';
 import ActivationStepCard from '@/components/ActivationStepCard';
+import ShopifyCard from '@/components/ShopifyCard';
 
 const HomePage = () => {
   const { currentStore, isStoresLoading } = useStores();
@@ -41,6 +42,10 @@ const HomePage = () => {
       </DashboardLayout>
     );
   }
+
+  // Filter required and optional steps
+  const requiredSteps = steps.filter(step => step.isRequired);
+  const optionalSteps = steps.filter(step => !step.isRequired);
 
   return (
     <DashboardLayout>
@@ -92,8 +97,8 @@ const HomePage = () => {
           </div>
         </div>
 
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {steps.map((step) => (
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-8">
+          {requiredSteps.map((step) => (
             <ActivationStepCard
               key={step.id}
               step={step}
@@ -101,6 +106,13 @@ const HomePage = () => {
             />
           ))}
         </div>
+
+        {/* Optional steps section */}
+        {optionalSteps.length > 0 && (
+          <div className="mt-10">
+            <ShopifyCard />
+          </div>
+        )}
       </div>
     </DashboardLayout>
   );

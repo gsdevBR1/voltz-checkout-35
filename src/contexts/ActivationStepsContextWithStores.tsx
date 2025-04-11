@@ -48,6 +48,15 @@ const defaultSteps: ActivationStep[] = [
     isRequired: true,
     icon: 'truck',
     route: '/steps/shipping'
+  },
+  {
+    id: 'shopify',
+    name: 'Integração com Shopify',
+    description: 'Sincronize seus produtos e tema diretamente com a Shopify',
+    isCompleted: false,
+    isRequired: false,
+    icon: 'shopping-bag',
+    route: '/steps/shopify'
   }
 ];
 
