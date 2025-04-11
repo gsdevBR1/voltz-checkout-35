@@ -2,32 +2,28 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SidebarLayout } from '@/components/Sidebar';
 import { Calendar, CreditCard, DollarSign, BarChart2, PieChart, Users, ArrowUpRight, 
          TrendingUp, Activity, Percent, Package, ShoppingCart, Circle } from 'lucide-react';
-import { BarChart, Bar, Legend, PieChart as RechartPieChart, Pie, Cell, ResponsiveContainer, CartesianGrid, XAxis, YAxis, Tooltip } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+         BarChart, Bar, Legend, PieChart as RechartPieChart, Pie, Cell } from 'recharts';
 import { format, subDays } from 'date-fns';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import { ThemeToggle } from '@/components/ThemeToggle';
-import DashboardChart from '@/components/DashboardChart';
 
+// Mock data generation functions
 const generateRandomData = (days: number, min: number, max: number) => {
   return Array.from({ length: days }).map((_, i) => {
     const date = subDays(new Date(), days - i - 1);
-    const value = Math.floor(Math.random() * (max - min + 1)) + min;
-    const pixValue = Math.floor(value * (Math.random() * 0.5 + 0.3));
-    const abandonedValue = Math.floor(value * (Math.random() * 0.4 + 0.2));
-    
     return {
       date: format(date, 'dd/MM'),
-      value,
-      pixValue,
-      abandonedValue,
+      value: Math.floor(Math.random() * (max - min + 1)) + min,
     };
   });
 };
@@ -102,6 +98,7 @@ const Dashboard = () => {
   const [startDate, setStartDate] = useState<Date>(subDays(new Date(), 7));
   const [endDate, setEndDate] = useState<Date>(new Date());
   const [gateway, setGateway] = useState<string>('all');
+  const [chartMetric, setChartMetric] = useState<string>('faturamentoLiquido');
   const [chartData, setChartData] = useState(generateRandomData(7, 5000, 20000));
   const [kpiData, setKpiData] = useState({
     faturamento: Math.floor(Math.random() * 10000) + 10000,
@@ -116,6 +113,17 @@ const Dashboard = () => {
   const [topProducts, setTopProducts] = useState(generateTopProducts());
   const [topUtms, setTopUtms] = useState(generateTopUtms());
   
+  // Calculate ticket medio when transacoes changes
+  useEffect(() => {
+    setKpiData(prev => ({
+      ...prev,
+      ticketMedio: prev.transacoes > 0 
+        ? Math.round(prev.faturamento / prev.transacoes) 
+        : 0
+    }));
+  }, [kpiData.faturamento, kpiData.transacoes]);
+  
+  // Update data when filters change
   useEffect(() => {
     let days = 7;
     
@@ -136,31 +144,36 @@ const Dashboard = () => {
         days = 90;
         break;
       case 'custom':
+        // Calculate days between startDate and endDate
         const diffTime = Math.abs(endDate.getTime() - startDate.getTime());
         days = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
         break;
     }
     
+    // Update chart data based on filters
     setChartData(generateRandomData(days, 5000, 20000));
     
+    // Update KPIs
     setKpiData({
       faturamento: Math.floor(Math.random() * 10000 * days/7) + 10000,
       transacoes: Math.floor(Math.random() * 100 * days/7) + 100,
       conversaoCheckout: Math.floor(Math.random() * 20) + 60,
       conversaoGateway: Math.floor(Math.random() * 20) + 40,
-      ticketMedio: 0,
+      ticketMedio: 0, // Will be calculated in the useEffect above
     });
     
+    // Update other data
     setFunnelData(generateFunnelData());
     setPaymentData(generatePaymentMethodData());
     setTopProducts(generateTopProducts());
     setTopUtms(generateTopUtms());
   }, [dateRange, gateway, startDate, endDate]);
   
+  // Simulate realtime updates
   useEffect(() => {
     const interval = setInterval(() => {
       setRealtimeData(generateFunnelData());
-    }, 10 * 60 * 1000);
+    }, 10 * 60 * 1000); // Update every 10 minutes
     
     return () => clearInterval(interval);
   }, []);
@@ -191,6 +204,7 @@ const Dashboard = () => {
         setStartDate(subDays(today, 90));
         setEndDate(today);
         break;
+      // custom will be handled by the date picker
     }
   };
   
@@ -218,6 +232,20 @@ const Dashboard = () => {
     }
   };
   
+  const getChartMetricLabel = () => {
+    const metrics: Record<string, string> = {
+      faturamentoBruto: 'Faturamento Bruto',
+      faturamentoLiquido: 'Faturamento Líquido',
+      pixGerados: 'Quantidade de Pix gerados',
+      pixPagos: 'Quantidade de Pix pagos',
+      carrinhosAbandonados: 'Carrinhos abandonados',
+      aprovacaoCredito: 'Aprovação no Crédito',
+      chargebacks: 'Chargebacks'
+    };
+    
+    return metrics[chartMetric] || 'Faturamento Líquido';
+  };
+  
   return (
     <SidebarLayout>
       <div className="min-h-screen bg-background">
@@ -233,6 +261,7 @@ const Dashboard = () => {
         </header>
         
         <main className="container mx-auto px-4 py-6">
+          {/* Section 1: KPIs */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
             <Card>
               <CardHeader className="py-3">
@@ -300,6 +329,7 @@ const Dashboard = () => {
             </Card>
           </div>
           
+          {/* Section 2: Filters */}
           <Card className="mb-6">
             <CardContent className="py-4">
               <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
@@ -413,25 +443,100 @@ const Dashboard = () => {
             </CardContent>
           </Card>
           
+          {/* Section 3: Dynamic Chart */}
           <Card className="mb-6">
             <CardHeader className="py-4 flex flex-row items-center justify-between">
               <CardTitle className="flex items-center gap-2">
                 <BarChart2 className="h-5 w-5 text-primary" />
-                Análise de Dados
+                {getChartMetricLabel()}
                 <span className="text-xs font-normal text-muted-foreground ml-2">
                   {getDateRangeLabel()}
                 </span>
               </CardTitle>
+              <Select value={chartMetric} onValueChange={setChartMetric}>
+                <SelectTrigger className="w-[220px]">
+                  <SelectValue placeholder="Selecione a métrica" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="faturamentoBruto">Faturamento Bruto</SelectItem>
+                  <SelectItem value="faturamentoLiquido">Faturamento Líquido</SelectItem>
+                  <SelectItem value="pixGerados">Quantidade de Pix gerados</SelectItem>
+                  <SelectItem value="pixPagos">Quantidade de Pix pagos</SelectItem>
+                  <SelectItem value="carrinhosAbandonados">Carrinhos abandonados</SelectItem>
+                  <SelectItem value="aprovacaoCredito">Aprovação no Crédito</SelectItem>
+                  <SelectItem value="chargebacks">Chargebacks</SelectItem>
+                </SelectContent>
+              </Select>
             </CardHeader>
             <CardContent className="pt-0">
-              <DashboardChart 
-                data={chartData}
-                dateRangeLabel={getDateRangeLabel()}
-                formatCurrency={formatCurrency}
-              />
+              <div className="h-80 w-full overflow-hidden rounded-md">
+                <ChartContainer config={{ data: { theme: { light: '#9b87f5', dark: '#8B5CF6' } } }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart 
+                      data={chartData} 
+                      margin={{ top: 20, right: 30, left: 10, bottom: 10 }}
+                    >
+                      <defs>
+                        <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.8}/>
+                          <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0.1}/>
+                        </linearGradient>
+                      </defs>
+                      <XAxis 
+                        dataKey="date" 
+                        axisLine={false}
+                        tickLine={false}
+                        dy={10}
+                        tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                        tickMargin={10}
+                      />
+                      <YAxis 
+                        axisLine={false}
+                        tickLine={false}
+                        dx={-10}
+                        tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                        tickFormatter={(value) => 
+                          new Intl.NumberFormat('pt-BR', {
+                            notation: 'compact',
+                            compactDisplay: 'short',
+                            maximumFractionDigits: 1
+                          }).format(value)
+                        }
+                      />
+                      <CartesianGrid 
+                        strokeDasharray="3 3" 
+                        className="stroke-muted/50" 
+                        vertical={false} 
+                        horizontal={true}
+                      />
+                      <ChartTooltip 
+                        cursor={{ stroke: 'hsl(var(--muted-foreground))', strokeWidth: 1, strokeDasharray: '5 5' }}
+                        content={
+                          <ChartTooltipContent 
+                            formatter={(value) => [
+                              formatCurrency(Number(value)), 
+                              getChartMetricLabel()
+                            ]} 
+                          />
+                        } 
+                      />
+                      <Area 
+                        type="monotone" 
+                        dataKey="value" 
+                        stroke="hsl(var(--primary))" 
+                        fillOpacity={1} 
+                        fill="url(#colorValue)" 
+                        strokeWidth={2}
+                        activeDot={{ r: 6, strokeWidth: 0, fill: 'hsl(var(--primary))' }}
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </ChartContainer>
+              </div>
             </CardContent>
           </Card>
           
+          {/* Section 4: Realtime Behavior */}
           <Card className="mb-6">
             <CardHeader className="py-4">
               <div className="flex items-center justify-between">
@@ -446,13 +551,18 @@ const Dashboard = () => {
             </CardHeader>
             <CardContent>
               <div className="flex flex-col space-y-8">
+                {/* Progress tracker */}
                 <div className="relative flex justify-between items-center">
+                  {/* Connector line */}
                   <div className="absolute left-0 right-0 h-[2px] bg-gray-200 dark:bg-gray-700 top-1/2 transform -translate-y-1/2"></div>
+                  
+                  {/* Steps */}
                   {realtimeData.map((step, index) => (
                     <div key={step.name} className="relative flex flex-col items-center z-10">
                       <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
                         <Circle className="h-8 w-8 text-muted-foreground" />
                       </div>
+                      
                       <div className="mt-6 flex flex-col items-center">
                         <span className="text-3xl font-bold">{step.value}</span>
                         <span className="text-sm text-center mt-1 max-w-[100px]">{step.name}</span>
@@ -464,6 +574,7 @@ const Dashboard = () => {
             </CardContent>
           </Card>
           
+          {/* Section 5: Conversion Funnel */}
           <Card className="mb-6">
             <CardHeader className="py-4">
               <CardTitle className="flex items-center gap-2">
@@ -507,6 +618,7 @@ const Dashboard = () => {
             </CardContent>
           </Card>
           
+          {/* Section 6: Payment Methods Conversion */}
           <Card className="mb-6">
             <CardHeader className="py-4">
               <CardTitle className="flex items-center gap-2">
@@ -594,6 +706,7 @@ const Dashboard = () => {
             </CardContent>
           </Card>
           
+          {/* Section 7: Products and UTMs */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
             <Card>
               <CardHeader className="py-4">
