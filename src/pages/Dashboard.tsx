@@ -19,6 +19,7 @@ import { CustomizeDashboardDialog, availableKpis } from '@/components/dashboard/
 import { useStores } from '@/contexts/StoreContext';
 import { FunnelChart } from '@/components/ui/funnel-chart';
 import { InsightsAdvanced } from '@/components/dashboard/InsightsAdvanced';
+import CustomerBehavior from '@/components/dashboard/CustomerBehavior';
 
 const generateRandomData = (days: number, min: number, max: number) => {
   return Array.from({ length: days }).map((_, i) => {
@@ -445,121 +446,6 @@ const Dashboard = () => {
           </div>
           
           <Card className="mb-6">
-            <CardContent className="py-4">
-              <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
-                <div className="w-full md:w-auto">
-                  <label className="text-sm font-medium mb-1 block">Gateway</label>
-                  <Select value={gateway} onValueChange={setGateway}>
-                    <SelectTrigger className="w-full md:w-[180px]">
-                      <SelectValue placeholder="Selecione o gateway" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todos</SelectItem>
-                      <SelectItem value="pagarme">Pagar.me</SelectItem>
-                      <SelectItem value="mercadopago">MercadoPago</SelectItem>
-                      <SelectItem value="iugu">Iugu</SelectItem>
-                      <SelectItem value="shopify">Shopify Payments</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className="w-full md:w-auto">
-                  <label className="text-sm font-medium mb-1 block">Período</label>
-                  <div className="flex gap-2 flex-wrap">
-                    <Button 
-                      size="sm" 
-                      variant={dateRange === 'today' ? 'default' : 'outline'}
-                      onClick={() => handleDateRangeChange('today')}
-                    >
-                      Hoje
-                    </Button>
-                    <Button 
-                      size="sm" 
-                      variant={dateRange === 'yesterday' ? 'default' : 'outline'}
-                      onClick={() => handleDateRangeChange('yesterday')}
-                    >
-                      Ontem
-                    </Button>
-                    <Button 
-                      size="sm" 
-                      variant={dateRange === '7days' ? 'default' : 'outline'}
-                      onClick={() => handleDateRangeChange('7days')}
-                    >
-                      7 dias
-                    </Button>
-                    <Button 
-                      size="sm" 
-                      variant={dateRange === '30days' ? 'default' : 'outline'}
-                      onClick={() => handleDateRangeChange('30days')}
-                    >
-                      30 dias
-                    </Button>
-                    <Button 
-                      size="sm" 
-                      variant={dateRange === '90days' ? 'default' : 'outline'}
-                      onClick={() => handleDateRangeChange('90days')}
-                    >
-                      90 dias
-                    </Button>
-                    
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button 
-                          size="sm" 
-                          variant={dateRange === 'custom' ? 'default' : 'outline'}
-                          className="flex gap-2 items-center"
-                        >
-                          <Calendar className="h-4 w-4" />
-                          Personalizado
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <div className="px-4 py-2 border-b border-border">
-                          <h4 className="text-sm font-medium">Selecione o período</h4>
-                        </div>
-                        <div className="p-4">
-                          <div className="flex gap-2 mb-2">
-                            <div>
-                              <p className="text-xs mb-1">Data inicial</p>
-                              <CalendarComponent
-                                mode="single"
-                                selected={startDate}
-                                onSelect={(date) => {
-                                  if (date) {
-                                    setStartDate(date);
-                                    setDateRange('custom');
-                                  }
-                                }}
-                                initialFocus
-                                className="pointer-events-auto"
-                              />
-                            </div>
-                            <div>
-                              <p className="text-xs mb-1">Data final</p>
-                              <CalendarComponent
-                                mode="single"
-                                selected={endDate}
-                                onSelect={(date) => {
-                                  if (date) {
-                                    setEndDate(date);
-                                    setDateRange('custom');
-                                  }
-                                }}
-                                initialFocus
-                                className="pointer-events-auto"
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      </PopoverContent>
-                    </Popover>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card className="mb-6">
             <CardHeader className="py-4 flex flex-row items-center justify-between">
               <CardTitle className="flex items-center gap-2">
                 {isHourlyView ? (
@@ -681,33 +567,13 @@ const Dashboard = () => {
           
           <Card className="mb-6">
             <CardHeader className="py-4">
-              <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center gap-2">
-                  <Activity className="h-5 w-5 text-primary" />
-                  Comportamento do Cliente
-                </CardTitle>
-                <div className="bg-secondary/50 text-muted-foreground px-4 py-1 rounded-full text-sm">
-                  10 minutos
-                </div>
-              </div>
+              <CardTitle className="flex items-center gap-2">
+                <Activity className="h-5 w-5 text-primary" />
+                Comportamento do Cliente
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex flex-col space-y-8">
-                <div className="relative flex justify-between items-center">
-                  <div className="absolute left-0 right-0 h-[2px] bg-gray-200 dark:bg-gray-700 top-1/2 transform -translate-y-1/2"></div>
-                  {realtimeData.map((step) => (
-                    <div key={step.name} className="relative flex flex-col items-center z-10">
-                      <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
-                        <Circle className="h-8 w-8 text-muted-foreground" />
-                      </div>
-                      <div className="mt-6 flex flex-col items-center">
-                        <span className="text-3xl font-bold">{step.value}</span>
-                        <span className="text-sm text-center mt-1 max-w-[100px]">{step.name}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              <CustomerBehavior refreshInterval={600} />
             </CardContent>
           </Card>
           
@@ -759,7 +625,7 @@ const Dashboard = () => {
                     </div>
                   </div>
                   
-                  <div className="rounded-lg bg-[#eef3fc] dark:bg-blue-950/20 p-4 border-l-4 border-blue-500">
+                  <div className="rounded-lg bg-[#dee7f8] dark:bg-blue-950/20 p-4 border-l-4 border-blue-500">
                     <div className="flex justify-between items-center">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full bg-[#dee7f8] dark:bg-blue-900/20 flex items-center justify-center">
@@ -785,7 +651,7 @@ const Dashboard = () => {
                     </div>
                   </div>
                   
-                  <div className="rounded-lg bg-[#f6f1ff] dark:bg-purple-950/20 p-4 border-l-4 border-purple-500">
+                  <div className="rounded-lg bg-[#ede4ff] dark:bg-purple-950/20 p-4 border-l-4 border-purple-500">
                     <div className="flex justify-between items-center">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full bg-[#ede4ff] dark:bg-purple-900/20 flex items-center justify-center">
