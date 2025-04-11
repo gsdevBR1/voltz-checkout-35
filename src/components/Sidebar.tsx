@@ -30,7 +30,8 @@ import {
   SidebarTrigger,
   SidebarMenuSub,
   SidebarMenuSubItem,
-  SidebarMenuSubButton
+  SidebarMenuSubButton,
+  useSidebar
 } from '@/components/ui/sidebar';
 
 interface SidebarProps {
@@ -40,6 +41,7 @@ interface SidebarProps {
 export const AppSidebar: React.FC<SidebarProps> = ({ className }) => {
   const location = useLocation();
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
+  const { state } = useSidebar();
   
   const menuItems = [
     {
@@ -88,6 +90,17 @@ export const AppSidebar: React.FC<SidebarProps> = ({ className }) => {
   const toggleSection = (path: string) => {
     setOpenSections(prev => ({ ...prev, [path]: !prev[path] }));
   };
+
+  // Check if a menu item is active
+  const isActive = (path: string): boolean => {
+    return location.pathname === path || location.pathname.startsWith(path);
+  };
+  
+  // Style for active icon
+  const activeIconClass = "text-primary transition-all duration-200 ease-in-out transform scale-110";
+  
+  // Style for inactive icon
+  const inactiveIconClass = "text-muted-foreground transition-all duration-200 ease-in-out";
   
   return (
     <Sidebar className={className}>
@@ -113,18 +126,26 @@ export const AppSidebar: React.FC<SidebarProps> = ({ className }) => {
                   <div className="flex w-full">
                     <CollapsibleTrigger asChild className="w-full">
                       <SidebarMenuButton
-                        isActive={location.pathname.startsWith(item.path)}
+                        isActive={isActive(item.path)}
                         tooltip={item.title}
-                        className="flex justify-between"
+                        className="flex justify-between group"
                       >
                         <div className="flex items-center">
-                          <item.icon className="h-5 w-5 mr-2" />
+                          <item.icon 
+                            className={cn(
+                              "h-5 w-5 mr-2",
+                              isActive(item.path) ? activeIconClass : inactiveIconClass,
+                              "group-hover:scale-110 group-hover:text-primary/80"
+                            )} 
+                            aria-current={isActive(item.path) ? "page" : undefined}
+                          />
                           <span>{item.title}</span>
                         </div>
                         <ChevronDown 
                           className={cn(
                             "h-4 w-4 transition-transform duration-200",
-                            openSections[item.path] ? "transform rotate-180" : ""
+                            openSections[item.path] ? "transform rotate-180" : "",
+                            isActive(item.path) && "text-primary"
                           )} 
                         />
                       </SidebarMenuButton>
@@ -138,8 +159,15 @@ export const AppSidebar: React.FC<SidebarProps> = ({ className }) => {
                             asChild
                             isActive={location.pathname === subItem.path}
                           >
-                            <Link to={subItem.path}>
-                              <subItem.icon className="h-4 w-4" />
+                            <Link to={subItem.path} className="group">
+                              <subItem.icon 
+                                className={cn(
+                                  "h-4 w-4",
+                                  location.pathname === subItem.path ? activeIconClass : inactiveIconClass,
+                                  "group-hover:scale-110 group-hover:text-primary/80"
+                                )}
+                                aria-current={location.pathname === subItem.path ? "page" : undefined}
+                              />
                               <span>{subItem.title}</span>
                             </Link>
                           </SidebarMenuSubButton>
@@ -154,8 +182,16 @@ export const AppSidebar: React.FC<SidebarProps> = ({ className }) => {
                   isActive={location.pathname === item.path}
                   tooltip={item.title}
                 >
-                  <Link to={item.path} className="w-full">
-                    <item.icon className="h-5 w-5" />
+                  <Link to={item.path} className="w-full group">
+                    <item.icon 
+                      className={cn(
+                        "h-5 w-5",
+                        location.pathname === item.path ? activeIconClass : inactiveIconClass,
+                        "group-hover:scale-110 group-hover:text-primary/80",
+                        state === "collapsed" && "mx-auto"
+                      )}
+                      aria-current={location.pathname === item.path ? "page" : undefined}
+                    />
                     <span>{item.title}</span>
                   </Link>
                 </SidebarMenuButton>
