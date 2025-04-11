@@ -11,6 +11,7 @@ import {
   SidebarMenuButton,
   SidebarProvider,
   SidebarFooter,
+  SidebarHeader,
 } from '@/components/ui/sidebar';
 import { StoreSelector } from '@/components/StoreSelector';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -37,10 +38,17 @@ export const AppSidebar: React.FC<SidebarProps> = ({ className }) => {
   
   return (
     <Sidebar className={className}>
-      <SidebarContent>
-        <div className="px-4 py-6">
+      <SidebarHeader>
+        <div className="flex items-center justify-between w-full px-4 py-6">
           <h2 className="text-xl font-bold text-primary">voltz.checkout</h2>
+          <Avatar className="h-8 w-8">
+            <AvatarFallback className="bg-primary/10 text-primary">
+              <User className="h-4 w-4" />
+            </AvatarFallback>
+          </Avatar>
         </div>
+      </SidebarHeader>
+      <SidebarContent>
         <SidebarMenu>
           {menuItems.map((item) => (
             <SidebarMenuItem key={item.path}>
