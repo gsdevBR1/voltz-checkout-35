@@ -10,7 +10,9 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
   SidebarProvider,
+  SidebarFooter,
 } from '@/components/ui/sidebar';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 interface SidebarProps {
   className?: string;
@@ -55,6 +57,9 @@ export const AppSidebar: React.FC<SidebarProps> = ({ className }) => {
           ))}
         </SidebarMenu>
       </SidebarContent>
+      <SidebarFooter className="px-4 py-3 border-t border-border">
+        <ThemeToggle />
+      </SidebarFooter>
     </Sidebar>
   );
 };
