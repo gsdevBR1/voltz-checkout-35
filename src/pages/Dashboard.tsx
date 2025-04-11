@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -8,10 +7,10 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SidebarLayout } from '@/components/Sidebar';
 import { Calendar, CreditCard, DollarSign, BarChart2, PieChart, Users, ArrowUpRight, 
-         TrendingUp, Activity, Percent, Package, ShoppingCart, Circle, Settings } from 'lucide-react';
+         TrendingUp, Activity, Percent, Package, ShoppingCart, Circle, Settings, Clock } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
          BarChart, Bar, Legend, PieChart as RechartPieChart, Pie, Cell } from 'recharts';
-import { format, subDays } from 'date-fns';
+import { format, subDays, addHours, startOfDay, endOfDay } from 'date-fns';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
@@ -25,6 +24,26 @@ const generateRandomData = (days: number, min: number, max: number) => {
     return {
       date: format(date, 'dd/MM'),
       value: Math.floor(Math.random() * (max - min + 1)) + min,
+    };
+  });
+};
+
+const generateHourlyData = (isToday: boolean, min: number, max: number) => {
+  const baseDate = isToday ? new Date() : subDays(new Date(), 1);
+  const currentHour = baseDate.getHours();
+  
+  return Array.from({ length: 24 }).map((_, i) => {
+    const hourValue = isToday && i > currentHour 
+      ? 0 // Futuras horas hoje terão valor zero
+      : Math.floor(Math.random() * (max - min + 1)) + min;
+    
+    const hourDate = startOfDay(baseDate);
+    const dateWithHour = addHours(hourDate, i);
+    
+    return {
+      date: format(dateWithHour, 'HH:00'),
+      hour: i,
+      value: hourValue,
     };
   });
 };
@@ -101,6 +120,7 @@ const Dashboard = () => {
   const [gateway, setGateway] = useState<string>('all');
   const [chartMetric, setChartMetric] = useState<string>('faturamentoLiquido');
   const [chartData, setChartData] = useState(generateRandomData(7, 5000, 20000));
+  const [isHourlyView, setIsHourlyView] = useState(false);
   const [kpiData, setKpiData] = useState({
     faturamento: Math.floor(Math.random() * 10000) + 10000,
     transacoes: Math.floor(Math.random() * 100) + 100,
@@ -130,13 +150,16 @@ const Dashboard = () => {
   
   useEffect(() => {
     let days = 7;
+    let isOneDay = false;
     
     switch(dateRange) {
       case 'today':
         days = 1;
+        isOneDay = true;
         break;
       case 'yesterday':
         days = 1;
+        isOneDay = true;
         break;
       case '7days':
         days = 7;
@@ -150,10 +173,19 @@ const Dashboard = () => {
       case 'custom':
         const diffTime = Math.abs(endDate.getTime() - startDate.getTime());
         days = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        isOneDay = days === 1;
         break;
     }
     
-    setChartData(generateRandomData(days, 5000, 20000));
+    setIsHourlyView(isOneDay);
+    
+    if (isOneDay) {
+      const isToday = dateRange === 'today' || 
+        (dateRange === 'custom' && format(startDate, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd'));
+      setChartData(generateHourlyData(isToday, 1000, 8000));
+    } else {
+      setChartData(generateRandomData(days, 5000, 20000));
+    }
     
     setKpiData({
       faturamento: Math.floor(Math.random() * 10000 * days/7) + 10000,
@@ -249,11 +281,9 @@ const Dashboard = () => {
   
   const getActiveKpis = () => {
     if (!currentStore || !currentStore.dashboardSettings?.kpis) {
-      // Return default active KPIs if store has no settings
       return availableKpis.filter(kpi => kpi.default).map(kpi => kpi.id);
     }
     
-    // Otherwise return KPIs that are set to true in store settings
     return Object.entries(currentStore.dashboardSettings.kpis)
       .filter(([_, isActive]) => isActive)
       .map(([kpiId]) => kpiId);
@@ -500,6 +530,7 @@ const Dashboard = () => {
                                   }
                                 }}
                                 initialFocus
+                                className="pointer-events-auto"
                               />
                             </div>
                             <div>
@@ -514,6 +545,7 @@ const Dashboard = () => {
                                   }
                                 }}
                                 initialFocus
+                                className="pointer-events-auto"
                               />
                             </div>
                           </div>
@@ -530,11 +562,20 @@ const Dashboard = () => {
           <Card className="mb-6">
             <CardHeader className="py-4 flex flex-row items-center justify-between">
               <CardTitle className="flex items-center gap-2">
-                <BarChart2 className="h-5 w-5 text-primary" />
+                {isHourlyView ? (
+                  <Clock className="h-5 w-5 text-primary" />
+                ) : (
+                  <BarChart2 className="h-5 w-5 text-primary" />
+                )}
                 {getChartMetricLabel()}
                 <span className="text-xs font-normal text-muted-foreground ml-2">
                   {getDateRangeLabel()}
                 </span>
+                {isHourlyView && (
+                  <span className="text-xs font-normal text-muted-foreground ml-2 bg-secondary/50 px-2 py-0.5 rounded-full">
+                    Visualização por hora
+                  </span>
+                )}
               </CardTitle>
               <Select value={chartMetric} onValueChange={setChartMetric}>
                 <SelectTrigger className="w-[220px]">
@@ -576,7 +617,7 @@ const Dashboard = () => {
                       tick={{ fill: 'hsl(var(--muted-foreground))' }}
                       tickMargin={10}
                       label={{ 
-                        value: 'Período', 
+                        value: isHourlyView ? 'Hora' : 'Período', 
                         position: 'insideBottomRight', 
                         offset: -10,
                         fill: 'hsl(var(--muted-foreground))'
