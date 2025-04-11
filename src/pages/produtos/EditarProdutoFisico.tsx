@@ -34,7 +34,6 @@ import {
 } from '@/components/ui/dialog';
 import { Product, ProductFormData } from '@/types/product';
 
-// Mock data for demonstration purposes
 const mockProducts: Product[] = [
   {
     id: '1',
@@ -103,7 +102,6 @@ const EditarProdutoFisico: React.FC = () => {
   const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
   const [dropTargetIndex, setDropTargetIndex] = useState<number | null>(null);
 
-  // Initialize form with default values
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -127,19 +125,16 @@ const EditarProdutoFisico: React.FC = () => {
   });
 
   useEffect(() => {
-    // In a real app, this would be an API call
     const fetchProduct = () => {
-      // Find product in mock data
       const foundProduct = mockProducts.find(p => p.id === id);
       
       if (foundProduct) {
         setProduct(foundProduct);
         
-        // Populate form with product data
         form.reset({
           name: foundProduct.name,
           description: foundProduct.description,
-          price: foundProduct.price / 100, // Convert from cents to real
+          price: foundProduct.price / 100,
           costPrice: foundProduct.costPrice ? foundProduct.costPrice / 100 : undefined,
           comparePrice: foundProduct.comparePrice ? foundProduct.comparePrice / 100 : undefined,
           sku: foundProduct.sku || '',
@@ -155,7 +150,6 @@ const EditarProdutoFisico: React.FC = () => {
           variantValues: foundProduct.variantValues || [],
         });
         
-        // Setup images
         if (foundProduct.images && foundProduct.images.length > 0) {
           setImages(foundProduct.images.map(url => ({ url })));
         }
@@ -169,10 +163,9 @@ const EditarProdutoFisico: React.FC = () => {
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     
-    // Validate file size and type
     const validFiles = files.filter(file => {
       const isValidType = ['image/jpeg', 'image/png'].includes(file.type);
-      const isValidSize = file.size <= 2 * 1024 * 1024; // 2MB
+      const isValidSize = file.size <= 2 * 1024 * 1024;
       
       if (!isValidType) {
         toast({
@@ -203,14 +196,12 @@ const EditarProdutoFisico: React.FC = () => {
       setImages(prev => [...prev, ...newImages]);
     }
     
-    // Reset input value to allow uploading the same file again
     e.target.value = '';
   };
 
   const removeImage = (index: number) => {
     const updatedImages = [...images];
     
-    // If this was a new image with an object URL, revoke it to prevent memory leaks
     if (updatedImages[index].isNew && updatedImages[index].url.startsWith('blob:')) {
       URL.revokeObjectURL(updatedImages[index].url);
     }
@@ -232,10 +223,7 @@ const EditarProdutoFisico: React.FC = () => {
       const updatedImages = [...images];
       const draggedImage = updatedImages[draggingIndex];
       
-      // Remove dragged item
       updatedImages.splice(draggingIndex, 1);
-      
-      // Insert at new position
       updatedImages.splice(dropTargetIndex, 0, draggedImage);
       
       setImages(updatedImages);
@@ -270,7 +258,6 @@ const EditarProdutoFisico: React.FC = () => {
   };
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
-    // Validate at least one image
     if (images.length === 0) {
       toast({
         title: "Imagens obrigatórias",
@@ -280,7 +267,6 @@ const EditarProdutoFisico: React.FC = () => {
       return;
     }
 
-    // Validate variants if hasVariants is true
     if (values.hasVariants) {
       if (!values.variantName || values.variantName.trim() === '') {
         toast({
@@ -302,20 +288,17 @@ const EditarProdutoFisico: React.FC = () => {
       }
     }
 
-    // In a real app, we would upload the images and save the product data
     toast({
       title: "Produto atualizado",
       description: "As alterações foram salvas com sucesso.",
     });
 
-    // Redirect to product list
     navigate('/produtos');
   };
 
   const handleDelete = () => {
     setDeleting(true);
     
-    // In a real app, this would be an API call to delete the product
     setTimeout(() => {
       setDeleting(false);
       setDeleteConfirmOpen(false);
@@ -355,7 +338,7 @@ const EditarProdutoFisico: React.FC = () => {
   return (
     <DashboardLayout>
       <div className="max-w-4xl mx-auto px-8 py-6">
-        <div className="sticky top-16 z-10 bg-background pb-4 border-b mb-6">
+        <div className="bg-background pb-4 border-b mb-6">
           <div className="flex items-center mb-4">
             <Button variant="ghost" onClick={() => navigate('/produtos')} className="mr-2">
               <ArrowLeft className="w-4 h-4 mr-2" />
@@ -367,7 +350,6 @@ const EditarProdutoFisico: React.FC = () => {
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            {/* Informações Básicas */}
             <Card>
               <CardHeader>
                 <CardTitle>Informações Básicas</CardTitle>
@@ -410,7 +392,6 @@ const EditarProdutoFisico: React.FC = () => {
               </CardContent>
             </Card>
 
-            {/* Imagens do Produto */}
             <Card>
               <CardHeader>
                 <CardTitle>Imagens do Produto</CardTitle>
@@ -501,7 +482,6 @@ const EditarProdutoFisico: React.FC = () => {
               </CardContent>
             </Card>
 
-            {/* Variantes */}
             <Card>
               <CardHeader>
                 <CardTitle>Variantes do Produto</CardTitle>
@@ -591,7 +571,6 @@ const EditarProdutoFisico: React.FC = () => {
               </CardContent>
             </Card>
 
-            {/* Preços */}
             <Card>
               <CardHeader>
                 <CardTitle>Preços</CardTitle>
@@ -691,7 +670,6 @@ const EditarProdutoFisico: React.FC = () => {
               </CardContent>
             </Card>
 
-            {/* Estoque */}
             <Card>
               <CardHeader>
                 <CardTitle>Estoque</CardTitle>
@@ -790,7 +768,6 @@ const EditarProdutoFisico: React.FC = () => {
               </CardContent>
             </Card>
 
-            {/* Peso e Dimensões */}
             <Card>
               <CardHeader>
                 <CardTitle>Peso e Dimensões</CardTitle>
@@ -880,7 +857,6 @@ const EditarProdutoFisico: React.FC = () => {
               </CardContent>
             </Card>
 
-            {/* Form Actions */}
             <div className="pt-6 border-t bg-background">
               <div className="flex justify-between items-center">
                 <div>
@@ -911,7 +887,6 @@ const EditarProdutoFisico: React.FC = () => {
           </form>
         </Form>
 
-        {/* Delete Confirmation Dialog */}
         <Dialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
           <DialogContent>
             <DialogHeader>
