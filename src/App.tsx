@@ -1,25 +1,36 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
+import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
+import BillingStep from "./pages/steps/BillingStep";
+import DomainStep from "./pages/steps/DomainStep";
+import GatewayStep from "./pages/steps/GatewayStep";
+import ShippingStep from "./pages/steps/ShippingStep";
+import { ActivationStepsProvider } from "./contexts/ActivationStepsContext";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
+      <ActivationStepsProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/steps/billing" element={<BillingStep />} />
+            <Route path="/steps/domain" element={<DomainStep />} />
+            <Route path="/steps/gateway" element={<GatewayStep />} />
+            <Route path="/steps/shipping" element={<ShippingStep />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </ActivationStepsProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
