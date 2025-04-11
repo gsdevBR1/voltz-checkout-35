@@ -29,14 +29,14 @@ const StepIcon = ({ id }: { id: string }) => {
 const StatusIcon = ({ isCompleted }: { isCompleted: boolean }) => {
   return isCompleted ? 
     <CheckCircle className="h-5 w-5 text-success" /> : 
-    <Circle className="h-5 w-5 text-gray-300" />;
+    <Circle className="h-5 w-5 text-gray-300 dark:text-gray-600" />;
 };
 
 const ActivationStepCard: React.FC<ActivationStepCardProps> = ({ step, onClick }) => {
   return (
     <Card className={cn(
       "transition-all duration-200 hover:shadow-md",
-      step.isCompleted && "border-success/30 bg-success/5"
+      step.isCompleted && "border-success/30 bg-success/5 dark:bg-success/10 dark:border-success/20"
     )}>
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
@@ -58,7 +58,7 @@ const ActivationStepCard: React.FC<ActivationStepCardProps> = ({ step, onClick }
           variant={step.isCompleted ? "outline" : "default"} 
           className={cn(
             "w-full",
-            step.isCompleted && "border-success text-success hover:bg-success/10"
+            step.isCompleted && "border-success text-success hover:bg-success/10 dark:hover:bg-success/20"
           )}
           onClick={onClick}
         >

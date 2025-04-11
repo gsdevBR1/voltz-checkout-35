@@ -64,13 +64,13 @@ const Dashboard = () => {
     <DashboardLayout>
       <div className="max-w-5xl mx-auto">
         {currentStore?.isDemo && (
-          <Card className="mb-6 border-amber-200 bg-amber-50/50">
+          <Card className="mb-6 bg-amber-50/50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800/50">
             <CardHeader className="pb-2">
-              <CardTitle className="flex items-center text-amber-700">
-                <AlertTriangle className="mr-2 h-5 w-5 text-amber-500" />
+              <CardTitle className="flex items-center text-amber-700 dark:text-amber-400">
+                <AlertTriangle className="mr-2 h-5 w-5 text-amber-500 dark:text-amber-400" />
                 Loja de Demonstração
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-amber-700/80 dark:text-amber-400/80">
                 Esta é uma loja de demonstração para você conhecer a plataforma. 
                 Nenhuma transação real será processada aqui.
               </CardDescription>
@@ -78,7 +78,7 @@ const Dashboard = () => {
             <CardFooter>
               <Button 
                 variant="outline" 
-                className="w-full border-amber-200 hover:bg-amber-100 text-amber-700"
+                className="w-full border-amber-200 dark:border-amber-800/50 hover:bg-amber-100 dark:hover:bg-amber-950/50 text-amber-700 dark:text-amber-400"
                 onClick={() => navigate('/stores')}
               >
                 Criar uma loja real
@@ -110,7 +110,7 @@ const Dashboard = () => {
           ))}
         </div>
 
-        <Card className={`mt-8 border ${isAllCompleted ? 'border-success bg-success/5' : 'border-amber-500/50 bg-amber-50/50'}`}>
+        <Card className={`mt-8 border ${isAllCompleted ? 'border-success/30 bg-success/5 dark:bg-success/10 dark:border-success/20' : 'border-amber-500/30 bg-amber-50/50 dark:bg-amber-950/20 dark:border-amber-800/30'}`}>
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center">
               {isAllCompleted ? (
@@ -120,7 +120,7 @@ const Dashboard = () => {
                 </>
               ) : (
                 <>
-                  <ArrowRightCircle className="mr-2 h-5 w-5 text-amber-500" />
+                  <ArrowRightCircle className="mr-2 h-5 w-5 text-amber-500 dark:text-amber-400" />
                   Conclua todos os passos para publicar
                 </>
               )}
