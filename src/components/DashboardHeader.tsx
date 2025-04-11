@@ -27,9 +27,7 @@ export function DashboardHeader() {
           )}
         </div>
         
-        <div className="flex items-center gap-4">
-          <StoreSelector />
-          
+        <div className="flex items-center gap-3">
           <Button variant="ghost" asChild>
             <Link to="/stores" className="flex items-center gap-2">
               <Store className="h-4 w-4" />
@@ -38,6 +36,8 @@ export function DashboardHeader() {
           </Button>
           
           <ThemeToggle />
+          
+          <StoreSelector />
           
           <Avatar>
             <AvatarFallback className="bg-primary/10 text-primary">

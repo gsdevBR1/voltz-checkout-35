@@ -1,24 +1,22 @@
 
 import React, { useState } from 'react';
 import { useStores } from '@/contexts/StoreContext';
-import { Button } from '@/components/ui/button';
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
 import { 
   Plus, 
   Store, 
   AlertTriangle, 
-  ChevronDown, 
   CheckCircle, 
   Clock, 
   X, 
   ExternalLink 
 } from 'lucide-react';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import {
   Dialog,
   DialogContent,
@@ -28,10 +26,18 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Link } from 'react-router-dom';
 import { Store as StoreType } from '@/contexts/StoreContext';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 export function StoreSelector() {
   const { stores, currentStore, setCurrentStore, addStore } = useStores();
@@ -95,17 +101,12 @@ export function StoreSelector() {
     <div className="relative">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" className="h-auto flex items-center gap-2 px-3 py-2 border-dashed">
-            {currentStore.isDemo ? (
-              <AlertTriangle className="h-4 w-4 text-amber-500" />
-            ) : (
-              <Store className="h-4 w-4" />
-            )}
-            <span className="font-medium truncate max-w-[150px]">{currentStore.name}</span>
-            <ChevronDown className="h-4 w-4 text-muted-foreground" />
+          <Button variant="outline" className="border rounded-lg px-3 py-2 flex items-center justify-between min-w-[180px]">
+            <span className="font-medium truncate">{currentStore.name}</span>
+            <span className="ml-2 opacity-50">▼</span>
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-64">
+        <DropdownMenuContent align="end" className="w-[220px]">
           <div className="py-2 px-3">
             <div className="text-sm font-medium">Suas lojas</div>
             <div className="text-xs text-muted-foreground">Selecione ou crie uma loja</div>
@@ -180,12 +181,6 @@ export function StoreSelector() {
           </Link>
         </DropdownMenuContent>
       </DropdownMenu>
-      
-      {currentStore.isDemo && (
-        <div className="mt-1 fixed top-16 left-0 right-0 z-10 bg-amber-50 border-b border-amber-200 py-2 px-4 text-amber-800 text-sm text-center">
-          ⚠️ Esta é uma loja de demonstração. Para começar a vender, <Link to="/stores" className="underline font-medium">crie sua loja real clicando aqui</Link>.
-        </div>
-      )}
     </div>
   );
 }
