@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -29,7 +28,6 @@ import {
 import { formatCurrency, formatDateTime, formatRelativeTime } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 
-// Mock data for a single abandoned cart
 const mockAbandonedCart = {
   id: 'abc123',
   customer: {
@@ -40,7 +38,7 @@ const mockAbandonedCart = {
   },
   stage: 'Pagamento',
   total: 159.90,
-  createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000 - 16 * 60 * 1000), // 2 hours and 16 minutes ago
+  createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000 - 16 * 60 * 1000),
   items: [
     {
       id: 'p001',
@@ -77,28 +75,23 @@ const DetalheCarrinhoAbandonado: React.FC = () => {
   const { toast } = useToast();
   const [cart] = useState(mockAbandonedCart);
   
-  // Calculate progress percentage based on completed steps
   const calculateProgress = () => {
     const total = Object.keys(cart.checkoutProgress).length;
     const completed = Object.values(cart.checkoutProgress).filter(status => status === 'completed').length;
     return (completed / total) * 100;
   };
   
-  // Get hours since cart was abandoned
   const getHoursSinceAbandoned = () => {
     const now = new Date();
     return Math.floor((now.getTime() - cart.createdAt.getTime()) / (1000 * 60 * 60));
   };
   
-  // Get status color based on abandonment time
   const getStatusColor = () => {
     const hours = getHoursSinceAbandoned();
     return hours < 6 ? 'amber' : 'destructive';
   };
   
-  // Handle copy cart link
   const handleCopyCartLink = () => {
-    // In a real app, this would be a deep link to resume the cart
     navigator.clipboard.writeText(`https://yourcheckout.com/resume-cart/${cart.id}`);
     toast({
       title: "Link copiado!",
@@ -106,7 +99,6 @@ const DetalheCarrinhoAbandonado: React.FC = () => {
     });
   };
   
-  // Handle send recovery email
   const handleSendRecoveryEmail = () => {
     toast({
       title: "Email enviado com sucesso!",
@@ -114,7 +106,6 @@ const DetalheCarrinhoAbandonado: React.FC = () => {
     });
   };
   
-  // Handle mark as unrecoverable
   const handleMarkUnrecoverable = () => {
     toast({
       title: "Carrinho marcado como irrecuperável",
@@ -122,9 +113,7 @@ const DetalheCarrinhoAbandonado: React.FC = () => {
     });
   };
   
-  // Handle WhatsApp contact
   const handleWhatsAppContact = () => {
-    // Format phone number for WhatsApp link
     const phoneNumber = cart.customer.phone.replace(/\D/g, '');
     const message = encodeURIComponent(`Olá ${cart.customer.name}, notamos que você deixou alguns produtos no carrinho em nossa loja. Posso ajudar a finalizar sua compra?`);
     window.open(`https://wa.me/${phoneNumber}?text=${message}`, '_blank');
@@ -133,7 +122,6 @@ const DetalheCarrinhoAbandonado: React.FC = () => {
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        {/* Header with back button and actions */}
         <div className="flex flex-col sm:flex-row justify-between gap-4">
           <div className="flex items-center gap-2">
             <Button variant="outline" size="icon" asChild>
@@ -182,7 +170,6 @@ const DetalheCarrinhoAbandonado: React.FC = () => {
           </div>
         </div>
         
-        {/* Abandonment Status Card */}
         <Card className={`border-l-4 border-l-${getStatusColor()}-500`}>
           <CardContent className="pt-6">
             <div className="flex flex-col md:flex-row md:items-center gap-4">
@@ -202,7 +189,6 @@ const DetalheCarrinhoAbandonado: React.FC = () => {
           </CardContent>
         </Card>
         
-        {/* Main content in tabs */}
         <Tabs defaultValue="overview" className="w-full">
           <TabsList className="grid w-full md:w-auto grid-cols-2 md:grid-cols-4">
             <TabsTrigger value="overview">Visão Geral</TabsTrigger>
@@ -211,7 +197,6 @@ const DetalheCarrinhoAbandonado: React.FC = () => {
             <TabsTrigger value="source">Origem</TabsTrigger>
           </TabsList>
           
-          {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-4">
             <Card>
               <CardHeader>
@@ -259,7 +244,6 @@ const DetalheCarrinhoAbandonado: React.FC = () => {
             </Card>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Progress Summary */}
               <Card>
                 <CardHeader className="pb-2">
                   <CardTitle>Progresso do Checkout</CardTitle>
@@ -291,7 +275,6 @@ const DetalheCarrinhoAbandonado: React.FC = () => {
                 </CardContent>
               </Card>
               
-              {/* Products Summary */}
               <Card>
                 <CardHeader className="pb-2">
                   <CardTitle>Produtos no Carrinho</CardTitle>
@@ -331,7 +314,6 @@ const DetalheCarrinhoAbandonado: React.FC = () => {
               </Card>
             </div>
             
-            {/* Recovery Actions */}
             <Card>
               <CardHeader>
                 <CardTitle>Ações Recomendadas</CardTitle>
@@ -377,7 +359,6 @@ const DetalheCarrinhoAbandonado: React.FC = () => {
             </Card>
           </TabsContent>
           
-          {/* Products Tab */}
           <TabsContent value="products">
             <Card>
               <CardHeader>
@@ -435,7 +416,6 @@ const DetalheCarrinhoAbandonado: React.FC = () => {
             </Card>
           </TabsContent>
           
-          {/* Checkout Progress Tab */}
           <TabsContent value="checkout">
             <Card>
               <CardHeader>
@@ -469,7 +449,7 @@ const DetalheCarrinhoAbandonado: React.FC = () => {
                               </p>
                               <div className="mt-4">
                                 {status === 'completed' ? (
-                                  <Badge variant="success" className="bg-success/10 text-success">
+                                  <Badge variant="secondary" className="bg-success/10 text-success">
                                     <CheckCircle className="h-3 w-3 mr-1" />
                                     Completo
                                   </Badge>
@@ -491,7 +471,6 @@ const DetalheCarrinhoAbandonado: React.FC = () => {
             </Card>
           </TabsContent>
           
-          {/* Source Tab */}
           <TabsContent value="source">
             <Card>
               <CardHeader>
