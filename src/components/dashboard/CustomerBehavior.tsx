@@ -18,6 +18,7 @@ import { cn } from '@/lib/utils';
 interface BehaviorStep {
   id: string;
   title: string;
+  shortTitle: string; // Added short title for compact view
   value: number;
   icon: React.ReactNode;
   color: string;
@@ -35,43 +36,49 @@ const generateStepData = () => {
     {
       id: 'checkout',
       title: 'Entraram no Checkout',
+      shortTitle: 'Checkout',
       value: initialCheckout,
-      icon: <ShoppingCart className="h-6 w-6" />,
+      icon: <ShoppingCart className="h-5 w-5" />,
       color: 'bg-emerald-500 dark:bg-emerald-600'
     },
     {
       id: 'personal',
       title: 'Dados Pessoais',
+      shortTitle: 'Dados',
       value: Math.floor(initialCheckout * (Math.random() * 0.2 + 0.7)), // 70-90% of previous step
-      icon: <Users className="h-6 w-6" />,
+      icon: <Users className="h-5 w-5" />,
       color: 'bg-blue-500 dark:bg-blue-600'
     },
     {
       id: 'delivery',
       title: 'Entrega',
+      shortTitle: 'Entrega',
       value: 0, // Will be calculated
-      icon: <Package className="h-6 w-6" />,
+      icon: <Package className="h-5 w-5" />,
       color: 'bg-purple-500 dark:bg-purple-600'
     },
     {
       id: 'payment',
       title: 'Pagamento',
+      shortTitle: 'Pagamento',
       value: 0, // Will be calculated
-      icon: <CreditCard className="h-6 w-6" />,
+      icon: <CreditCard className="h-5 w-5" />,
       color: 'bg-amber-500 dark:bg-amber-600'
     },
     {
       id: 'pix',
       title: 'Gerou Pix',
+      shortTitle: 'Pix',
       value: 0, // Will be calculated
-      icon: <QrCode className="h-6 w-6" />,
+      icon: <QrCode className="h-5 w-5" />,
       color: 'bg-indigo-500 dark:bg-indigo-600'
     },
     {
       id: 'purchase',
       title: 'Comprou',
+      shortTitle: 'Comprou',
       value: 0, // Will be calculated
-      icon: <ShoppingBag className="h-6 w-6" />,
+      icon: <ShoppingBag className="h-5 w-5" />,
       color: 'bg-green-600 dark:bg-green-700'
     }
   ];
@@ -126,116 +133,98 @@ const CustomerBehavior: React.FC<CustomerBehaviorProps> = ({ refreshInterval = 6
   }, [refreshInterval]);
   
   return (
-    <div className="space-y-6">
+    <div className="space-y-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Clock className="h-5 w-5 text-primary" />
-          <h3 className="text-lg font-semibold">Comportamento dos Clientes</h3>
-          <Badge variant="secondary" className="ml-2">
+          <Clock className="h-4 w-4 text-primary" />
+          <h3 className="text-sm font-semibold">Comportamento dos Clientes</h3>
+          <Badge variant="secondary" className="text-xs">
             últimos 10 minutos
           </Badge>
         </div>
-        <div className="flex items-center gap-3">
-          <span className="text-sm text-muted-foreground">
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-muted-foreground">
             {getTimeSinceUpdate()}
           </span>
           <button 
             onClick={handleRefresh} 
-            className="flex items-center justify-center h-8 w-8 rounded-full bg-secondary/40 hover:bg-secondary/60 transition-colors"
+            className="flex items-center justify-center h-6 w-6 rounded-full bg-secondary/40 hover:bg-secondary/60 transition-colors"
             disabled={updating}
           >
             <RefreshCw className={cn(
-              "h-4 w-4 text-muted-foreground", 
+              "h-3 w-3 text-muted-foreground", 
               updating && "animate-spin"
             )} />
           </button>
         </div>
       </div>
       
-      {/* Timeline View */}
-      <div className="relative">
-        {/* Connection line */}
-        <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-muted -translate-x-1/2 hidden md:block" />
-        
-        <div className="space-y-8 relative">
-          {behaviorData.map((step, index) => (
-            <div key={step.id} className={cn(
-              "grid grid-cols-1 md:grid-cols-12 items-center gap-4",
-              index % 2 === 0 ? "md:grid-flow-col md:auto-cols-fr" : ""
-            )}>
-              {/* Desktop layout */}
-              <div className={cn(
-                "hidden md:flex items-center justify-end md:col-span-5",
-                index % 2 !== 0 && "md:order-2 md:justify-start"
-              )}>
-                <div className="flex items-center gap-3">
-                  {index % 2 !== 0 && (
-                    <div className="text-3xl font-bold">{step.value}</div>
+      {/* Progress indicator for refresh */}
+      <div className="relative h-0.5 w-full bg-muted overflow-hidden">
+        <div 
+          className={cn(
+            "absolute top-0 left-0 h-full bg-primary transition-all duration-300",
+            updating ? "opacity-100" : "opacity-0"
+          )}
+          style={{ width: updating ? "100%" : "0%" }}
+        ></div>
+      </div>
+      
+      {/* Compact Horizontal Layout */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
+        {behaviorData.map((step, index) => (
+          <TooltipProvider key={step.id}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div 
+                  className={cn(
+                    "flex flex-col items-center justify-center p-3 rounded-md border border-border/50",
+                    "bg-card/50 hover:bg-card/80 transition-colors",
+                    index < behaviorData.length - 1 && "relative"
                   )}
+                >
+                  {/* Icon with colored background */}
                   <div className={cn(
-                    "p-3 rounded-full flex items-center justify-center",
+                    "h-9 w-9 rounded-full flex items-center justify-center mb-2",
                     `bg-opacity-15 dark:bg-opacity-25 text-${step.color.split('-')[1]}-700 dark:text-${step.color.split('-')[1]}-300`,
                     step.color.replace('bg-', 'bg-opacity-15 dark:bg-opacity-25 bg-')
                   )}>
                     {step.icon}
                   </div>
-                  {index % 2 === 0 && (
-                    <div className="text-3xl font-bold">{step.value}</div>
+                  
+                  {/* Step title - short version */}
+                  <span className="text-xs text-muted-foreground whitespace-nowrap overflow-hidden text-ellipsis w-full text-center">
+                    {step.shortTitle}
+                  </span>
+                  
+                  {/* Value */}
+                  <span className="text-xl font-bold mt-1">{step.value}</span>
+                  
+                  {/* Connector to next step (only for non-last items) */}
+                  {index < behaviorData.length - 1 && (
+                    <div className="hidden md:block absolute -right-1 top-1/2 w-2 h-0.5 bg-muted -translate-y-1/2"></div>
                   )}
                 </div>
-              </div>
-              
-              {/* Circle connector for desktop */}
-              <div className="hidden md:flex justify-center items-center md:col-span-2">
-                <div className={cn(
-                  "h-6 w-6 rounded-full border-4 z-10",
-                  step.color,
-                  "border-background"
-                )} />
-              </div>
-              
-              <div className={cn(
-                "hidden md:block md:col-span-5",
-                index % 2 === 0 && "md:order-2"
-              )}>
-                <h4 className="text-lg font-medium">{step.title}</h4>
-                <Progress
-                  value={(step.value / maxValue) * 100}
-                  className="h-2 mt-2"
-                  indicatorClassName={step.color}
-                />
-              </div>
-              
-              {/* Mobile layout */}
-              <div className="flex md:hidden items-center gap-3 p-4 bg-card/50 rounded-lg border border-border/50">
-                <div className={cn(
-                  "p-3 rounded-full flex items-center justify-center shrink-0",
-                  `bg-opacity-15 dark:bg-opacity-25 text-${step.color.split('-')[1]}-700 dark:text-${step.color.split('-')[1]}-300`,
-                  step.color.replace('bg-', 'bg-opacity-15 dark:bg-opacity-25 bg-')
-                )}>
-                  {step.icon}
+              </TooltipTrigger>
+              <TooltipContent>
+                <div className="text-sm">
+                  <p className="font-semibold">{step.title}</p>
+                  <p>{step.value} usuários nesta etapa nos últimos 10 minutos</p>
+                  {index > 0 && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {Math.round((step.value / behaviorData[0].value) * 100)}% do total inicial
+                    </p>
+                  )}
                 </div>
-                <div className="flex-1">
-                  <div className="flex justify-between items-center">
-                    <h4 className="font-medium">{step.title}</h4>
-                    <div className="text-2xl font-bold">{step.value}</div>
-                  </div>
-                  <Progress
-                    value={(step.value / maxValue) * 100}
-                    className="h-2 mt-2"
-                    indicatorClassName={step.color}
-                  />
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        ))}
       </div>
       
       {/* Mini Funnel Visualization */}
-      <div className="mt-6 pt-4 border-t border-border">
-        <h4 className="text-sm font-medium mb-3 text-muted-foreground">Conversão por Etapa</h4>
-        <div className="grid grid-cols-6 gap-1 h-20">
+      <div className="mt-2 pt-2 border-t border-border">
+        <div className="flex items-center gap-1 h-12">
           {behaviorData.map((step, index) => {
             const conversionRate = index === 0 
               ? 100 
@@ -245,18 +234,18 @@ const CustomerBehavior: React.FC<CustomerBehaviorProps> = ({ refreshInterval = 6
               <TooltipProvider key={step.id}>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <div className="flex flex-col items-center">
+                    <div className="flex-1 flex flex-col h-full">
                       <div className="flex-1 w-full flex items-end">
                         <div 
                           className={cn("w-full rounded-t-sm", step.color)}
                           style={{ height: `${conversionRate}%` }}
                         />
                       </div>
-                      <span className="text-xs mt-1 text-center">{conversionRate}%</span>
+                      <span className="text-[10px] mt-1 text-center text-muted-foreground">{conversionRate}%</span>
                     </div>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <div className="text-sm">
+                    <div className="text-xs">
                       <p><strong>{step.title}</strong></p>
                       <p>{step.value} usuários ({conversionRate}%)</p>
                     </div>
