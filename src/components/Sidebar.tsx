@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -151,11 +152,11 @@ export const AppSidebar: React.FC<SidebarProps> = ({ className }) => {
     <Sidebar className={className}>
       <SidebarHeader>
         <div className="flex items-center justify-between w-full px-4 py-6">
-          <Link to="/" className="flex items-center">
+          <Link to="/" className="flex items-center justify-center">
             <img 
               src="/lovable-uploads/3aa07f77-7311-4155-8e6c-39abb8dca3df.png" 
               alt="Voltz.Checkout Logo" 
-              className="h-8 w-8"
+              className="h-10 w-10"
             />
           </Link>
           <Avatar className="h-8 w-8">
@@ -272,3 +273,4 @@ export const SidebarLayout = ({ children }: { children: React.ReactNode }) => {
     </SidebarProvider>
   );
 };
+

@@ -20,9 +20,8 @@ export function DashboardHeader({ onCustomizeClick }: { onCustomizeClick?: () =>
             <img 
               src="/lovable-uploads/3aa07f77-7311-4155-8e6c-39abb8dca3df.png" 
               alt="Voltz.Checkout Logo" 
-              className="h-8 w-8"
+              className="h-10 w-10"
             />
-            <span className="font-semibold text-lg">Voltz.Checkout</span>
           </Link>
           
           {currentStore?.isDemo && (
