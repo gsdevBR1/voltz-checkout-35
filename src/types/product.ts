@@ -29,6 +29,8 @@ export interface Product {
   variantName?: string;
   variantValues?: string[];
   manageStock?: boolean;
+  // New field for upsell relationship
+  linkedUpsellId?: string;
 }
 
 export interface ProductFormData {
@@ -54,4 +56,6 @@ export interface ProductFormData {
   variantName?: string;
   variantValues?: string[];
   manageStock?: boolean;
+  // New field for upsell relationship
+  linkedUpsellId?: string;
 }

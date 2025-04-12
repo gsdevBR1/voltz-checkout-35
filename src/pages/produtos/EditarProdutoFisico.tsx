@@ -20,7 +20,7 @@ import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, Plus, Trash2, Image, Save, X, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, Image, Save, X, RefreshCw, ExternalLink } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import {
@@ -33,6 +33,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Product, ProductFormData } from '@/types/product';
+import UpsellSelector from '@/components/marketing/UpsellSelector';
 
 const mockProducts: Product[] = [
   {
@@ -82,6 +83,7 @@ const formSchema = z.object({
   hasVariants: z.boolean(),
   variantName: z.string().optional(),
   variantValues: z.array(z.string()).optional(),
+  linkedUpsellId: z.string().optional(),
 });
 
 interface ImageItem {
@@ -121,6 +123,7 @@ const EditarProdutoFisico: React.FC = () => {
       hasVariants: false,
       variantName: '',
       variantValues: [],
+      linkedUpsellId: undefined,
     },
   });
 
@@ -148,6 +151,7 @@ const EditarProdutoFisico: React.FC = () => {
           hasVariants: foundProduct.hasVariants || false,
           variantName: foundProduct.variantName || '',
           variantValues: foundProduct.variantValues || [],
+          linkedUpsellId: foundProduct.linkedUpsellId,
         });
         
         if (foundProduct.images && foundProduct.images.length > 0) {
@@ -288,9 +292,13 @@ const EditarProdutoFisico: React.FC = () => {
       }
     }
 
+    const upsellMessage = values.linkedUpsellId 
+      ? "com upsell vinculado" 
+      : "sem upsell vinculado";
+
     toast({
       title: "Produto atualizado",
-      description: "As alterações foram salvas com sucesso.",
+      description: `As alterações foram salvas com sucesso (${upsellMessage}).`,
     });
 
     navigate('/produtos');
@@ -854,6 +862,53 @@ const EditarProdutoFisico: React.FC = () => {
                     )}
                   />
                 </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Configuração de Upsell</CardTitle>
+                <CardDescription>
+                  Vincule um Upsell One Click que será exibido automaticamente após a compra deste produto.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <FormField
+                  control={form.control}
+                  name="linkedUpsellId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Upsell após compra</FormLabel>
+                      <FormControl>
+                        <UpsellSelector 
+                          value={field.value} 
+                          onChange={field.onChange} 
+                          productId={id}
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        O cliente será redirecionado automaticamente para este Upsell após finalizar a compra.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {form.watch('linkedUpsellId') && (
+                  <div className="mt-4 text-sm text-muted-foreground flex items-center gap-2">
+                    <Badge variant="outline" className="text-blue-600 border-blue-600">
+                      <ExternalLink className="h-3 w-3 mr-1" />
+                      Redireciona para Upsell após compra
+                    </Badge>
+                    <Button
+                      variant="link"
+                      className="text-xs p-0 h-auto"
+                      onClick={() => navigate('/marketing/upsell')}
+                    >
+                      Gerenciar todos os Upsells
+                    </Button>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
