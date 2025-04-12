@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useNavigate } from 'react-router-dom';
-import { ChevronRight, Eye, Save, Clock, Paintbrush, Type, Layout, AlertCircle, ImageIcon, X, Upload, Search, CheckSquare, Filter, ListFilter } from 'lucide-react';
+import { ChevronRight, Eye, Save, Clock, Paintbrush, Type, Layout, AlertCircle, ImageIcon, X, Upload, Search, CheckSquare, Filter, ListFilter, ExternalLink, CornerDownRight } from 'lucide-react';
 import { toast } from 'sonner';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
@@ -98,6 +98,12 @@ const UpsellBuilder: React.FC<UpsellBuilderProps> = ({ initialData, onSave, prod
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [pendingProductId, setPendingProductId] = useState<string | null>(null);
   
+  const mockUpsells = [
+    { id: 'ups_1', name: 'Upsell Premium: Curso Avançado' },
+    { id: 'ups_2', name: 'Upsell Básico: E-book Complementar' },
+    { id: 'ups_3', name: 'Oferta Especial: Mentoria' },
+  ];
+  
   const [upsellData, setUpsellData] = useState(initialData || {
     id: 'new-' + Date.now(),
     title: '🎁 Oferta exclusiva para completar seu pedido!',
@@ -116,6 +122,9 @@ const UpsellBuilder: React.FC<UpsellBuilderProps> = ({ initialData, onSave, prod
     buttonText: 'Sim, quero adicionar!',
     declineText: 'Não, obrigado',
     redirectUrl: 'https://voltz.checkout/obrigado',
+    redirectType: 'url',
+    redirectUpsellId: '',
+    fallbackRedirectUrl: 'https://voltz.checkout/obrigado',
     showOriginalPrice: true,
     layout: 'vertical',
     theme: {
@@ -565,7 +574,7 @@ const UpsellBuilder: React.FC<UpsellBuilderProps> = ({ initialData, onSave, prod
           </div>
           
           <Tabs defaultValue="content" className="w-full">
-            <TabsList className="grid w-full grid-cols-4 mb-6">
+            <TabsList className="grid w-full grid-cols-5 mb-6">
               <TabsTrigger value="content">
                 <Type className="h-4 w-4 mr-2" />
                 Conteúdo
@@ -577,6 +586,10 @@ const UpsellBuilder: React.FC<UpsellBuilderProps> = ({ initialData, onSave, prod
               <TabsTrigger value="behavior">
                 <Clock className="h-4 w-4 mr-2" />
                 Comportamento
+              </TabsTrigger>
+              <TabsTrigger value="redirection">
+                <CornerDownRight className="h-4 w-4 mr-2" />
+                Redirecionamento
               </TabsTrigger>
               <TabsTrigger value="layout">
                 <Layout className="h-4 w-4 mr-2" />
@@ -918,6 +931,108 @@ const UpsellBuilder: React.FC<UpsellBuilderProps> = ({ initialData, onSave, prod
                 <p className="text-xs text-muted-foreground">
                   Esta configuração é apenas para preview. Na prática, será baseado no método de pagamento utilizado no checkout principal.
                 </p>
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="redirection" className="space-y-6">
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium">Redirecionamento após a interação</h3>
+                <p className="text-sm text-muted-foreground">
+                  Configure para onde o cliente será redirecionado após aceitar ou recusar esta oferta.
+                </p>
+                
+                <div className="space-y-4 mt-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="redirectType">Escolher redirecionamento para</Label>
+                    <Select 
+                      value={upsellData.redirectType}
+                      onValueChange={handleRedirectTypeChange}
+                    >
+                      <SelectTrigger id="redirectType">
+                        <SelectValue placeholder="Selecione o tipo de redirecionamento" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="url">URL personalizada</SelectItem>
+                        <SelectItem value="upsell">Outro Upsell One Click</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  {upsellData.redirectType === 'url' ? (
+                    <div className="space-y-2">
+                      <Label htmlFor="redirectUrl">URL de redirecionamento</Label>
+                      <div className="flex">
+                        <div className="bg-muted px-3 py-2 rounded-l-md border-y border-l border-input flex items-center">
+                          <ExternalLink className="h-4 w-4 text-muted-foreground" />
+                        </div>
+                        <Input 
+                          id="redirectUrl" 
+                          value={upsellData.redirectUrl}
+                          onChange={(e) => handleChange('redirectUrl', e.target.value)}
+                          placeholder="https://..."
+                          className="rounded-l-none"
+                        />
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        O cliente será redirecionado para esta URL após interagir com a oferta.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <Label htmlFor="redirectUpsellId">Selecionar próximo Upsell</Label>
+                      <Select 
+                        value={upsellData.redirectUpsellId}
+                        onValueChange={handleRedirectUpsellChange}
+                      >
+                        <SelectTrigger id="redirectUpsellId">
+                          <SelectValue placeholder="Escolha o próximo Upsell" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {mockUpsells.map(upsell => (
+                            <SelectItem 
+                              key={upsell.id} 
+                              value={upsell.id}
+                              disabled={upsell.id === upsellData.id}
+                            >
+                              {upsell.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      
+                      {upsellData.redirectUpsellId && (
+                        <div className="bg-primary/10 border border-primary/20 p-3 rounded-md flex items-start gap-2 mt-2">
+                          <ChevronRight className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                          <div>
+                            <p className="text-sm font-medium text-primary">
+                              {mockUpsells.find(u => u.id === upsellData.redirectUpsellId)?.name}
+                            </p>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              Após interagir com este upsell, o cliente será direcionado para a oferta acima.
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  
+                  <div className="pt-4 border-t mt-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="fallbackRedirectUrl">URL de redirecionamento de fallback</Label>
+                      <Input 
+                        id="fallbackRedirectUrl" 
+                        value={upsellData.fallbackRedirectUrl}
+                        onChange={(e) => handleChange('fallbackRedirectUrl', e.target.value)}
+                        placeholder="https://..."
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        {upsellData.redirectType === 'upsell' 
+                          ? "Se o próximo upsell estiver desativado, o cliente será redirecionado para esta URL." 
+                          : "Esta URL será usada como fallback em caso de problemas no redirecionamento principal."}
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </div>
             </TabsContent>
             
