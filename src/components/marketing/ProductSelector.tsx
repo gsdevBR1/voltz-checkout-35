@@ -41,14 +41,14 @@ const ProductSelector: React.FC<ProductSelectorProps> = ({
   const [productNameFilter, setProductNameFilter] = useState('');
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   
-  // Safe handling for select product with improved state management
+  // Handle selecting a product with proper state management
   const handleSelectProduct = (productId: string) => {
     if (onSelectProduct) {
       onSelectProduct(productId);
     } else if (onChange) {
-      // If using the onChange prop
+      // For the new onChange API
       if (allowMultiple) {
-        // Toggle selection for multiple selection
+        // Toggle selection for multiple selection mode
         const newSelection = selectedProductIds.includes(productId)
           ? selectedProductIds.filter(id => id !== productId)
           : [...selectedProductIds, productId];
@@ -60,7 +60,7 @@ const ProductSelector: React.FC<ProductSelectorProps> = ({
     }
   };
 
-  // Safe handling for select all
+  // Handle selecting all filtered products
   const handleSelectAllFiltered = () => {
     if (onSelectAllFiltered) {
       onSelectAllFiltered();
@@ -73,7 +73,7 @@ const ProductSelector: React.FC<ProductSelectorProps> = ({
     }
   };
 
-  // Safe handling for apply to all
+  // Handle the "apply to all products" option
   const handleApplyToAllProducts = (checked: boolean) => {
     if (onApplyToAllProducts) {
       onApplyToAllProducts(checked);
@@ -171,7 +171,7 @@ const ProductSelector: React.FC<ProductSelectorProps> = ({
                         <Checkbox 
                           id={`product-${product.id}`} 
                           checked={isSelected}
-                          onCheckedChange={() => handleSelectProduct(product.id)}
+                          onCheckedChange={() => !isDisabled && handleSelectProduct(product.id)}
                           disabled={isDisabled}
                           className="mr-3 h-5 w-5 rounded-sm transition-colors data-[state=checked]:bg-success data-[state=checked]:border-success hover:border-success/70"
                         />

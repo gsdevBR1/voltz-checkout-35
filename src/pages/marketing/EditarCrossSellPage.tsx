@@ -159,6 +159,7 @@ const EditarCrossSellPage: React.FC = () => {
     };
     
     // Here we would update the cross-sell in the backend
+    console.log("Updated cross-sell:", updatedCrossSell);
     
     setTimeout(() => {
       toast.success("Cross-sell atualizado com sucesso!");
@@ -170,6 +171,7 @@ const EditarCrossSellPage: React.FC = () => {
 
   // Handle product selection for main products where cross-sell will appear
   const handleMainProductsChange = (productIds: string[]) => {
+    console.log("Selected product IDs changed:", productIds);
     setSelectedMainProducts(productIds);
     form.setValue('mainProductIds', productIds, { shouldValidate: true });
   };
