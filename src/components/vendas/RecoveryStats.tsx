@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -12,7 +11,6 @@ import { Separator } from "@/components/ui/separator";
 import { MessageCircle, Mail, MessageSquare, TrendingUp, Download, Calendar, Filter } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from 'recharts';
 
-// Mock data for demonstration
 const mockEmailData = [
   { date: '2025-03-12', sends: 45, opens: 32, clicks: 18, recovered: 8 },
   { date: '2025-03-13', sends: 50, opens: 38, clicks: 21, recovered: 10 },
@@ -33,7 +31,6 @@ const mockSmsData = [
   { date: '2025-03-18', sends: 36, delivered: 34, clicks: 16, recovered: 8 },
 ];
 
-// Map date strings to more readable format
 const formatChartData = (data: any[]) => {
   return data.map(item => ({
     ...item,
@@ -41,12 +38,10 @@ const formatChartData = (data: any[]) => {
   }));
 };
 
-// Calculate conversion rate
 const calculateConversionRate = (recovered: number, sends: number) => {
   return sends > 0 ? ((recovered / sends) * 100).toFixed(2) : '0.00';
 };
 
-// Sum up totals from data
 const calculateTotals = (data: any[]) => {
   return data.reduce((acc, curr) => {
     Object.keys(curr).forEach(key => {
@@ -96,12 +91,10 @@ export const RecoveryStats: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [chartType, setChartType] = useState<string>("bar");
 
-  // Get data based on active tab
   const data = activeTab === "email" ? mockEmailData : mockSmsData;
   const formattedData = formatChartData(data);
   const totals = calculateTotals(data);
   
-  // Calculate conversion rate for the selected channel
   const conversionRate = activeTab === "email" 
     ? calculateConversionRate(totals.recovered, totals.sends) 
     : calculateConversionRate(totals.recovered, totals.sends);
@@ -186,7 +179,6 @@ export const RecoveryStats: React.FC = () => {
           </TabsTrigger>
         </TabsList>
 
-        {/* Email Statistics */}
         <TabsContent value="email" className="space-y-6">
           <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-5">
             <StatCard 
@@ -256,11 +248,14 @@ export const RecoveryStats: React.FC = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="h-[300px] w-full">
-                <ChartContainer config={{
-                  send: { color: "#3B82F6" },
-                  recovered: { color: "#10B981" }
-                }}>
+              <div className="h-[400px] w-full relative">
+                <ChartContainer 
+                  className="h-full w-full aspect-[4/3] mx-auto" 
+                  config={{
+                    send: { color: "#3B82F6" },
+                    recovered: { color: "#10B981" }
+                  }}
+                >
                   {chartType === "bar" ? (
                     <BarChart data={formattedData}>
                       <CartesianGrid strokeDasharray="3 3" />
@@ -341,7 +336,6 @@ export const RecoveryStats: React.FC = () => {
           </Card>
         </TabsContent>
 
-        {/* SMS Statistics */}
         <TabsContent value="sms" className="space-y-6">
           <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-5">
             <StatCard 
@@ -411,11 +405,14 @@ export const RecoveryStats: React.FC = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="h-[300px] w-full">
-                <ChartContainer config={{
-                  send: { color: "#3B82F6" },
-                  recovered: { color: "#10B981" }
-                }}>
+              <div className="h-[400px] w-full relative">
+                <ChartContainer 
+                  className="h-full w-full aspect-[4/3] mx-auto" 
+                  config={{
+                    send: { color: "#3B82F6" },
+                    recovered: { color: "#10B981" }
+                  }}
+                >
                   {chartType === "bar" ? (
                     <BarChart data={formattedData}>
                       <CartesianGrid strokeDasharray="3 3" />
@@ -496,7 +493,6 @@ export const RecoveryStats: React.FC = () => {
           </Card>
         </TabsContent>
 
-        {/* WhatsApp Statistics (Coming Soon) */}
         <TabsContent value="whatsapp">
           <Card className="min-h-[500px] flex flex-col items-center justify-center text-center p-10">
             <MessageCircle className="h-16 w-16 text-muted-foreground mb-4" />
