@@ -41,7 +41,7 @@ const ProductSelector: React.FC<ProductSelectorProps> = ({
   const [productNameFilter, setProductNameFilter] = useState('');
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   
-  // Safe handling for select product
+  // Safe handling for select product with improved state management
   const handleSelectProduct = (productId: string) => {
     if (onSelectProduct) {
       onSelectProduct(productId);
@@ -65,6 +65,7 @@ const ProductSelector: React.FC<ProductSelectorProps> = ({
     if (onSelectAllFiltered) {
       onSelectAllFiltered();
     } else if (onChange) {
+      // Get all visible product IDs that aren't the excluded one
       const productIds = filteredProducts
         .filter(product => product.id !== excludedProductId)
         .map(product => product.id);
@@ -79,6 +80,7 @@ const ProductSelector: React.FC<ProductSelectorProps> = ({
     }
   };
 
+  // Filter products when search term or products array changes
   useEffect(() => {
     if (productNameFilter) {
       const filtered = products.filter(product => 
@@ -100,7 +102,7 @@ const ProductSelector: React.FC<ProductSelectorProps> = ({
             <Checkbox 
               id="applyToAll" 
               checked={applyToAllProducts}
-              onCheckedChange={handleApplyToAllProducts}
+              onCheckedChange={(checked) => handleApplyToAllProducts(checked === true)}
               className="h-5 w-5 rounded-sm transition-colors data-[state=checked]:bg-primary data-[state=checked]:border-primary hover:border-primary/70"
             />
           </div>
@@ -171,7 +173,7 @@ const ProductSelector: React.FC<ProductSelectorProps> = ({
                           checked={isSelected}
                           onCheckedChange={() => handleSelectProduct(product.id)}
                           disabled={isDisabled}
-                          className="mr-3 h-5 w-5 rounded-sm transition-colors data-[state=checked]:bg-success data-[state=checked]:border-success"
+                          className="mr-3 h-5 w-5 rounded-sm transition-colors data-[state=checked]:bg-success data-[state=checked]:border-success hover:border-success/70"
                         />
                         <Label 
                           htmlFor={`product-${product.id}`}

@@ -47,6 +47,7 @@ import CuponsPage from "./pages/marketing/CuponsPage";
 import CriarCupomPage from "./pages/marketing/CriarCupomPage";
 import CrossSellPage from "./pages/marketing/CrossSellPage";
 import CriarCrossSellPage from "./pages/marketing/CriarCrossSellPage";
+import EditarCrossSellPage from "./pages/marketing/EditarCrossSellPage";
 import PixelsPage from "./pages/marketing/PixelsPage";
 
 import { ActivationStepsProvider } from "./contexts/ActivationStepsContextWithStores";
@@ -100,15 +101,18 @@ const App: React.FC = () => {
                   <Route path="/marketing/upsell/display/:id" element={<UpsellDisplay />} />
                   <Route path="/marketing/upsell/editar/:id" element={<CriarUpsellPage />} />
                   
-                  {/* Updated Order Bumps Routes */}
+                  {/* Order Bumps Routes */}
                   <Route path="/marketing/order-bumps" element={<OrderBumpsPage />} />
                   <Route path="/marketing/order-bumps/novo" element={<CriarOrderBumpPage />} />
                   <Route path="/marketing/order-bumps/:id/editar" element={<EditarOrderBumpPage />} />
                   
-                  <Route path="/marketing/cupons" element={<CuponsPage />} />
-                  <Route path="/marketing/cupons/novo" element={<CriarCupomPage />} />
+                  {/* Cross-Sell Routes */}
                   <Route path="/marketing/cross-sell" element={<CrossSellPage />} />
                   <Route path="/marketing/cross-sells/novo" element={<CriarCrossSellPage />} />
+                  <Route path="/marketing/cross-sells/:id/editar" element={<EditarCrossSellPage />} />
+                  
+                  <Route path="/marketing/cupons" element={<CuponsPage />} />
+                  <Route path="/marketing/cupons/novo" element={<CriarCupomPage />} />
                   <Route path="/marketing/pixels" element={<PixelsPage />} />
                   
                   <Route path="/checkouts/descontos" element={<DescontosPage />} />
