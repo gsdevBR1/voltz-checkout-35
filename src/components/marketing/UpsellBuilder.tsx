@@ -473,6 +473,21 @@ const UpsellBuilder: React.FC<UpsellBuilderProps> = ({ initialData, onSave, prod
     navigate(`/marketing/upsell/${upsellData.id}/preview`);
   };
   
+  const handleRedirectTypeChange = (value: string) => {
+    setUpsellData(prev => ({
+      ...prev,
+      redirectType: value,
+      redirectUpsellId: value === 'url' ? '' : prev.redirectUpsellId
+    }));
+  };
+  
+  const handleRedirectUpsellChange = (upsellId: string) => {
+    setUpsellData(prev => ({
+      ...prev,
+      redirectUpsellId: upsellId
+    }));
+  };
+  
   const getSelectedTriggerProducts = () => {
     return mockProducts.filter(p => upsellData.triggerProductIds.includes(p.id));
   };
