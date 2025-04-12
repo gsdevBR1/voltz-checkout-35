@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { DashboardLayout } from '@/components/DashboardLayout';
+import DashboardLayout from '@/components/DashboardLayout';
 import { 
   AlertCircle, 
   Copy, 
@@ -243,7 +243,7 @@ const ClonadorShopifyPage: React.FC = () => {
             <h1 className="text-3xl font-bold tracking-tight">Clonador Loja Shopify</h1>
             <div className="flex items-center gap-2">
               <Badge variant="success" className="text-xs px-2 py-1">EXCLUSIVO</Badge>
-              <Badge className="bg-amber-600 hover:bg-amber-700 text-white text-xs px-2 py-1">🔥 Novo</Badge>
+              <Badge variant="warning" className="text-xs px-2 py-1">🔥 Novo</Badge>
             </div>
           </div>
           <p className="text-muted-foreground">

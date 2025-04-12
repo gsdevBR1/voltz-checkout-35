@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -159,10 +158,10 @@ export const AppSidebar: React.FC<SidebarProps> = ({ className }) => {
           icon: Copy,
           badge: {
             text: 'EXCLUSIVO',
-            variant: 'success',
+            variant: 'success' as const,
             extraBadge: {
               text: '🔥 Novo',
-              variant: 'warning'
+              variant: 'warning' as const
             }
           }
         }
@@ -338,7 +337,7 @@ export const AppSidebar: React.FC<SidebarProps> = ({ className }) => {
                                     {subItem.badge.extraBadge && (
                                       <Badge 
                                         variant={subItem.badge.extraBadge.variant} 
-                                        className="text-[10px] px-1 py-0 bg-amber-600 hover:bg-amber-700 text-white"
+                                        className="text-[10px] px-1 py-0"
                                       >
                                         {subItem.badge.extraBadge.text}
                                       </Badge>
