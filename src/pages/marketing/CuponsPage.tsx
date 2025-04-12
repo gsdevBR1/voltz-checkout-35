@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Plus, Search } from 'lucide-react';
@@ -24,9 +23,11 @@ const CuponsPage = () => {
             Incentive suas vendas com promoções e descontos.
           </p>
         </div>
-        <Button as={Link} to="/marketing/cupons/novo">
-          <Plus className="mr-2 h-4 w-4" />
-          Novo Cupom
+        <Button asChild>
+          <Link to="/marketing/cupons/novo">
+            <Plus className="mr-2 h-4 w-4" />
+            Novo Cupom
+          </Link>
         </Button>
       </div>
 
@@ -123,7 +124,6 @@ const CuponsPage = () => {
         </TabsContent>
         
         <TabsContent value="ativos" className="space-y-4">
-          {/* Similar structure for active coupons */}
           <Card>
             <CardContent className="p-0">
               <div className="flex items-center justify-center p-6">
@@ -134,7 +134,6 @@ const CuponsPage = () => {
         </TabsContent>
         
         <TabsContent value="inativos" className="space-y-4">
-          {/* Similar structure for inactive coupons */}
           <Card>
             <CardContent className="p-0">
               <div className="flex items-center justify-center p-6">
@@ -145,7 +144,6 @@ const CuponsPage = () => {
         </TabsContent>
         
         <TabsContent value="expirados" className="space-y-4">
-          {/* Similar structure for expired coupons */}
           <Card>
             <CardContent className="p-0">
               <div className="flex items-center justify-center p-6">

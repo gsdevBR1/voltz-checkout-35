@@ -68,8 +68,6 @@ const App: React.FC = () => {
         <TooltipProvider>
           <StoreProvider>
             <ActivationStepsProvider>
-              <Toaster />
-              <Sonner />
               <BrowserRouter>
                 <Routes>
                   <Route path="/" element={<Navigate to="/pagina-inicial" replace />} />
@@ -123,6 +121,8 @@ const App: React.FC = () => {
                   <Route path="/steps/shopify" element={<ShopifyStep />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
+                <Toaster />
+                <Sonner />
               </BrowserRouter>
             </ActivationStepsProvider>
           </StoreProvider>
