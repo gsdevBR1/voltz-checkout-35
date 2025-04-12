@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useNavigate } from 'react-router-dom';
-import { ChevronRight, Eye, Save, Clock, Paintbrush, Type, Layout, AlertCircle } from 'lucide-react';
+import { ChevronRight, Eye, Save, Clock, Paintbrush, Type, Layout, AlertCircle, ImageIcon, X, Upload } from 'lucide-react';
 import { toast } from 'sonner';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
@@ -20,6 +20,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Product } from '@/types/product';
 
 const mockProducts: Product[] = [
@@ -94,6 +95,7 @@ const UpsellBuilder: React.FC<UpsellBuilderProps> = ({ initialData, onSave, prod
     title: '🎁 Oferta exclusiva para completar seu pedido!',
     description: '<p>Parabéns pela sua compra! Como cliente especial, você tem acesso a esta oferta por tempo limitado.</p>',
     productImage: 'https://placehold.co/1000x1000',
+    productImageFile: null,
     productId: '',
     productName: 'Produto Upsell',
     originalPrice: 197.0,
@@ -115,6 +117,15 @@ const UpsellBuilder: React.FC<UpsellBuilderProps> = ({ initialData, onSave, prod
   });
   
   const [showAutoFillAlert, setShowAutoFillAlert] = useState(false);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [dragActive, setDragActive] = useState(false);
+  const [imageError, setImageError] = useState<string | null>(null);
+  
+  useEffect(() => {
+    if (upsellData.productImage) {
+      setImagePreview(upsellData.productImage);
+    }
+  }, []);
   
   const handleChange = (field: string, value: any) => {
     if (field === 'title' || field === 'description' || field === 'productImage') {
@@ -129,6 +140,90 @@ const UpsellBuilder: React.FC<UpsellBuilderProps> = ({ initialData, onSave, prod
       [field]: value
     }));
   };
+  
+  const handleImageUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const url = e.target.value;
+    handleChange('productImage', url);
+    setImagePreview(url);
+    
+    if (url && upsellData.productImageFile) {
+      setUpsellData(prev => ({
+        ...prev,
+        productImageFile: null
+      }));
+    }
+  };
+  
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      validateAndProcessImage(file);
+    }
+  };
+  
+  const validateAndProcessImage = (file: File) => {
+    setImageError(null);
+    
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+    if (!validTypes.includes(file.type)) {
+      setImageError('Formato de arquivo inválido. Use apenas JPG ou PNG.');
+      return;
+    }
+    
+    if (file.size > 2 * 1024 * 1024) {
+      setImageError('Imagem muito grande. O tamanho máximo é 2MB.');
+      return;
+    }
+    
+    const objectUrl = URL.createObjectURL(file);
+    setImagePreview(objectUrl);
+    
+    setUpsellData(prev => ({
+      ...prev,
+      productImageFile: file,
+      productImage: ''
+    }));
+    
+    setFieldsEdited(prev => ({
+      ...prev,
+      productImage: true
+    }));
+  };
+  
+  const handleRemoveImage = () => {
+    setImagePreview(null);
+    setUpsellData(prev => ({
+      ...prev,
+      productImage: '',
+      productImageFile: null
+    }));
+    setFieldsEdited(prev => ({
+      ...prev,
+      productImage: true
+    }));
+    setImageError(null);
+  };
+  
+  const handleDrag = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (e.type === 'dragenter' || e.type === 'dragover') {
+      setDragActive(true);
+    } else if (e.type === 'dragleave') {
+      setDragActive(false);
+    }
+  }, []);
+  
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      validateAndProcessImage(e.dataTransfer.files[0]);
+    }
+  }, []);
   
   const handleThemeChange = (field: string, value: any) => {
     setUpsellData(prev => ({
@@ -160,10 +255,13 @@ const UpsellBuilder: React.FC<UpsellBuilderProps> = ({ initialData, onSave, prod
         productName: selectedProduct.name,
         title: `🎁 Oferta especial: ${selectedProduct.name}!`,
         description: selectedProduct.description || '<p>Detalhes do produto não disponíveis. Você pode adicionar uma descrição manualmente.</p>',
-        productImage: selectedProduct.imageUrl || 'https://placehold.co/1000x1000',
+        productImage: selectedProduct.imageUrl || '',
+        productImageFile: null,
         originalPrice: selectedProduct.price,
         discountPrice: Math.round(selectedProduct.price * 0.7)
       }));
+      
+      setImagePreview(selectedProduct.imageUrl || null);
       
       setFieldsEdited({
         title: false,
@@ -187,14 +285,38 @@ const UpsellBuilder: React.FC<UpsellBuilderProps> = ({ initialData, onSave, prod
     setShowConfirmDialog(false);
   };
   
+  const validateBeforeSave = () => {
+    let isValid = true;
+    
+    if (!upsellData.productImage && !upsellData.productImageFile) {
+      toast.error("Imagem necessária", {
+        description: "Você precisa adicionar uma imagem para exibir no upsell."
+      });
+      isValid = false;
+    }
+    
+    return isValid;
+  };
+  
   const handleSave = async () => {
+    if (!validateBeforeSave()) {
+      return;
+    }
+    
     setSaving(true);
     
     try {
       await new Promise(resolve => setTimeout(resolve, 1000));
       
+      const dataToSave = { ...upsellData };
+      
+      if (upsellData.productImageFile) {
+        dataToSave.productImage = imagePreview;
+        delete dataToSave.productImageFile;
+      }
+      
       if (onSave) {
-        onSave(upsellData);
+        onSave(dataToSave);
       }
       
       toast.success("Upsell salvo com sucesso!", {
@@ -212,6 +334,10 @@ const UpsellBuilder: React.FC<UpsellBuilderProps> = ({ initialData, onSave, prod
   };
   
   const handlePreview = () => {
+    if (!validateBeforeSave()) {
+      return;
+    }
+    
     localStorage.setItem('upsell-preview-data', JSON.stringify(upsellData));
     navigate(`/marketing/upsell/${upsellData.id}/preview`);
   };
@@ -304,6 +430,75 @@ const UpsellBuilder: React.FC<UpsellBuilderProps> = ({ initialData, onSave, prod
                 </p>
               </div>
               
+              <div className="space-y-4">
+                <Label>Imagem Destaque do Upsell</Label>
+                
+                <div 
+                  className={`border-2 border-dashed rounded-lg p-6 transition-colors ${dragActive ? 'border-primary bg-primary/5' : 'border-muted-foreground/25'}`}
+                  onDragEnter={handleDrag}
+                  onDragOver={handleDrag}
+                  onDragLeave={handleDrag}
+                  onDrop={handleDrop}
+                >
+                  {imagePreview ? (
+                    <div className="relative">
+                      <img 
+                        src={imagePreview} 
+                        alt="Preview" 
+                        className="max-h-64 mx-auto rounded-md object-contain"
+                      />
+                      <Button 
+                        size="icon" 
+                        variant="destructive" 
+                        className="absolute top-2 right-2 h-8 w-8"
+                        onClick={handleRemoveImage}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center py-4">
+                      <ImageIcon className="h-10 w-10 mb-2 text-muted-foreground" />
+                      <p className="text-sm font-medium mb-1">Arraste uma imagem ou clique para fazer upload</p>
+                      <p className="text-xs text-muted-foreground mb-4">Formatos: JPG, PNG (Max: 2MB, Ideal: 1000x1000px)</p>
+                      <Button 
+                        variant="outline" 
+                        className="gap-2" 
+                        onClick={() => document.getElementById('imageUpload')?.click()}
+                      >
+                        <Upload className="h-4 w-4" />
+                        Escolher arquivo
+                      </Button>
+                    </div>
+                  )}
+                  
+                  <input 
+                    type="file" 
+                    id="imageUpload" 
+                    accept=".jpg,.jpeg,.png" 
+                    onChange={handleImageUpload} 
+                    className="hidden" 
+                  />
+                </div>
+                
+                {imageError && (
+                  <div className="text-sm text-destructive mt-1">{imageError}</div>
+                )}
+                
+                <div className="space-y-2 mt-2">
+                  <Label htmlFor="imageUrl">Ou insira uma URL de imagem</Label>
+                  <Input 
+                    id="imageUrl" 
+                    value={upsellData.productImage}
+                    onChange={handleImageUrlChange}
+                    placeholder="https://exemplo.com/imagem.jpg"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Se você inserir uma URL e fizer upload de um arquivo, o arquivo terá prioridade.
+                  </p>
+                </div>
+              </div>
+              
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="productName">Nome do Produto</Label>
@@ -315,18 +510,6 @@ const UpsellBuilder: React.FC<UpsellBuilderProps> = ({ initialData, onSave, prod
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="productImage">URL da Imagem</Label>
-                  <Input 
-                    id="productImage" 
-                    value={upsellData.productImage}
-                    onChange={(e) => handleChange('productImage', e.target.value)}
-                    placeholder="https://..."
-                  />
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
                   <Label htmlFor="originalPrice">Preço Original (R$)</Label>
                   <Input 
                     id="originalPrice" 
@@ -335,7 +518,9 @@ const UpsellBuilder: React.FC<UpsellBuilderProps> = ({ initialData, onSave, prod
                     onChange={(e) => handleChange('originalPrice', parseFloat(e.target.value))}
                   />
                 </div>
-                
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="discountPrice">Preço com Desconto (R$)</Label>
                   <Input 
@@ -345,9 +530,7 @@ const UpsellBuilder: React.FC<UpsellBuilderProps> = ({ initialData, onSave, prod
                     onChange={(e) => handleChange('discountPrice', parseFloat(e.target.value))}
                   />
                 </div>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                
                 <div className="space-y-2">
                   <Label htmlFor="buttonText">Texto do Botão Principal</Label>
                   <Input 
@@ -356,7 +539,9 @@ const UpsellBuilder: React.FC<UpsellBuilderProps> = ({ initialData, onSave, prod
                     onChange={(e) => handleChange('buttonText', e.target.value)}
                   />
                 </div>
-                
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="declineText">Texto do Botão Recusar</Label>
                   <Input 
@@ -365,20 +550,21 @@ const UpsellBuilder: React.FC<UpsellBuilderProps> = ({ initialData, onSave, prod
                     onChange={(e) => handleChange('declineText', e.target.value)}
                   />
                 </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="redirectUrl">URL de Redirecionamento</Label>
+                  <Input 
+                    id="redirectUrl" 
+                    value={upsellData.redirectUrl}
+                    onChange={(e) => handleChange('redirectUrl', e.target.value)}
+                    placeholder="https://..."
+                  />
+                </div>
               </div>
               
-              <div className="space-y-2">
-                <Label htmlFor="redirectUrl">URL de Redirecionamento</Label>
-                <Input 
-                  id="redirectUrl" 
-                  value={upsellData.redirectUrl}
-                  onChange={(e) => handleChange('redirectUrl', e.target.value)}
-                  placeholder="https://..."
-                />
-                <p className="text-xs text-muted-foreground">
-                  Para onde o cliente será direcionado após aceitar ou recusar a oferta.
-                </p>
-              </div>
+              <p className="text-xs text-muted-foreground">
+                URL para onde o cliente será direcionado após aceitar ou recusar a oferta.
+              </p>
             </TabsContent>
             
             <TabsContent value="appearance" className="space-y-6">

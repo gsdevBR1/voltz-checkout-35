@@ -12,7 +12,8 @@ const CriarUpsellPage = () => {
   const { productId } = useParams<{ productId?: string }>();
   
   const handleSave = (data: any) => {
-    // In a real implementation, this would save the data to your backend
+    // In a real implementation, this would handle file upload
+    // and save the data to your backend
     console.log('Upsell data saved:', data);
     
     // Show success message
