@@ -25,7 +25,7 @@ import { OrderBump, OrderBumpFormData } from '@/types/orderBump';
 
 const formSchema = z.object({
   name: z.string().min(1, { message: "Nome é obrigatório" }),
-  description: z.string().min(1, { message: "Descrição é obrigatória" }),
+  description: z.string().optional(),
   isActive: z.boolean().default(true),
   triggerProductIds: z.array(z.string()).min(1, { 
     message: "Você precisa escolher ao menos um produto onde o OrderBump será aplicado" 
@@ -57,7 +57,7 @@ const OrderBumpForm: React.FC<OrderBumpFormProps> = ({
     resolver: zodResolver(formSchema),
     defaultValues: initialData ? {
       name: initialData.name,
-      description: initialData.description,
+      description: initialData.description || '',
       isActive: initialData.isActive,
       triggerProductIds: initialData.triggerProductIds,
       offerProductIds: initialData.offerProductIds
@@ -140,9 +140,9 @@ const OrderBumpForm: React.FC<OrderBumpFormProps> = ({
                   <FormItem>
                     <FormLabel className="text-base">Descrição (será exibida no checkout)</FormLabel>
                     <FormControl>
-                      <Textarea 
+                      <Input 
                         placeholder="Ex: Adicione 12 meses de garantia ao seu produto" 
-                        className="h-28 resize-none text-base"
+                        className="h-11"
                         {...field} 
                       />
                     </FormControl>

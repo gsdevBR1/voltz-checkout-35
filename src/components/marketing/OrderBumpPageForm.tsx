@@ -24,6 +24,7 @@ import { OrderBump, OrderBumpFormData } from '@/types/orderBump';
 
 const formSchema = z.object({
   name: z.string().min(1, { message: "Nome é obrigatório" }),
+  description: z.string().optional(),
   isActive: z.boolean().default(true),
   triggerProductIds: z.array(z.string()).min(1, { 
     message: "Você precisa escolher ao menos um produto onde o OrderBump será aplicado" 
@@ -54,11 +55,13 @@ const OrderBumpPageForm: React.FC<OrderBumpPageFormProps> = ({
     resolver: zodResolver(formSchema),
     defaultValues: initialData ? {
       name: initialData.name,
+      description: initialData.description || '',
       isActive: initialData.isActive,
       triggerProductIds: initialData.triggerProductIds,
       offerProductIds: initialData.offerProductIds,
     } : {
       name: '',
+      description: '',
       isActive: true,
       triggerProductIds: [],
       offerProductIds: [],
@@ -121,6 +124,27 @@ const OrderBumpPageForm: React.FC<OrderBumpPageFormProps> = ({
                     </FormDescription>
                     <FormControl>
                       <Input placeholder="Ex: Garantia Estendida" className="h-11" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-base">Descrição (opcional)</FormLabel>
+                    <FormDescription>
+                      Uma descrição interna para este OrderBump
+                    </FormDescription>
+                    <FormControl>
+                      <Input
+                        placeholder="Ex: Oferta especial para clientes do curso"
+                        className="h-11"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
