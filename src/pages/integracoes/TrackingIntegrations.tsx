@@ -14,9 +14,9 @@ const trackingIntegrations: TrackingIntegration[] = [
     category: 'tracking',
     platform: 'utmify',
     status: 'not_integrated',
-    logo: 'https://media.licdn.com/dms/image/C4D0BAQFm9hiVZxp56g/company-logo_200_200/0/1660657124131/utmify_logo?e=1752451200&v=beta&t=sRwH-WTNfLb1upVbDTwSEHRX7hWdDaFEiAqkCAMa0jg',
+    logo: 'https://utmify.com.br/logo/logo-white.png',
     isNative: false,
-    externalUrl: 'https://utmify.me'
+    externalUrl: 'https://utmify.com.br'
   },
   {
     id: 'xtracky',
