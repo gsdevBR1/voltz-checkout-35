@@ -17,3 +17,41 @@ export interface RecoverySettings {
     enabled: boolean;
   };
 }
+
+export interface RecoveryStats {
+  period: string;
+  email: {
+    sends: number;
+    opens: number;
+    clicks: number;
+    recovered: number;
+    conversionRate: number;
+  };
+  sms: {
+    sends: number;
+    delivered: number;
+    clicks: number;
+    recovered: number;
+    conversionRate: number;
+  };
+  whatsapp: {
+    sends: number;
+    delivered: number;
+    read: number;
+    clicked: number;
+    recovered: number;
+    conversionRate: number;
+  };
+}
+
+export interface RecoveryLogEntry {
+  id: string;
+  channel: 'email' | 'sms' | 'whatsapp';
+  timestamp: Date;
+  customerEmail?: string;
+  customerPhone?: string;
+  messageContent: string;
+  status: 'sent' | 'delivered' | 'opened' | 'clicked' | 'converted' | 'failed';
+  recoveryTime?: Date;
+  orderValue?: number;
+}
