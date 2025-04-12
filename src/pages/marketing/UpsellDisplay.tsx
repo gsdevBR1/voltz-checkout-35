@@ -25,6 +25,17 @@ const defaultUpsellTemplate = {
   redirectType: 'url',
   redirectUpsellId: '',
   fallbackRedirectUrl: 'https://voltz.checkout/obrigado',
+  // Downsell configuration
+  hasDownsell: false,
+  downsellProductId: '',
+  downsellProductName: '',
+  downsellPrice: 0,
+  downsellImage: '',
+  downsellDescription: '',
+  downsellRedirectType: 'url',
+  downsellRedirectUpsellId: '',
+  downsellRedirectUrl: 'https://voltz.checkout/obrigado',
+  // Display options
   showOriginalPrice: true,
   showScarcityBadge: true,
   scarcityText: 'Restam poucas unidades!',
@@ -64,11 +75,43 @@ const mockUpsells = [
   },
 ];
 
+// Mock downsells for demonstration
+const mockDownsells = [
+  {
+    id: 'down_1',
+    upsellId: 'ups_1',
+    name: 'Downsell do Curso Avançado: E-book Básico',
+    active: true,
+    productName: 'E-book Introdução à Fotografia',
+    price: 47.0,
+    description: 'Não quer o curso completo? Este e-book contém o básico para você começar!',
+    imageUrl: 'https://placehold.co/1000x1000/dc2626/ffffff?text=E-book',
+    path: '/marketing/upsell/ups_1/downsell'
+  },
+  {
+    id: 'down_2',
+    upsellId: 'ups_3',
+    name: 'Downsell da Mentoria: Consulta Express',
+    active: true,
+    productName: 'Consulta Express (15 minutos)',
+    price: 29.90,
+    description: 'Tire suas dúvidas principais em uma consulta rápida de 15 minutos.',
+    imageUrl: 'https://placehold.co/1000x1000/8b5cf6/ffffff?text=Consulta',
+    path: '/marketing/upsell/ups_3/downsell'
+  }
+];
+
 // Mock data - in a real implementation, this would come from your API/database
 // Merge default template with any saved user preferences
 const mockUpsellData = {
   id: '1',
   ...defaultUpsellTemplate,
+  hasDownsell: true,
+  downsellProductId: 'down_1',
+  downsellProductName: 'E-book Introdução à Fotografia',
+  downsellPrice: 47.0,
+  downsellImage: 'https://placehold.co/1000x1000/dc2626/ffffff?text=E-book',
+  downsellDescription: 'Não quer o curso completo? Este e-book contém o básico para você começar!',
 };
 
 const UpsellDisplay: React.FC = () => {
@@ -77,18 +120,41 @@ const UpsellDisplay: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [countdown, setCountdown] = useState(mockUpsellData.countdownMinutes * 60);
   const [upsellData, setUpsellData] = useState(mockUpsellData);
+  const [isDownsell, setIsDownsell] = useState(false);
   
   // In a real implementation, fetch upsell data based on ID
   useEffect(() => {
     // Simulating API fetch
     const fetchUpsellData = async () => {
+      // Check if it's a downsell page
+      const downsellPath = window.location.pathname.includes('/downsell');
+      setIsDownsell(downsellPath);
+      
       // In a real app, this would be an API call like:
-      // const response = await fetch(`/api/upsells/${id}`);
+      // const response = await fetch(`/api/upsells/${id}${downsellPath ? '/downsell' : ''}`);
       // const data = await response.json();
       // setUpsellData({...defaultUpsellTemplate, ...data});
       
-      // For demo, we're just using the mock data with default template
-      setUpsellData(mockUpsellData);
+      // For demo, we're using mock data
+      if (downsellPath && id) {
+        // Find the downsell for this upsell ID
+        const downsell = mockDownsells.find(d => d.upsellId === id);
+        if (downsell) {
+          setUpsellData({
+            ...upsellData,
+            title: '🔥 Espere! Temos uma oferta especial para você!',
+            description: downsell.description,
+            productName: downsell.productName,
+            productImage: downsell.imageUrl,
+            discountPrice: downsell.price,
+            originalPrice: downsell.price * 1.5, // Just for demonstration
+            id: downsell.id,
+          });
+        }
+      } else {
+        // Just using the mock data with default template for regular upsells
+        setUpsellData(mockUpsellData);
+      }
     };
     
     fetchUpsellData();
@@ -119,20 +185,58 @@ const UpsellDisplay: React.FC = () => {
   
   // Handle redirection based on settings
   const handleRedirection = (accepted: boolean) => {
-    // In a real app, these checks would be more robust
-    if (upsellData.redirectType === 'upsell' && upsellData.redirectUpsellId) {
-      const nextUpsell = mockUpsells.find(u => u.id === upsellData.redirectUpsellId);
+    // Different logic for downsell pages vs regular upsell pages
+    if (isDownsell) {
+      // Downsell redirection logic
+      if (upsellData.downsellRedirectType === 'upsell' && upsellData.downsellRedirectUpsellId) {
+        const nextUpsell = mockUpsells.find(u => u.id === upsellData.downsellRedirectUpsellId);
+        
+        if (nextUpsell && nextUpsell.active) {
+          // Redirect to the next upsell
+          console.log(`Redirecting to next upsell after downsell: ${nextUpsell.name}`);
+          navigate(nextUpsell.path);
+          return true;
+        } else {
+          // Use fallback URL if next upsell is inactive or not found
+          console.log(`Next upsell unavailable after downsell, using fallback URL: ${upsellData.fallbackRedirectUrl}`);
+          window.location.href = upsellData.fallbackRedirectUrl;
+          return true;
+        }
+      }
       
-      if (nextUpsell && nextUpsell.active) {
-        // Redirect to the next upsell
-        console.log(`Redirecting to next upsell: ${nextUpsell.name}`);
-        navigate(nextUpsell.path);
-        return true;
-      } else {
-        // Use fallback URL if next upsell is inactive or not found
-        console.log(`Next upsell unavailable, using fallback URL: ${upsellData.fallbackRedirectUrl}`);
-        window.location.href = upsellData.fallbackRedirectUrl;
-        return true;
+      // Default behavior for downsell: redirect to the thank you page
+      window.location.href = upsellData.downsellRedirectUrl || upsellData.fallbackRedirectUrl;
+      return true;
+    } else {
+      // Regular upsell redirection logic
+      // If declined and has downsell, redirect to downsell page
+      if (!accepted && upsellData.hasDownsell) {
+        // Check if there's an active downsell for this upsell
+        const downsell = mockDownsells.find(d => d.upsellId === id);
+        
+        if (downsell && downsell.active) {
+          console.log(`Customer declined upsell, redirecting to downsell: ${downsell.name}`);
+          navigate(downsell.path);
+          return true;
+        }
+        // If no downsell found or not active, continue with normal redirection
+      }
+      
+      // Regular upsell redirection
+      if (upsellData.redirectType === 'upsell' && upsellData.redirectUpsellId) {
+        const nextUpsell = mockUpsells.find(u => u.id === upsellData.redirectUpsellId);
+        
+        if (nextUpsell && nextUpsell.active) {
+          // Redirect to the next upsell
+          console.log(`Redirecting to next upsell: ${nextUpsell.name}`);
+          navigate(nextUpsell.path);
+          return true;
+        } else {
+          // Use fallback URL if next upsell is inactive or not found
+          console.log(`Next upsell unavailable, using fallback URL: ${upsellData.fallbackRedirectUrl}`);
+          window.location.href = upsellData.fallbackRedirectUrl;
+          return true;
+        }
       }
     }
     
@@ -155,7 +259,7 @@ const UpsellDisplay: React.FC = () => {
       });
       
       // Log conversion
-      console.log('Upsell accepted:', upsellData.id);
+      console.log(`${isDownsell ? 'Downsell' : 'Upsell'} accepted:`, upsellData.id);
       
       // Handle redirection
       const redirected = handleRedirection(true);
@@ -178,7 +282,7 @@ const UpsellDisplay: React.FC = () => {
   
   const handleDecline = () => {
     // Log decline
-    console.log('Upsell declined:', upsellData.id);
+    console.log(`${isDownsell ? 'Downsell' : 'Upsell'} declined:`, upsellData.id);
     
     // Handle redirection
     const redirected = handleRedirection(false);

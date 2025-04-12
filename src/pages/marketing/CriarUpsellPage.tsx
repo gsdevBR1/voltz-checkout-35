@@ -6,7 +6,6 @@ import { toast } from 'sonner';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Eye } from 'lucide-react';
-import ProductSelector from '@/components/marketing/ProductSelector';
 import { Product, ProductStatus, ProductType } from '@/types/product';
 
 // Mock products for the ProductSelector

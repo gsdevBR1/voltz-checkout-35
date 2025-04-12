@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useNavigate } from 'react-router-dom';
-import { ChevronRight, Eye, Save, Clock, Paintbrush, Type, Layout, AlertCircle, ImageIcon, X, Upload, Search, CheckSquare, Filter, ListFilter, ExternalLink, CornerDownRight } from 'lucide-react';
+import { ChevronRight, Eye, Save, Clock, Paintbrush, Type, Layout, AlertCircle, ImageIcon, X, Upload, Search, CheckSquare, Filter, ListFilter, ExternalLink, CornerDownRight, ArrowDown } from 'lucide-react';
 import { toast } from 'sonner';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
@@ -121,6 +121,17 @@ const UpsellBuilder: React.FC<UpsellBuilderProps> = ({ initialData, onSave, prod
     fallbackRedirectUrl: 'https://voltz.checkout/obrigado',
     showOriginalPrice: true,
     layout: 'vertical',
+    // Downsell fields
+    hasDownsell: false,
+    downsellProductId: '',
+    downsellProductName: '',
+    downsellOriginalPrice: 0,
+    downsellPrice: 0,
+    downsellDescription: '',
+    downsellImage: '',
+    downsellRedirectType: 'url',
+    downsellRedirectUpsellId: '',
+    downsellRedirectUrl: 'https://voltz.checkout/obrigado',
     theme: {
       background: '#ffffff',
       text: '#333333',
@@ -411,6 +422,14 @@ const UpsellBuilder: React.FC<UpsellBuilderProps> = ({ initialData, onSave, prod
       isValid = false;
     }
     
+    // Validate downsell settings if enabled
+    if (upsellData.hasDownsell && !upsellData.downsellProductId) {
+      toast.error("Produto do Downsell necessário", {
+        description: "Você ativou o Downsell mas não selecionou um produto para ele."
+      });
+      isValid = false;
+    }
+    
     if (hasConflictingProducts) {
       setShowReplaceUpsellDialog(true);
       return false;
@@ -482,12 +501,55 @@ const UpsellBuilder: React.FC<UpsellBuilderProps> = ({ initialData, onSave, prod
     }));
   };
   
+  // New handlers for downsell functionality
+  const handleDownsellChange = (checked: boolean) => {
+    setUpsellData(prev => ({
+      ...prev,
+      hasDownsell: checked
+    }));
+  };
+  
+  const handleDownsellProductSelect = (productId: string) => {
+    const selectedProduct = mockProducts.find(p => p.id === productId);
+    
+    if (selectedProduct) {
+      setUpsellData(prev => ({
+        ...prev,
+        downsellProductId: selectedProduct.id,
+        downsellProductName: selectedProduct.name,
+        downsellOriginalPrice: selectedProduct.price,
+        downsellPrice: Math.round(selectedProduct.price * 0.7),
+        downsellDescription: selectedProduct.description || '<p>Detalhes do produto não disponíveis. Você pode adicionar uma descrição manualmente.</p>',
+        downsellImage: selectedProduct.imageUrl || '',
+      }));
+    }
+  };
+  
+  const handleDownsellRedirectTypeChange = (value: string) => {
+    setUpsellData(prev => ({
+      ...prev,
+      downsellRedirectType: value,
+      downsellRedirectUpsellId: value === 'url' ? '' : prev.downsellRedirectUpsellId
+    }));
+  };
+  
+  const handleDownsellRedirectUpsellChange = (upsellId: string) => {
+    setUpsellData(prev => ({
+      ...prev,
+      downsellRedirectUpsellId: upsellId
+    }));
+  };
+  
   const getSelectedTriggerProducts = () => {
     return mockProducts.filter(p => upsellData.triggerProductIds.includes(p.id));
   };
   
   const getSelectedOfferProduct = () => {
     return mockProducts.find(p => p.id === upsellData.productId);
+  };
+  
+  const getSelectedDownsellProduct = () => {
+    return mockProducts.find(p => p.id === upsellData.downsellProductId);
   };
 
   return (
@@ -583,7 +645,7 @@ const UpsellBuilder: React.FC<UpsellBuilderProps> = ({ initialData, onSave, prod
           </div>
           
           <Tabs defaultValue="content" className="w-full">
-            <TabsList className="grid w-full grid-cols-5 mb-6">
+            <TabsList className="grid w-full grid-cols-6 mb-6">
               <TabsTrigger value="content">
                 <Type className="h-4 w-4 mr-2" />
                 Conteúdo
@@ -599,6 +661,10 @@ const UpsellBuilder: React.FC<UpsellBuilderProps> = ({ initialData, onSave, prod
               <TabsTrigger value="redirection">
                 <CornerDownRight className="h-4 w-4 mr-2" />
                 Redirecionamento
+              </TabsTrigger>
+              <TabsTrigger value="downsell">
+                <ArrowDown className="h-4 w-4 mr-2" />
+                Downsell
               </TabsTrigger>
               <TabsTrigger value="layout">
                 <Layout className="h-4 w-4 mr-2" />
@@ -1051,6 +1117,174 @@ const UpsellBuilder: React.FC<UpsellBuilderProps> = ({ initialData, onSave, prod
                     </div>
                   </div>
                 </div>
+              </div>
+            </TabsContent>
+            
+            {/* New Downsell tab */}
+            <TabsContent value="downsell" className="space-y-6">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label htmlFor="hasDownsell" className="text-base">Ativar Downsell</Label>
+                    <p className="text-sm text-muted-foreground">
+                      Oferece um produto alternativo quando o cliente recusar o upsell principal
+                    </p>
+                  </div>
+                  <Switch 
+                    id="hasDownsell"
+                    checked={upsellData.hasDownsell}
+                    onCheckedChange={handleDownsellChange}
+                  />
+                </div>
+                
+                {upsellData.hasDownsell && (
+                  <div className="space-y-6 mt-4 pl-4 border-l-2 border-gray-100">
+                    <div className="space-y-2">
+                      <Label htmlFor="downsellProduct">Produto a ser ofertado no downsell</Label>
+                      <Select 
+                        value={upsellData.downsellProductId}
+                        onValueChange={handleDownsellProductSelect}
+                      >
+                        <SelectTrigger id="downsellProduct">
+                          <SelectValue placeholder="Escolha um produto" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {mockProducts.map(product => (
+                            <SelectItem key={product.id} value={product.id}>
+                              {product.name} - R${product.price.toFixed(2)}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      
+                      {getSelectedDownsellProduct() && (
+                        <div className="flex items-center gap-2 mt-2">
+                          <div className="bg-primary/20 text-primary px-2 py-1 rounded-md text-xs">
+                            {getSelectedDownsellProduct()?.name}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="downsellPrice">Preço especial do downsell</Label>
+                      <Input 
+                        id="downsellPrice" 
+                        type="number"
+                        value={upsellData.downsellPrice}
+                        onChange={(e) => handleChange('downsellPrice', parseFloat(e.target.value))}
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Este preço promocional será oferecido quando o cliente recusar o upsell principal.
+                      </p>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="downsellDescription">Descrição personalizada (opcional)</Label>
+                      <Textarea 
+                        id="downsellDescription" 
+                        value={upsellData.downsellDescription}
+                        onChange={(e) => handleChange('downsellDescription', e.target.value)}
+                        placeholder="Deixe em branco para usar a descrição padrão do produto"
+                        className="min-h-[100px]"
+                      />
+                    </div>
+                    
+                    <div className="pt-4 border-t mt-4">
+                      <h4 className="font-medium mb-3">Redirecionamento após o Downsell</h4>
+                      
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="downsellRedirectType">Escolher redirecionamento para</Label>
+                          <Select 
+                            value={upsellData.downsellRedirectType}
+                            onValueChange={handleDownsellRedirectTypeChange}
+                          >
+                            <SelectTrigger id="downsellRedirectType">
+                              <SelectValue placeholder="Selecione o tipo de redirecionamento" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="url">URL personalizada</SelectItem>
+                              <SelectItem value="upsell">Outro Upsell One Click</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        
+                        {upsellData.downsellRedirectType === 'url' ? (
+                          <div className="space-y-2">
+                            <Label htmlFor="downsellRedirectUrl">URL de redirecionamento</Label>
+                            <Input 
+                              id="downsellRedirectUrl" 
+                              value={upsellData.downsellRedirectUrl}
+                              onChange={(e) => handleChange('downsellRedirectUrl', e.target.value)}
+                              placeholder="https://..."
+                            />
+                          </div>
+                        ) : (
+                          <div className="space-y-2">
+                            <Label htmlFor="downsellRedirectUpsellId">Selecionar próximo Upsell</Label>
+                            <Select 
+                              value={upsellData.downsellRedirectUpsellId}
+                              onValueChange={handleDownsellRedirectUpsellChange}
+                            >
+                              <SelectTrigger id="downsellRedirectUpsellId">
+                                <SelectValue placeholder="Escolha o próximo Upsell" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {mockUpsells.map(upsell => (
+                                  <SelectItem 
+                                    key={upsell.id} 
+                                    value={upsell.id}
+                                    disabled={upsell.id === upsellData.id || !upsell.isActive}
+                                  >
+                                    {upsell.name} {!upsell.isActive && "(Inativo)"}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    
+                    {upsellData.downsellProductId && (
+                      <div className="bg-muted p-4 rounded-lg mt-6">
+                        <h4 className="font-medium mb-2">Pré-visualização do Downsell</h4>
+                        <div className="flex items-center gap-4">
+                          {upsellData.downsellImage && (
+                            <img 
+                              src={upsellData.downsellImage} 
+                              alt={upsellData.downsellProductName} 
+                              className="w-16 h-16 object-cover rounded"
+                            />
+                          )}
+                          <div>
+                            <h5 className="font-medium">{upsellData.downsellProductName}</h5>
+                            <div className="flex items-center gap-2 mt-1">
+                              <span className="text-green-600 font-medium">
+                                {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(upsellData.downsellPrice)}
+                              </span>
+                              {upsellData.downsellOriginalPrice > upsellData.downsellPrice && (
+                                <span className="text-sm line-through text-gray-400">
+                                  {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(upsellData.downsellOriginalPrice)}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+                
+                {!upsellData.hasDownsell && (
+                  <Alert variant="default" className="bg-blue-50 border-blue-200 mt-4">
+                    <AlertCircle className="h-4 w-4 text-blue-600" />
+                    <AlertDescription className="text-blue-700">
+                      Quando o Downsell está desativado, o cliente será redirecionado conforme a configuração da aba "Redirecionamento".
+                    </AlertDescription>
+                  </Alert>
+                )}
               </div>
             </TabsContent>
             
