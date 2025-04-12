@@ -168,17 +168,19 @@ const EditarOrderBumpPage = () => {
         </Button>
       }
     >
-      <OrderBumpForm
-        initialData={orderBump}
-        products={mockProducts}
-        onSubmit={handleSubmit}
-        onCancel={() => navigate('/marketing/order-bumps')}
-        onDuplicate={() => {
-          navigate('/marketing/order-bumps/criar', { 
-            state: { duplicateFrom: orderBump }
-          });
-        }}
-      />
+      <div className="max-w-5xl mx-auto p-2">
+        <OrderBumpForm
+          initialData={orderBump}
+          products={mockProducts}
+          onSubmit={handleSubmit}
+          onCancel={() => navigate('/marketing/order-bumps')}
+          onDuplicate={() => {
+            navigate('/marketing/order-bumps/criar', { 
+              state: { duplicateFrom: orderBump }
+            });
+          }}
+        />
+      </div>
     </MarketingLayout>
   );
 };

@@ -244,7 +244,7 @@ const OrderBumpsPage = () => {
           if (!open) setDuplicatingOrderBump(null);
         }}
       >
-        <DialogContent className="max-w-4xl">
+        <DialogContent className="max-w-5xl mx-auto my-8 p-6">
           <OrderBumpForm
             products={mockProducts}
             initialData={duplicatingOrderBump || undefined}
@@ -264,7 +264,7 @@ const OrderBumpsPage = () => {
           if (!open) setEditingOrderBump(null);
         }}
       >
-        <DialogContent className="max-w-4xl">
+        <DialogContent className="max-w-5xl mx-auto my-8 p-6">
           {editingOrderBump && (
             <OrderBumpForm
               products={mockProducts}
