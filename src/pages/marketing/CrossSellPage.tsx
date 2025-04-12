@@ -8,16 +8,17 @@ import { Separator } from '@/components/ui/separator';
 import MarketingLayout from '@/components/marketing/MarketingLayout';
 import ProductSelector from '@/components/marketing/ProductSelector';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Product, ProductType, ProductStatus } from '@/types/product';
 
 // Mock products for demo
-const mockProducts = [
+const mockProducts: Product[] = [
   {
     id: "prod_1",
     name: "iPhone 15 Pro",
-    type: "physical",
+    type: "physical" as ProductType,
     price: 5999.0,
     description: "O mais recente iPhone com tecnologia avançada.",
-    status: "active",
+    status: "active" as ProductStatus,
     imageUrl: "https://placehold.co/1000x1000/2563eb/ffffff?text=iPhone",
     createdAt: new Date(),
     updatedAt: new Date()
@@ -25,10 +26,10 @@ const mockProducts = [
   {
     id: "prod_2",
     name: "Whey Protein",
-    type: "physical",
+    type: "physical" as ProductType,
     price: 147.0,
     description: "Suplemento proteico para atletas e praticantes de atividade física.",
-    status: "active",
+    status: "active" as ProductStatus,
     imageUrl: "https://placehold.co/1000x1000/10b981/ffffff?text=Whey",
     createdAt: new Date(),
     updatedAt: new Date()
@@ -36,10 +37,10 @@ const mockProducts = [
   {
     id: "prod_3",
     name: "Curso de Fotografia",
-    type: "digital",
+    type: "digital" as ProductType,
     price: 129.90,
     description: "Aprenda técnicas avançadas de fotografia digital.",
-    status: "active",
+    status: "active" as ProductStatus,
     imageUrl: "https://placehold.co/1000x1000/f59e0b/ffffff?text=Curso",
     createdAt: new Date(),
     updatedAt: new Date()

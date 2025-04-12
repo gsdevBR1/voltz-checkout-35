@@ -8,16 +8,17 @@ import { Separator } from '@/components/ui/separator';
 import MarketingLayout from '@/components/marketing/MarketingLayout';
 import ProductSelector from '@/components/marketing/ProductSelector';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Product, ProductType, ProductStatus } from '@/types/product';
 
 // Mock products for demo
-const mockProducts = [
+const mockProducts: Product[] = [
   {
     id: "prod_1",
     name: "Curso Avançado de Marketing Digital",
-    type: "digital",
+    type: "digital" as ProductType,
     price: 197.0,
     description: "Aprenda estratégias avançadas de marketing digital com este curso completo.",
-    status: "active",
+    status: "active" as ProductStatus,
     imageUrl: "https://placehold.co/1000x1000/2563eb/ffffff?text=Curso+Marketing",
     createdAt: new Date(),
     updatedAt: new Date()
@@ -25,10 +26,10 @@ const mockProducts = [
   {
     id: "prod_2",
     name: "E-book: Transformação Digital para Empresas",
-    type: "digital",
+    type: "digital" as ProductType,
     price: 47.0,
     description: "Guia completo para implementar a transformação digital no seu negócio.",
-    status: "active",
+    status: "active" as ProductStatus,
     imageUrl: "https://placehold.co/1000x1000/10b981/ffffff?text=E-book",
     createdAt: new Date(),
     updatedAt: new Date()
@@ -36,10 +37,10 @@ const mockProducts = [
   {
     id: "prod_3",
     name: "Template de Planilha para Gestão Financeira",
-    type: "digital",
+    type: "digital" as ProductType,
     price: 29.90,
     description: "Controle suas finanças com esta planilha profissional.",
-    status: "active",
+    status: "active" as ProductStatus,
     imageUrl: "https://placehold.co/1000x1000/f59e0b/ffffff?text=Planilha",
     createdAt: new Date(),
     updatedAt: new Date()
