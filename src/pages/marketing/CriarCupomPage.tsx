@@ -1,5 +1,6 @@
+
 import React from 'react';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useNavigate } from 'react-router-dom';
@@ -35,7 +36,6 @@ import {
   FormMessage 
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { CurrencyInput } from '@/components/ui/currency-input';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { 
@@ -65,17 +65,16 @@ const cupomSchema = z.object({
       message: 'Código deve conter apenas letras e números, sem espaços'
     }),
   tipoDesconto: z.enum(['valor', 'porcentagem']),
-  valorDesconto: z.number()
-    .nonnegative({ message: 'Valor não pode ser negativo' })
-    .or(z.nan().transform(() => 0)), // Handle NaN as 0
+  valorDesconto: z.coerce.number()
+    .positive({ message: 'Valor deve ser positivo' }),
   ativo: z.boolean().default(true),
   limiteUsoCliente: z.boolean().default(false),
-  limiteTotalUsos: z.number()
+  limiteTotalUsos: z.coerce.number()
     .int({ message: 'Deve ser um número inteiro' })
     .nonnegative({ message: 'Valor não pode ser negativo' })
     .nullable()
     .optional(),
-  valorMinimoPedido: z.number()
+  valorMinimoPedido: z.coerce.number()
     .nonnegative({ message: 'Valor não pode ser negativo' })
     .nullable()
     .optional(),
@@ -142,7 +141,6 @@ const CriarCupomPage = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Name field - keep existing code */}
                 <FormField
                   control={form.control}
                   name="nome"
@@ -160,7 +158,6 @@ const CriarCupomPage = () => {
                   )}
                 />
                 
-                {/* Code field - keep existing code */}
                 <FormField
                   control={form.control}
                   name="codigo"
@@ -184,7 +181,6 @@ const CriarCupomPage = () => {
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Discount type - keep existing code */}
                 <FormField
                   control={form.control}
                   name="tipoDesconto"
@@ -223,7 +219,6 @@ const CriarCupomPage = () => {
                   )}
                 />
                 
-                {/* UPDATED: Discount value with currency formatting */}
                 <FormField
                   control={form.control}
                   name="valorDesconto"
@@ -232,37 +227,22 @@ const CriarCupomPage = () => {
                       <FormLabel>Valor do Desconto*</FormLabel>
                       <FormControl>
                         <div className="relative">
-                          {tipoDesconto === 'valor' ? (
-                            <Controller
-                              name="valorDesconto"
-                              control={form.control}
-                              render={({ field, fieldState }) => (
-                                <CurrencyInput
-                                  value={field.value}
-                                  onChange={field.onChange}
-                                  error={!!fieldState.error}
-                                  onBlur={field.onBlur}
-                                  name={field.name}
-                                />
-                              )}
-                            />
-                          ) : (
-                            <div className="relative">
-                              <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                                <Percent className="h-4 w-4 text-gray-500" />
-                              </div>
-                              <Input
-                                type="number"
-                                placeholder="10"
-                                className="pl-10 text-right"
-                                {...field}
-                                onChange={(e) => {
-                                  const value = e.target.value === '' ? 0 : parseFloat(e.target.value);
-                                  field.onChange(value);
-                                }}
-                              />
-                            </div>
-                          )}
+                          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                            {tipoDesconto === 'valor' ? (
+                              <span className="text-gray-500">R$</span>
+                            ) : (
+                              <Percent className="h-4 w-4 text-gray-500" />
+                            )}
+                          </div>
+                          <Input
+                            type="number"
+                            placeholder={tipoDesconto === 'valor' ? "20.00" : "10"}
+                            className="pl-10"
+                            {...field}
+                            onChange={(e) => {
+                              field.onChange(e.target.valueAsNumber);
+                            }}
+                          />
                         </div>
                       </FormControl>
                       <FormDescription>
@@ -290,7 +270,6 @@ const CriarCupomPage = () => {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {/* Active toggle - keep existing code */}
               <FormField
                 control={form.control}
                 name="ativo"
@@ -312,7 +291,6 @@ const CriarCupomPage = () => {
                 )}
               />
               
-              {/* Client usage limit toggle - keep existing code */}
               <FormField
                 control={form.control}
                 name="limiteUsoCliente"
@@ -335,7 +313,6 @@ const CriarCupomPage = () => {
               />
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Total usage limit - keep existing code */}
                 <FormField
                   control={form.control}
                   name="limiteTotalUsos"
@@ -346,7 +323,6 @@ const CriarCupomPage = () => {
                         <Input
                           type="number"
                           placeholder="Ex: 100"
-                          className="text-right"
                           {...field}
                           value={field.value === null ? '' : field.value}
                           onChange={(e) => {
@@ -363,7 +339,6 @@ const CriarCupomPage = () => {
                   )}
                 />
                 
-                {/* UPDATED: Minimum order value with currency formatting */}
                 <FormField
                   control={form.control}
                   name="valorMinimoPedido"
@@ -371,19 +346,22 @@ const CriarCupomPage = () => {
                     <FormItem>
                       <FormLabel>Valor Mínimo do Pedido</FormLabel>
                       <FormControl>
-                        <Controller
-                          name="valorMinimoPedido"
-                          control={form.control}
-                          render={({ field, fieldState }) => (
-                            <CurrencyInput
-                              value={field.value}
-                              onChange={field.onChange}
-                              error={!!fieldState.error}
-                              onBlur={field.onBlur}
-                              name={field.name}
-                            />
-                          )}
-                        />
+                        <div className="relative">
+                          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                            <span className="text-gray-500">R$</span>
+                          </div>
+                          <Input
+                            type="number"
+                            placeholder="Ex: 50.00"
+                            className="pl-10"
+                            {...field}
+                            value={field.value === null ? '' : field.value}
+                            onChange={(e) => {
+                              const value = e.target.value === '' ? null : parseFloat(e.target.value);
+                              field.onChange(value);
+                            }}
+                          />
+                        </div>
                       </FormControl>
                       <FormDescription>
                         Valor mínimo do pedido para aplicar o cupom
@@ -394,7 +372,6 @@ const CriarCupomPage = () => {
                 />
               </div>
               
-              {/* Products selection - keep existing code */}
               <FormField
                 control={form.control}
                 name="produtosEspecificos"
@@ -460,7 +437,6 @@ const CriarCupomPage = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Start date - keep existing code */}
                 <FormField
                   control={form.control}
                   name="dataInicio"
@@ -503,7 +479,6 @@ const CriarCupomPage = () => {
                   )}
                 />
                 
-                {/* End date - keep existing code */}
                 <FormField
                   control={form.control}
                   name="dataTermino"

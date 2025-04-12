@@ -25,15 +25,3 @@ export function formatRelativeTime(date: Date): string {
     locale: pt
   })
 }
-
-export function parseCurrencyToNumber(value: string): number | null {
-  if (!value) return null;
-  
-  // Remove currency symbol, spaces and dots, then replace comma with dot
-  const parsed = value
-    .replace(/[R$\s.]/g, '')
-    .replace(',', '.');
-  
-  const number = parseFloat(parsed);
-  return isNaN(number) ? null : number;
-}
