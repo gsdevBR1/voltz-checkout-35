@@ -25,4 +25,16 @@ export interface WebhookLog {
   duration: number;
   event: WebhookEvent;
   payload: string;
+  response?: string;
+  headers?: Record<string, string>;
+  retried?: boolean;
+}
+
+export interface WebhookLogFilters {
+  startDate?: Date;
+  endDate?: Date;
+  status?: number | null;
+  event?: WebhookEvent | null;
+  page: number;
+  perPage: number;
 }
