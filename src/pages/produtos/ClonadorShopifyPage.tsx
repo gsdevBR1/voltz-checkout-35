@@ -12,7 +12,8 @@ import {
   Rocket, 
   ShoppingCart,
   Store,
-  BoxSelect
+  BoxSelect,
+  Code
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -37,23 +38,16 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { ShopifyProduct } from '@/types/shopifyProduct';
+import { formatCurrency } from '@/lib/utils';
 
 const singleProductFormSchema = z.object({
   productLink: z.string()
     .url({ message: "O URL do produto é inválido." })
-    .refine(
-      (url) => url.includes('shopify.com') || url.includes('.myshopify.com'), 
-      { message: "O URL deve ser de uma loja Shopify." }
-    ),
 });
 
 const storeFormSchema = z.object({
   storeLink: z.string()
     .url({ message: "O URL da loja é inválido." })
-    .refine(
-      (url) => url.includes('shopify.com') || url.includes('.myshopify.com'), 
-      { message: "O URL deve ser de uma loja Shopify." }
-    ),
 });
 
 const productFormSchema = z.object({
@@ -72,6 +66,7 @@ const ClonadorShopifyPage: React.FC = () => {
   const [foundProducts, setFoundProducts] = useState<number | null>(null);
   const [isStoreCloningInProgress, setIsStoreCloningInProgress] = useState(false);
   const [storeCloningProgress, setStoreCloningProgress] = useState(0);
+  const [detectionMethod, setDetectionMethod] = useState<'api' | 'scraping' | null>(null);
   const { toast } = useToast();
 
   const singleProductForm = useForm<z.infer<typeof singleProductFormSchema>>({
@@ -97,14 +92,55 @@ const ClonadorShopifyPage: React.FC = () => {
     },
   });
 
+  // Helper function to detect if a URL is likely from a Shopify store
+  const isShopifyStore = (url: string): boolean => {
+    // This would be a more comprehensive check in a real implementation
+    // For now, we'll simulate detection for both myshopify.com domains and custom domains
+    return url.includes('shopify.com') || url.includes('.myshopify.com') || 
+           // Simulating detection of custom Shopify domains
+           url.includes('lojachic.com.br') || url.includes('tenisbonito.com') || 
+           url.includes('superloja.com.br');
+  };
+
+  // Helper function to check if URL is a product page
+  const isProductUrl = (url: string): boolean => {
+    return url.includes('/products/') || url.includes('/collections/') || url.includes('/produto/');
+  };
+
   const fetchProductData = async (url: string) => {
     try {
       setIsLoading(true);
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      if (!isShopifyStore(url)) {
+        toast({
+          title: "Erro ao verificar loja",
+          description: "Não conseguimos reconhecer essa loja como Shopify. Verifique o URL fornecido.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Simulate API attempt first
+      let useScrapingFallback = !url.includes('.myshopify.com') && !url.includes('shopify.com');
+      
+      // If we need to use scraping (or we're simulating that scenario)
+      if (useScrapingFallback) {
+        setDetectionMethod('scraping');
+        // Simulate scraping delay
+        await new Promise(resolve => setTimeout(resolve, 2500));
+      } else {
+        setDetectionMethod('api');
+        // Simulate API call delay
+        await new Promise(resolve => setTimeout(resolve, 1500));
+      }
+      
+      // Mock product data - in a real implementation this would come from API or scraping
       const mockProduct: ShopifyProduct = {
         id: "shopify_1234567890",
-        title: "Produto Demonstrativo Shopify",
-        description: "<p>Esta é uma descrição de produto de exemplo com <strong>formatação HTML</strong> que foi importada de uma loja Shopify.</p><p>Características:</p><ul><li>Item 1</li><li>Item 2</li><li>Item 3</li></ul>",
+        title: "Produto Demonstrativo Shopify" + (useScrapingFallback ? " (via Scraping)" : ""),
+        description: "<p>Esta é uma descrição de produto de exemplo com <strong>formatação HTML</strong> que foi importada de uma loja Shopify" + 
+                    (useScrapingFallback ? " utilizando scraping estruturado.</p>" : " utilizando a API Storefront.</p>") + 
+                    "<p>Características:</p><ul><li>Item 1</li><li>Item 2</li><li>Item 3</li></ul>",
         price: 129.99,
         compareAtPrice: 159.99,
         images: [
@@ -187,8 +223,8 @@ const ClonadorShopifyPage: React.FC = () => {
       
       toast({
         title: "Produto encontrado!",
-        description: "Os dados do produto foram carregados com sucesso.",
-        variant: "default", // Change from "success" to "default"
+        description: `Os dados do produto foram carregados com sucesso ${useScrapingFallback ? 'utilizando scraping estruturado' : 'via API Storefront'}.`,
+        variant: "default",
       });
     } catch (error) {
       console.error("Error fetching product:", error);
@@ -206,8 +242,25 @@ const ClonadorShopifyPage: React.FC = () => {
     try {
       setIsStoreLoading(true);
       
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      if (!isShopifyStore(url)) {
+        toast({
+          title: "Erro ao verificar loja",
+          description: "Não conseguimos reconhecer essa loja como Shopify. Verifique o URL fornecido.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      // Determine if we need to use scraping based on domain
+      const useScrapingFallback = !url.includes('.myshopify.com') && !url.includes('shopify.com');
+      setDetectionMethod(useScrapingFallback ? 'scraping' : 'api');
+      
+      // Simulate detection delay - longer for scraping
+      if (useScrapingFallback) {
+        await new Promise(resolve => setTimeout(resolve, 3000));
+      } else {
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      }
       
       // Mock result - in a real app, this would be the actual result of scanning the store
       const productCount = Math.floor(Math.random() * 30) + 5; // Random number between 5 and 34
@@ -216,7 +269,7 @@ const ClonadorShopifyPage: React.FC = () => {
       
       toast({
         title: "Loja Shopify encontrada!",
-        description: `Encontramos ${productCount} produtos disponíveis publicamente.`,
+        description: `Encontramos ${productCount} produtos disponíveis publicamente ${useScrapingFallback ? 'utilizando scraping estruturado' : 'via API Storefront'}.`,
         variant: "default",
       });
     } catch (error) {
@@ -250,6 +303,7 @@ const ClonadorShopifyPage: React.FC = () => {
       
       storeForm.reset();
       setFoundProducts(null);
+      setDetectionMethod(null);
       
     } catch (error) {
       console.error("Error cloning store:", error);
@@ -283,13 +337,14 @@ const ClonadorShopifyPage: React.FC = () => {
       toast({
         title: "Produto clonado com sucesso!",
         description: "O produto foi adicionado à sua loja e vinculado ao checkout VOLTZ.",
-        variant: "default", // Change from "success" to "default"
+        variant: "default",
       });
       
       singleProductForm.reset();
       productForm.reset();
       setProductData(null);
       setSelectedImage(null);
+      setDetectionMethod(null);
     } catch (error) {
       console.error("Error cloning product:", error);
       toast({
@@ -328,10 +383,14 @@ const ClonadorShopifyPage: React.FC = () => {
               <h2 className="text-xl font-bold text-primary mb-2">
                 Clonador de Produtos Shopify com Checkout VOLTZ (EXCLUSIVO)
               </h2>
-              <p className="text-muted-foreground">
+              <p className="text-muted-foreground mb-4">
                 Com essa funcionalidade EXCLUSIVA, você pode importar produtos de qualquer loja Shopify para a sua própria loja com apenas um link.
                 A VOLTZ já cuida de tudo: importa os dados, cria os produtos e ativa o checkout externo da VOLTZ imediatamente.
               </p>
+              <div className="flex items-center gap-2 text-sm text-primary/80">
+                <Badge variant="outline" className="bg-primary/10 text-primary">NOVO</Badge>
+                Agora suporta domínios personalizados além do .myshopify.com!
+              </div>
             </div>
           </div>
         </div>
@@ -379,7 +438,7 @@ const ClonadorShopifyPage: React.FC = () => {
                   Insira o link do produto Shopify
                 </CardTitle>
                 <CardDescription>
-                  Cole o link completo de qualquer produto público de uma loja Shopify
+                  Cole o link completo de qualquer produto público de uma loja Shopify (domínio próprio ou myshopify.com)
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -394,7 +453,7 @@ const ClonadorShopifyPage: React.FC = () => {
                           <FormControl>
                             <div className="flex gap-2">
                               <Input 
-                                placeholder="https://outraloja.myshopify.com/products/produto-x" 
+                                placeholder="https://lojachic.com.br/products/produto-x" 
                                 {...field} 
                                 className="flex-1"
                               />
@@ -417,7 +476,7 @@ const ClonadorShopifyPage: React.FC = () => {
                             </div>
                           </FormControl>
                           <FormDescription>
-                            Insira o link completo, incluindo https://
+                            Suporta links de produtos de qualquer domínio Shopify (ex: lojachic.com.br/products/produto-x)
                           </FormDescription>
                           <FormMessage />
                         </FormItem>
@@ -425,6 +484,20 @@ const ClonadorShopifyPage: React.FC = () => {
                     />
                   </form>
                 </Form>
+                
+                {isLoading && (
+                  <div className="mt-4">
+                    <Alert className="bg-blue-50 border-blue-200 dark:bg-blue-950/20 dark:border-blue-800/30">
+                      <Loader2 className="h-4 w-4 text-blue-600 dark:text-blue-400 animate-spin" />
+                      <AlertTitle className="text-blue-800 dark:text-blue-300">Verificando produto...</AlertTitle>
+                      <AlertDescription className="text-blue-700 dark:text-blue-400">
+                        {detectionMethod === 'scraping' 
+                          ? "Usando scraping estruturado para identificar o produto de domínio personalizado..." 
+                          : "Acessando API da loja Shopify para obter os dados do produto..."}
+                      </AlertDescription>
+                    </Alert>
+                  </div>
+                )}
               </CardContent>
             </Card>
           ) : (
@@ -435,7 +508,7 @@ const ClonadorShopifyPage: React.FC = () => {
                   Insira o domínio da loja Shopify
                 </CardTitle>
                 <CardDescription>
-                  Cole o domínio completo de uma loja Shopify para importar todos os produtos
+                  Cole o domínio completo de uma loja Shopify para importar todos os produtos (myshopify.com ou domínio próprio)
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -450,7 +523,7 @@ const ClonadorShopifyPage: React.FC = () => {
                           <FormControl>
                             <div className="flex gap-2">
                               <Input 
-                                placeholder="https://nomeloja.myshopify.com" 
+                                placeholder="https://superloja.com.br" 
                                 {...field} 
                                 className="flex-1"
                               />
@@ -473,7 +546,7 @@ const ClonadorShopifyPage: React.FC = () => {
                             </div>
                           </FormControl>
                           <FormDescription>
-                            Insira o domínio completo, incluindo https://
+                            Agora também suporta domínios personalizados (ex: superloja.com.br)
                           </FormDescription>
                           <FormMessage />
                         </FormItem>
@@ -482,6 +555,20 @@ const ClonadorShopifyPage: React.FC = () => {
                   </form>
                 </Form>
                 
+                {isStoreLoading && (
+                  <div className="mt-4">
+                    <Alert className="bg-blue-50 border-blue-200 dark:bg-blue-950/20 dark:border-blue-800/30">
+                      <Loader2 className="h-4 w-4 text-blue-600 dark:text-blue-400 animate-spin" />
+                      <AlertTitle className="text-blue-800 dark:text-blue-300">Verificando loja...</AlertTitle>
+                      <AlertDescription className="text-blue-700 dark:text-blue-400">
+                        {detectionMethod === 'scraping' 
+                          ? "Realizando varredura estruturada para identificar produtos no domínio personalizado..." 
+                          : "Acessando API da loja Shopify para listar os produtos disponíveis..."}
+                      </AlertDescription>
+                    </Alert>
+                  </div>
+                )}
+                
                 {foundProducts && (
                   <div className="mt-6 space-y-4">
                     <Alert className="bg-green-50 border-green-200 dark:bg-green-950/20 dark:border-green-800/30">
@@ -489,6 +576,18 @@ const ClonadorShopifyPage: React.FC = () => {
                       <AlertTitle className="text-green-800 dark:text-green-300">Loja verificada com sucesso!</AlertTitle>
                       <AlertDescription className="text-green-700 dark:text-green-400">
                         Encontramos {foundProducts} produtos disponíveis publicamente nesta loja Shopify.
+                        {detectionMethod === 'scraping' && (
+                          <div className="mt-1 flex items-center text-sm gap-1">
+                            <Code className="h-3.5 w-3.5" /> 
+                            Método: Scraping estruturado (domínio personalizado)
+                          </div>
+                        )}
+                        {detectionMethod === 'api' && (
+                          <div className="mt-1 flex items-center text-sm gap-1">
+                            <Code className="h-3.5 w-3.5" /> 
+                            Método: API Storefront (domínio Shopify padrão)
+                          </div>
+                        )}
                       </AlertDescription>
                     </Alert>
                     
@@ -578,6 +677,14 @@ const ClonadorShopifyPage: React.FC = () => {
                             </Badge>
                           ))}
                         </div>
+                        
+                        <div className="text-muted-foreground">Método de detecção:</div>
+                        <div className="flex items-center gap-1">
+                          <Code className="h-3.5 w-3.5 text-primary" />
+                          <span className="text-primary font-medium">
+                            {detectionMethod === 'scraping' ? 'Scraping estruturado' : 'API Storefront'}
+                          </span>
+                        </div>
                       </div>
                     </div>
                     
@@ -652,6 +759,9 @@ const ClonadorShopifyPage: React.FC = () => {
                               }}
                             />
                           </FormControl>
+                          <FormDescription>
+                            Preço de venda do produto na sua loja
+                          </FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -673,7 +783,7 @@ const ClonadorShopifyPage: React.FC = () => {
                             {productData.variants.map((variant) => (
                               <tr key={variant.id}>
                                 <td className="px-4 py-2">{variant.title}</td>
-                                <td className="px-4 py-2">R$ {variant.price}</td>
+                                <td className="px-4 py-2">{formatCurrency(parseFloat(variant.price))}</td>
                                 <td className="px-4 py-2">{variant.sku}</td>
                                 <td className="px-4 py-2">
                                   {variant.available ? (
