@@ -1035,7 +1035,7 @@ const UpsellBuilder: React.FC<UpsellBuilderProps> = ({ initialData, onSave, prod
                   )}
                   
                   <div className="pt-4 border-t mt-4">
-                    <div className="space-y-2">
+                    <div>
                       <Label htmlFor="fallbackRedirectUrl">URL de redirecionamento de fallback</Label>
                       <Input 
                         id="fallbackRedirectUrl" 
