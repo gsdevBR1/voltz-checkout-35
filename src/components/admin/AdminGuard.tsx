@@ -4,9 +4,9 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { useStores } from '@/contexts/StoreContext';
 import { toast } from '@/hooks/use-toast';
 
-// Simple admin check - in a real app, you would check this from an auth context
+// Admin check - in a real app, this would be connected to an auth context
 const isAdmin = () => {
-  // Mock - in a real app, this would come from your auth context
+  // In a production environment, this would be verified through JWT tokens or a secure auth mechanism
   return localStorage.getItem('is_admin') === 'true';
 };
 
@@ -22,7 +22,7 @@ export const AdminGuard: React.FC<AdminGuardProps> = ({ children }) => {
     if (isAdmin()) {
       console.log("Admin authentication successful");
     } else {
-      console.log("Admin authentication failed");
+      console.log("Admin authentication failed - redirecting to login");
     }
   }, []);
   

@@ -17,6 +17,7 @@ function AdminAccessButton() {
     <Link 
       to="/admin/login" 
       className="fixed bottom-4 right-4 bg-[#1E1E1E] hover:bg-[#262626] text-[#10B981] p-2 rounded-full shadow-lg flex items-center justify-center"
+      title="Acessar Painel Admin"
     >
       <Shield className="h-6 w-6" />
     </Link>

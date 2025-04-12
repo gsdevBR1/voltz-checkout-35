@@ -170,6 +170,7 @@ const App: React.FC = () => {
                   <Route path="/admin" element={<AdminLayout />}>
                     <Route index element={<AdminDashboard />} />
                     <Route path="lojas" element={<AdminStoresList />} />
+                    {/* Redirect any other admin paths back to dashboard */}
                     <Route path="*" element={<Navigate to="/admin" replace />} />
                   </Route>
                   
