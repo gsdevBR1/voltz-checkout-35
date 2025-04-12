@@ -5,39 +5,44 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import MarketingLayout from '@/components/marketing/MarketingLayout';
-import { ArrowRight, Clock, CreditCard, QrCode, CheckCircle, X } from 'lucide-react';
+import { ArrowRight, Clock, CreditCard, QrCode, CheckCircle, X, Badge } from 'lucide-react';
 
-// Mock data - in a real implementation, this would come from your API/database
-const mockUpsellData = {
-  id: '1',
-  title: '🎁 Oferta exclusiva para completar seu pedido!',
-  description: `
-    <p>Parabéns pela sua compra! Como cliente especial, você tem acesso a esta oferta por tempo limitado.</p>
-    <ul>
-      <li>✅ Método de pagamento já configurado</li>
-      <li>✅ Entrega junto com seu pedido principal</li>
-      <li>✅ Desconto exclusivo de 30%</li>
-    </ul>
-    <p>Esta oferta é válida apenas agora, após sua compra!</p>
-  `,
+// Default template for One Click Upsells
+const defaultUpsellTemplate = {
+  title: '🎁 Oferta exclusiva só para agora!',
+  description: 'Adicione este produto ao seu pedido com desconto especial. Sem preencher nada de novo!',
   productImage: 'https://placehold.co/1000x1000',
   productName: 'Kit de Extensão Premium',
   originalPrice: 197.0,
   discountPrice: 97.0,
-  countdown: true, // Whether to show countdown timer
-  countdownMinutes: 15, // How many minutes for countdown
-  paymentMethod: 'card', // 'card' or 'pix'
+  countdown: true,
+  countdownMinutes: 15,
+  paymentMethod: 'card',
   buttonText: 'Sim, quero adicionar!',
   declineText: 'Não, obrigado',
   redirectUrl: 'https://voltz.checkout/obrigado',
   showOriginalPrice: true,
-  layout: 'vertical', // 'vertical' or 'carousel'
+  showScarcityBadge: true,
+  scarcityText: 'Restam poucas unidades!',
+  layout: 'vertical',
   theme: {
-    background: '#ffffff',
-    text: '#333333',
+    background: '#F3F4F8',
+    cardBackground: '#FFFFFF',
+    title: '#222222',
+    text: '#555555',
     button: '#2BBA00',
-    buttonText: '#ffffff',
+    buttonText: '#FFFFFF',
+    border: '8px',
+    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+    font: 'Arial, sans-serif',
   }
+};
+
+// Mock data - in a real implementation, this would come from your API/database
+// Merge default template with any saved user preferences
+const mockUpsellData = {
+  id: '1',
+  ...defaultUpsellTemplate,
 };
 
 const UpsellDisplay: React.FC = () => {
@@ -54,9 +59,9 @@ const UpsellDisplay: React.FC = () => {
       // In a real app, this would be an API call like:
       // const response = await fetch(`/api/upsells/${id}`);
       // const data = await response.json();
-      // setUpsellData(data);
+      // setUpsellData({...defaultUpsellTemplate, ...data});
       
-      // For demo, we're just using the mock data
+      // For demo, we're just using the mock data with default template
       setUpsellData(mockUpsellData);
     };
     
@@ -126,7 +131,7 @@ const UpsellDisplay: React.FC = () => {
   
   const getPaymentText = () => {
     if (upsellData.paymentMethod === 'card') {
-      return "Este valor será cobrado automaticamente no mesmo cartão de crédito da sua compra anterior.";
+      return "Será cobrado automaticamente no mesmo cartão da compra anterior.";
     } else if (upsellData.paymentMethod === 'pix') {
       return "Clique para gerar o PIX automaticamente com os dados do seu pedido.";
     }
@@ -134,35 +139,61 @@ const UpsellDisplay: React.FC = () => {
   };
   
   // Apply custom theme styles
-  const themeStyles = {
+  const pageStyles = {
     backgroundColor: upsellData.theme.background,
+  };
+  
+  const cardStyles = {
+    borderRadius: upsellData.theme.border,
+    boxShadow: upsellData.theme.boxShadow,
+    backgroundColor: upsellData.theme.cardBackground || '#FFFFFF',
+  };
+  
+  const titleStyles = {
+    color: upsellData.theme.title,
+    fontFamily: upsellData.theme.font,
+  };
+  
+  const textStyles = {
     color: upsellData.theme.text,
+    fontFamily: upsellData.theme.font,
   };
   
   const buttonStyles = {
     backgroundColor: upsellData.theme.button,
     color: upsellData.theme.buttonText,
+    borderRadius: '9999px', // Pill shape
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center py-10 px-4" style={themeStyles}>
-      <Card className="w-full max-w-4xl shadow-lg overflow-hidden border-0">
+    <div className="min-h-screen flex flex-col items-center justify-center py-10 px-4" style={pageStyles}>
+      <Card className="w-full max-w-4xl border-0 overflow-hidden" style={cardStyles}>
         <CardContent className="p-0">
           <div className={`flex ${upsellData.layout === 'vertical' ? 'flex-col md:flex-row' : 'flex-col'}`}>
             {/* Product Image */}
             <div className={`${upsellData.layout === 'vertical' ? 'md:w-1/2' : 'w-full'} bg-gray-50 flex items-center justify-center p-6`}>
-              <img 
-                src={upsellData.productImage} 
-                alt={upsellData.productName}
-                className="w-full max-w-md rounded-lg object-contain"
-                style={{ maxHeight: '400px' }}
-              />
+              <div className="relative">
+                <img 
+                  src={upsellData.productImage} 
+                  alt={upsellData.productName}
+                  className="w-full max-w-md rounded-lg object-contain"
+                  style={{ maxHeight: '400px' }}
+                />
+                
+                {/* Scarcity Badge */}
+                {upsellData.showScarcityBadge && (
+                  <div className="absolute top-4 right-4 bg-red-600 text-white px-3 py-1 rounded-full text-sm font-semibold flex items-center">
+                    <Badge className="mr-1 h-4 w-4" />
+                    {upsellData.scarcityText}
+                  </div>
+                )}
+              </div>
             </div>
             
             {/* Offer Content */}
             <div className={`${upsellData.layout === 'vertical' ? 'md:w-1/2' : 'w-full'} p-6 md:p-8 space-y-6`}>
               {/* Title */}
-              <h1 className="text-2xl md:text-3xl font-bold" style={{ color: upsellData.theme.text }}>
+              <h1 className="text-2xl md:text-3xl font-semibold" style={titleStyles}>
                 {upsellData.title}
               </h1>
               
@@ -177,13 +208,13 @@ const UpsellDisplay: React.FC = () => {
               {/* Description */}
               <div 
                 className="prose prose-sm max-w-none"
-                style={{ color: upsellData.theme.text }}
+                style={textStyles}
                 dangerouslySetInnerHTML={{ __html: upsellData.description }}
               />
               
               {/* Price */}
               <div className="flex items-center gap-3">
-                <span className="text-3xl font-bold" style={{ color: upsellData.theme.text }}>
+                <span className="text-3xl font-bold" style={titleStyles}>
                   {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(upsellData.discountPrice)}
                 </span>
                 
@@ -195,7 +226,7 @@ const UpsellDisplay: React.FC = () => {
               </div>
               
               {/* Payment method indicator */}
-              <div className="flex items-center text-sm text-gray-600 gap-2">
+              <div className="flex items-center text-sm text-gray-600 gap-2" style={textStyles}>
                 {upsellData.paymentMethod === 'card' ? (
                   <CreditCard className="h-4 w-4" />
                 ) : (

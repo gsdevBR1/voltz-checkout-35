@@ -5,7 +5,7 @@ import UpsellBuilder from '@/components/marketing/UpsellBuilder';
 import { toast } from 'sonner';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Eye } from 'lucide-react';
 
 const CriarUpsellPage = () => {
   const navigate = useNavigate();
@@ -36,14 +36,24 @@ const CriarUpsellPage = () => {
       title="Criar Upsell One Click" 
       description="Configure uma oferta especial que será exibida após a compra principal"
       actions={
-        <Button 
-          variant="outline" 
-          onClick={() => navigate('/marketing/upsell')}
-          className="gap-2"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Voltar
-        </Button>
+        <>
+          <Button 
+            variant="outline" 
+            onClick={() => navigate('/marketing/upsell/preview')}
+            className="gap-2 mr-2"
+          >
+            <Eye className="h-4 w-4" />
+            Pré-visualizar
+          </Button>
+          <Button 
+            variant="outline" 
+            onClick={() => navigate('/marketing/upsell')}
+            className="gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Voltar
+          </Button>
+        </>
       }
     >
       <UpsellBuilder onSave={handleSave} productId={productId} />
