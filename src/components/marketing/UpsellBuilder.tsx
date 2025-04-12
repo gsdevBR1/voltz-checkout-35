@@ -571,7 +571,7 @@ const UpsellBuilder: React.FC<UpsellBuilderProps> = ({ initialData, onSave, prod
               </div>
               
               {!upsellData.applyToAllProducts && (
-                <div className="space-y-4 bg-slate-50 p-4 rounded-lg">
+                <div className="space-y-4 bg-gradient-to-br from-white to-slate-100 p-6 rounded-lg border border-slate-200 shadow-sm">
                   <div className="space-y-2">
                     <Label htmlFor="productFilter">Filtrar produtos pelo nome</Label>
                     <div className="flex items-center space-x-2">
