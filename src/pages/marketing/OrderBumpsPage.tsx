@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
-import { Plus, Copy } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Switch } from '@/components/ui/switch';
-import { Separator } from '@/components/ui/separator';
+import { Card } from '@/components/ui/card';
 import MarketingLayout from '@/components/marketing/MarketingLayout';
 import { Product, ProductType, ProductStatus } from '@/types/product';
 import { OrderBump } from '@/types/orderBump';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
+import MarketingCard from '@/components/marketing/MarketingCard';
+import MarketingEmptyState from '@/components/marketing/MarketingEmptyState';
 
 // Mock products for demo
 const mockProducts: Product[] = [
@@ -71,125 +71,70 @@ const OrderBumpsPage = () => {
     toast.success("Order Bump excluído com sucesso!");
   };
 
-  const handleToggleActive = (id: string, isActive: boolean) => {
-    setOrderBumps(prev => prev.map(ob => 
-      ob.id === id ? { ...ob, isActive, updatedAt: new Date() } : ob
-    ));
-    
-    toast.success(`Order Bump ${isActive ? 'ativado' : 'desativado'} com sucesso!`);
+  const handleDuplicate = (id: string) => {
+    const original = orderBumps.find(ob => ob.id === id);
+    if (original) {
+      const newOrderBump: OrderBump = {
+        ...original,
+        id: `ob_${Date.now()}`,
+        name: `${original.name} (Cópia)`,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      
+      setOrderBumps(prev => [...prev, newOrderBump]);
+      toast.success("Order Bump duplicado com sucesso!");
+    }
   };
 
-  const handleDuplicate = (orderBump: OrderBump) => {
-    const newOrderBump: OrderBump = {
-      ...orderBump,
-      id: `ob_${Date.now()}`,
-      name: `${orderBump.name} (Cópia)`,
-      createdAt: new Date(),
-      updatedAt: new Date()
-    };
+  const handleToggleActive = (id: string, active: boolean) => {
+    setOrderBumps(prev => prev.map(ob => 
+      ob.id === id ? { ...ob, isActive: active, updatedAt: new Date() } : ob
+    ));
     
-    setOrderBumps(prev => [...prev, newOrderBump]);
-    toast.success("Order Bump duplicado com sucesso!");
+    toast.success(`Order Bump ${active ? 'ativado' : 'desativado'} com sucesso!`);
   };
 
   // Helper to get product names for display
-  const getProductNames = (productIds: string[]) => {
-    return productIds
-      .map(id => mockProducts.find(p => p.id === id)?.name || 'Produto desconhecido')
-      .join(', ');
+  const getProductName = (productId: string): string => {
+    return mockProducts.find(p => p.id === productId)?.name || 'Produto desconhecido';
   };
 
   return (
     <MarketingLayout 
       title="Order Bumps" 
       description="Adicione ofertas complementares diretamente na página de checkout."
-    >
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-lg font-medium">Order Bumps</h2>
-          <p className="text-sm text-muted-foreground">
-            Aumente o valor médio do pedido com ofertas no checkout.
-          </p>
-        </div>
+      actions={
         <Button onClick={() => navigate("/marketing/order-bumps/novo")}>
           <Plus className="mr-2 h-4 w-4" />
           Novo Order Bump
         </Button>
-      </div>
-
-      <div className="grid gap-6 md:grid-cols-2">
+      }
+    >
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {orderBumps.map((orderBump) => (
-          <Card key={orderBump.id} className="group transition-all duration-200 hover:shadow-md">
-            <CardHeader className="pb-3 space-y-1">
-              <div className="flex justify-between items-start">
-                <div>
-                  <CardTitle className="text-base">{orderBump.name}</CardTitle>
-                  <CardDescription>
-                    Associado a {orderBump.triggerProductIds.length} produto{orderBump.triggerProductIds.length !== 1 ? 's' : ''}
-                  </CardDescription>
-                </div>
-                <Switch 
-                  checked={orderBump.isActive} 
-                  onCheckedChange={(checked) => handleToggleActive(orderBump.id, checked)}
-                />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-muted-foreground">Produtos aplicáveis:</span>
-                  <span className="font-medium">{getProductNames(orderBump.triggerProductIds)}</span>
-                </div>
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-muted-foreground">Oferta:</span>
-                  <span className="font-medium">{getProductNames(orderBump.offerProductIds)}</span>
-                </div>
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-muted-foreground">Valor:</span>
-                  <span className="font-medium">
-                    {orderBump.offerProductIds.map(id => {
-                      const product = mockProducts.find(p => p.id === id);
-                      return product ? `R$ ${product.price.toFixed(2)}` : '';
-                    }).join(', ')}
-                  </span>
-                </div>
-                {orderBump.conversionRate !== undefined && (
-                  <div className="flex justify-between items-center text-sm">
-                    <span className="text-muted-foreground">Taxa de conversão:</span>
-                    <span className="font-medium text-success">{orderBump.conversionRate}%</span>
-                  </div>
-                )}
-                <Separator className="my-1" />
-                <div className="flex justify-end pt-2 gap-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => handleDuplicate(orderBump)}
-                  >
-                    <Copy className="mr-1 h-3.5 w-3.5" />
-                    Duplicar
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => navigate(`/marketing/order-bumps/${orderBump.id}/editar`)}
-                  >
-                    Editar
-                  </Button>
-                  <Button 
-                    variant="destructive" 
-                    size="sm"
-                    onClick={() => handleDelete(orderBump.id)}
-                  >
-                    Excluir
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <MarketingCard
+            key={orderBump.id}
+            id={orderBump.id}
+            title={orderBump.name}
+            type="order-bump"
+            active={orderBump.isActive}
+            productName={orderBump.offerProductIds.map(id => getProductName(id)).join(', ')}
+            productImageUrl={mockProducts.find(p => p.id === orderBump.offerProductIds[0])?.imageUrl}
+            appliedToCount={orderBump.triggerProductIds.length}
+            appliedToProducts={orderBump.triggerProductIds.map(id => getProductName(id))}
+            editPath={`/marketing/order-bumps/${orderBump.id}/editar`}
+            onDuplicate={handleDuplicate}
+            onDelete={handleDelete}
+            onToggleActive={handleToggleActive}
+            stats={{
+              conversionRate: orderBump.conversionRate,
+              updatedAt: orderBump.updatedAt
+            }}
+          />
         ))}
 
-        {/* Placeholder for new card */}
+        {/* Add placeholder card for creating new order bump */}
         <Card 
           className="border-dashed flex items-center justify-center h-[270px] cursor-pointer hover:bg-accent/30 transition-all duration-200" 
           onClick={() => navigate("/marketing/order-bumps/novo")}
@@ -204,6 +149,15 @@ const OrderBumpsPage = () => {
             </p>
           </div>
         </Card>
+
+        {orderBumps.length === 0 && (
+          <MarketingEmptyState
+            title="Nenhum Order Bump configurado"
+            description="Você ainda não configurou nenhum order bump. Configure agora para aumentar o valor médio dos pedidos."
+            createPath="/marketing/order-bumps/novo"
+            createLabel="Criar Primeiro Order Bump"
+          />
+        )}
       </div>
     </MarketingLayout>
   );

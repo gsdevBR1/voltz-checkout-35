@@ -1,61 +1,17 @@
+
 import React, { useState } from 'react';
-import DashboardLayout from '@/components/DashboardLayout';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Plus } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
+import MarketingLayout from '@/components/marketing/MarketingLayout';
 import { Button } from '@/components/ui/button';
-import { Plus, Edit, Trash2, CalendarIcon, MoreHorizontal } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableFooter,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Badge } from "@/components/ui/badge"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Separator } from "@/components/ui/separator"
-import { useToast } from "@/hooks/use-toast"
-import { cn } from "@/lib/utils"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
-import { Switch } from "@/components/ui/switch"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import { Calendar } from "@/components/ui/calendar"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { format } from "date-fns"
-import { ptBR } from 'date-fns/locale';
-import { Textarea } from "@/components/ui/textarea"
-import { Checkbox } from "@/components/ui/checkbox"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Card } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
 import PaginationControl from '@/components/marketing/PaginationControl';
+import MarketingCard from '@/components/marketing/MarketingCard';
+import MarketingEmptyState from '@/components/marketing/MarketingEmptyState';
 
 interface Upsell {
   id: string;
@@ -65,9 +21,11 @@ interface Upsell {
   endDate: Date;
   product: string;
   discount: number;
+  image?: string;
+  appliedToProducts: string[];
 }
 
-const data: Upsell[] = [
+const mockUpsells: Upsell[] = [
   {
     id: "728ed52f",
     name: "Black Friday Upsell",
@@ -76,6 +34,7 @@ const data: Upsell[] = [
     endDate: new Date("2023-11-25"),
     product: "Product A",
     discount: 10,
+    appliedToProducts: ["Product X", "Product Y", "Product Z"]
   },
   {
     id: "39cd7cb0",
@@ -85,6 +44,7 @@ const data: Upsell[] = [
     endDate: new Date("2023-11-28"),
     product: "Product B",
     discount: 15,
+    appliedToProducts: ["Product X"]
   },
   {
     id: "0c1a1f69",
@@ -94,6 +54,7 @@ const data: Upsell[] = [
     endDate: new Date("2023-12-26"),
     product: "Product C",
     discount: 20,
+    appliedToProducts: ["Product Y", "Product Z"]
   },
   {
     id: "4b8e5a2d",
@@ -103,6 +64,7 @@ const data: Upsell[] = [
     endDate: new Date("2024-01-01"),
     product: "Product D",
     discount: 25,
+    appliedToProducts: ["Product X", "Product Z"]
   },
   {
     id: "9e5f2b1c",
@@ -112,61 +74,44 @@ const data: Upsell[] = [
     endDate: new Date("2024-02-15"),
     product: "Product E",
     discount: 30,
+    appliedToProducts: ["Product X"]
   },
-  {
-    id: "6a2b9c8f",
-    name: "Easter Promotion",
-    status: "inactive",
-    startDate: new Date("2024-04-01"),
-    endDate: new Date("2024-04-02"),
-    product: "Product F",
-    discount: 35,
-  },
-  {
-    id: "1d9c6a5e",
-    name: "Summer Sale",
-    status: "active",
-    startDate: new Date("2024-06-21"),
-    endDate: new Date("2024-06-22"),
-    product: "Product G",
-    discount: 40,
-  },
-  {
-    id: "8f6e3a2b",
-    name: "Back to School Offer",
-    status: "inactive",
-    startDate: new Date("2024-08-01"),
-    endDate: new Date("2024-08-02"),
-    product: "Product H",
-    discount: 45,
-  },
-  {
-    id: "5c3b0d9a",
-    name: "Halloween Discount",
-    status: "active",
-    startDate: new Date("2024-10-31"),
-    endDate: new Date("2024-11-01"),
-    product: "Product I",
-    discount: 50,
-  },
-  {
-    id: "2a0b7e6d",
-    name: "Thanksgiving Sale",
-    status: "inactive",
-    startDate: new Date("2024-11-28"),
-    endDate: new Date("2024-11-29"),
-    product: "Product J",
-    discount: 55,
-  },
-]
+];
 
 const UpsellOnePage: React.FC = () => {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<"active" | "inactive" | "all">("all");
-  const [upsells, setUpsells] = useState<Upsell[]>(data);
+  const [upsells, setUpsells] = useState<Upsell[]>(mockUpsells);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
-  const { toast } = useToast()
+  const itemsPerPage = 6;
+  const navigate = useNavigate();
+
+  const handleDelete = (id: string) => {
+    setUpsells(upsells.filter((upsell) => upsell.id !== id));
+    toast.success("Upsell excluído com sucesso!");
+  };
+  
+  const handleDuplicate = (id: string) => {
+    const originalUpsell = upsells.find(u => u.id === id);
+    if (originalUpsell) {
+      const newUpsell = {
+        ...originalUpsell,
+        id: `duplicate-${id}-${Date.now()}`,
+        name: `${originalUpsell.name} (Cópia)`,
+      };
+      setUpsells([...upsells, newUpsell]);
+      toast.success("Upsell duplicado com sucesso!");
+    }
+  };
+
+  const handleToggleActive = (id: string, active: boolean) => {
+    setUpsells(prev => 
+      prev.map(item => 
+        item.id === id ? { ...item, status: active ? 'active' : 'inactive' } : item
+      )
+    );
+    toast.success(`Upsell ${active ? 'ativado' : 'desativado'} com sucesso!`);
+  };
 
   const filteredUpsells = upsells.filter((upsell) => {
     const searchMatch = upsell.name.toLowerCase().includes(search.toLowerCase());
@@ -174,39 +119,25 @@ const UpsellOnePage: React.FC = () => {
     return searchMatch && statusMatch;
   });
 
-  const handleDelete = (id: string) => {
-    setUpsells(upsells.filter((upsell) => upsell.id !== id));
-    toast({
-      title: "Upsell deletado.",
-      description: "Este upsell foi removido da sua lista.",
-    })
-  };
-
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const currentUpsells = filteredUpsells.slice(startIndex, endIndex);
 
   return (
-    <DashboardLayout>
-      <div className="container py-10">
-        <div className="flex items-center justify-between">
-          <CardHeader>
-            <CardTitle>Upsell One Click</CardTitle>
-            <CardDescription>
-              Crie ofertas de upsell para aumentar suas vendas.
-            </CardDescription>
-          </CardHeader>
-          <Button asChild>
-            <Link to="/marketing/upsell/criar">
-              <Plus className="mr-2 h-4 w-4" />
-              Criar Upsell
-            </Link>
-          </Button>
-        </div>
-
-        <Separator className="my-4" />
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+    <MarketingLayout
+      title="Upsell One Click"
+      description="Crie ofertas de upsell para aumentar suas vendas."
+      actions={
+        <Button asChild>
+          <Link to="/marketing/upsell/criar">
+            <Plus className="mr-2 h-4 w-4" />
+            Criar Upsell
+          </Link>
+        </Button>
+      }
+    >
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Input
             type="search"
             placeholder="Buscar upsells..."
@@ -225,95 +156,67 @@ const UpsellOnePage: React.FC = () => {
           </Select>
         </div>
 
-        <Card>
-          <ScrollArea>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[200px]">Nome</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Período</TableHead>
-                  <TableHead>Produto</TableHead>
-                  <TableHead>Desconto</TableHead>
-                  <TableHead className="text-right">Ações</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {currentUpsells.map((upsell) => (
-                  <TableRow key={upsell.id}>
-                    <TableCell className="font-medium">{upsell.name}</TableCell>
-                    <TableCell>
-                      <Badge variant={upsell.status === "active" ? "default" : "secondary"}>
-                        {upsell.status === "active" ? "Ativo" : "Inativo"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      {format(upsell.startDate, "dd/MM/yyyy", { locale: ptBR })} - {format(upsell.endDate, "dd/MM/yyyy", { locale: ptBR })}
-                    </TableCell>
-                    <TableCell>{upsell.product}</TableCell>
-                    <TableCell>{upsell.discount}%</TableCell>
-                    <TableCell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-8 w-8 p-0">
-                            <span className="sr-only">Abrir menu</span>
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuLabel>Ações</DropdownMenuLabel>
-                          <DropdownMenuItem asChild>
-                            <Link to={`/marketing/upsell/editar/${upsell.id}`}>
-                              <Edit className="mr-2 h-4 w-4" />
-                              Editar
-                            </Link>
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <DropdownMenuItem className="text-destructive focus:bg-destructive/20">
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                Deletar
-                              </DropdownMenuItem>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>Tem certeza?</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  Esta ação irá deletar o upsell permanentemente.
-                                  Você tem certeza que gostaria de continuar?
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => handleDelete(upsell.id)}>Deletar</AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                ))}
-                {currentUpsells.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={6} className="text-center">
-                      Nenhum upsell encontrado.
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </ScrollArea>
-        </Card>
-        <PaginationControl
-          currentPage={currentPage}
-          totalItems={filteredUpsells.length}
-          itemsPerPage={itemsPerPage}
-          onPageChange={setCurrentPage}
-        />
+        <Separator />
+
+        {currentUpsells.length > 0 ? (
+          <>
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {currentUpsells.map((upsell) => (
+                <MarketingCard
+                  key={upsell.id}
+                  id={upsell.id}
+                  title={upsell.name}
+                  type="upsell"
+                  active={upsell.status === 'active'}
+                  productName={upsell.product}
+                  appliedToCount={upsell.appliedToProducts.length}
+                  appliedToProducts={upsell.appliedToProducts}
+                  editPath={`/marketing/upsell/editar/${upsell.id}`}
+                  onDuplicate={handleDuplicate}
+                  onDelete={handleDelete}
+                  onToggleActive={handleToggleActive}
+                  stats={{
+                    conversionRate: upsell.discount,
+                  }}
+                />
+              ))}
+              
+              {/* Add New Upsell Card */}
+              <Card 
+                className="border-dashed flex items-center justify-center h-[270px] cursor-pointer hover:bg-accent/30 transition-all duration-200" 
+                onClick={() => navigate("/marketing/upsell/criar")}
+              >
+                <div className="text-center">
+                  <div className="mx-auto bg-primary/10 h-12 w-12 rounded-full flex items-center justify-center mb-3">
+                    <Plus className="h-6 w-6 text-primary" />
+                  </div>
+                  <h3 className="font-medium mb-1">Adicionar novo Upsell</h3>
+                  <p className="text-sm text-muted-foreground max-w-[180px]">
+                    Crie uma nova oferta para após a compra
+                  </p>
+                </div>
+              </Card>
+            </div>
+            
+            <PaginationControl
+              currentPage={currentPage}
+              totalItems={filteredUpsells.length}
+              itemsPerPage={itemsPerPage}
+              onPageChange={setCurrentPage}
+            />
+          </>
+        ) : (
+          <MarketingEmptyState
+            title="Nenhum Upsell encontrado"
+            description={search || statusFilter !== "all" 
+              ? "Nenhum upsell corresponde aos seus critérios de busca. Tente alterar seus filtros."
+              : "Você ainda não criou nenhum upsell. Crie agora para aumentar o valor dos seus pedidos."}
+            createPath="/marketing/upsell/criar"
+            createLabel="Criar Primeiro Upsell"
+          />
+        )}
       </div>
-    </DashboardLayout>
+    </MarketingLayout>
   );
 };
 
