@@ -28,11 +28,13 @@ export interface ShopifyProduct {
   handle: string;
   tags: string[];
   url: string;
-  // New fields for tracking the cloning process
-  status?: 'pending' | 'cloning' | 'complete' | 'error';
+  // Status fields for tracking the cloning process
+  status?: 'pending' | 'cloning' | 'cloned' | 'error' | 'integrating' | 'integrated';
   errorMessage?: string;
   clonedProductId?: string;
   voltzCheckoutUrl?: string;
+  shopifyProductUrl?: string;
+  isIntegratedWithVoltz?: boolean;
 }
 
 export interface ShopifyAppCredentials {
@@ -47,7 +49,8 @@ export interface ShopifyCloneResult {
   success: boolean;
   message: string;
   productId?: string;
-  checkoutUrl?: string;
+  shopifyProductUrl?: string;
+  checkoutIntegrated?: boolean;
 }
 
 export interface ShopifyStoreCloneStatus {
@@ -56,4 +59,5 @@ export interface ShopifyStoreCloneStatus {
   successCount: number;
   errorCount: number;
   inProgress: boolean;
+  integratedWithVoltz: number;
 }
