@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import DashboardLayout from "@/components/DashboardLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -31,6 +30,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { RecoverySettings, RecoveryTrigger, TRIGGER_EVENTS, DELAY_OPTIONS } from "@/types/recovery";
 import RecoveryStats from "@/components/vendas/RecoveryStats";
 import RecoveryTriggerForm from "@/components/vendas/RecoveryTriggerForm";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 const initialSettings: RecoverySettings = {
   email: {
@@ -84,25 +84,22 @@ const RecuperacaoVendas: React.FC = () => {
   const [isAddingTrigger, setIsAddingTrigger] = useState(false);
   const [editingTrigger, setEditingTrigger] = useState<{trigger: RecoveryTrigger, channel: 'email' | 'sms'} | null>(null);
   const [triggerToDelete, setTriggerToDelete] = useState<{id: string, channel: 'email' | 'sms'} | null>(null);
+  const [newTriggerChannel, setNewTriggerChannel] = useState<'email' | 'sms'>('email');
 
   const handleSaveTrigger = (trigger: RecoveryTrigger, channel: 'email' | 'sms') => {
-    // Create a copy of the current settings
     const newSettings = { ...settings };
     
-    // Check if this trigger already exists (editing scenario)
     const triggerIndex = channel === 'email' 
       ? newSettings.email.triggers.findIndex(t => t.id === trigger.id)
       : newSettings.sms.triggers.findIndex(t => t.id === trigger.id);
     
     if (triggerIndex !== -1) {
-      // Update existing trigger
       if (channel === 'email') {
         newSettings.email.triggers[triggerIndex] = trigger;
       } else {
         newSettings.sms.triggers[triggerIndex] = trigger;
       }
     } else {
-      // Add new trigger
       if (channel === 'email') {
         newSettings.email.triggers.push(trigger);
       } else {
@@ -110,10 +107,8 @@ const RecuperacaoVendas: React.FC = () => {
       }
     }
     
-    // Update settings
     setSettings(newSettings);
     
-    // Reset form state
     setIsAddingTrigger(false);
     setEditingTrigger(null);
     
@@ -126,20 +121,16 @@ const RecuperacaoVendas: React.FC = () => {
   const handleDeleteTrigger = () => {
     if (!triggerToDelete) return;
     
-    // Create a copy of the current settings
     const newSettings = { ...settings };
     
-    // Filter out the trigger with the specified id
     if (triggerToDelete.channel === 'email') {
       newSettings.email.triggers = newSettings.email.triggers.filter(t => t.id !== triggerToDelete.id);
     } else {
       newSettings.sms.triggers = newSettings.sms.triggers.filter(t => t.id !== triggerToDelete.id);
     }
     
-    // Update settings
     setSettings(newSettings);
     
-    // Reset state
     setTriggerToDelete(null);
     
     toast({
@@ -159,13 +150,16 @@ const RecuperacaoVendas: React.FC = () => {
   };
 
   const countLinksInMessage = (message: string) => {
-    // Look for {link_checkout} or {link_rastreamento} variables
     const linkPattern = /{link[^}]*}/g;
     const matches = message.match(linkPattern);
     return matches ? matches.length : 0;
   };
 
-  // If we're editing or adding, show the form
+  const startNewAutomation = (channel: 'email' | 'sms') => {
+    setNewTriggerChannel(channel);
+    setIsAddingTrigger(true);
+  };
+
   if (isAddingTrigger || editingTrigger) {
     return (
       <DashboardLayout>
@@ -188,11 +182,11 @@ const RecuperacaoVendas: React.FC = () => {
           </div>
           
           <RecoveryTriggerForm
-            type={editingTrigger ? editingTrigger.channel : 'email'}
+            type={editingTrigger ? editingTrigger.channel : newTriggerChannel}
             existingTrigger={editingTrigger ? editingTrigger.trigger : undefined}
             onSave={(trigger) => handleSaveTrigger(
               trigger, 
-              editingTrigger ? editingTrigger.channel : 'email'
+              editingTrigger ? editingTrigger.channel : newTriggerChannel
             )}
             onCancel={() => {
               setIsAddingTrigger(false);
@@ -214,10 +208,24 @@ const RecuperacaoVendas: React.FC = () => {
               Automatize a comunicação com seus clientes para recuperar vendas abandonadas ou notificar eventos importantes.
             </p>
           </div>
-          <Button onClick={() => setIsAddingTrigger(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            Criar nova automação
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button>
+                <Plus className="h-4 w-4 mr-2" />
+                Criar nova automação
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => startNewAutomation('email')} className="flex items-center cursor-pointer">
+                <Mail className="h-4 w-4 mr-2 text-blue-500" />
+                Email
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => startNewAutomation('sms')} className="flex items-center cursor-pointer">
+                <MessageSquare className="h-4 w-4 mr-2 text-green-500" />
+                SMS
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -227,7 +235,6 @@ const RecuperacaoVendas: React.FC = () => {
           </TabsList>
           
           <TabsContent value="automacoes" className="space-y-6">
-            {/* Email Automations */}
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h2 className="text-xl font-semibold flex items-center">
@@ -237,9 +244,7 @@ const RecuperacaoVendas: React.FC = () => {
                     {settings.email.triggers.length} automações
                   </Badge>
                 </h2>
-                <Button variant="outline" size="sm" onClick={() => {
-                  setIsAddingTrigger(true);
-                }}>
+                <Button variant="outline" size="sm" onClick={() => startNewAutomation('email')}>
                   <Plus className="h-4 w-4 mr-2" />
                   Adicionar email
                 </Button>
@@ -332,7 +337,7 @@ const RecuperacaoVendas: React.FC = () => {
                       Você ainda não criou nenhuma automação de email. 
                       Clique no botão acima para começar.
                     </p>
-                    <Button onClick={() => setIsAddingTrigger(true)}>
+                    <Button onClick={() => startNewAutomation('email')}>
                       <Plus className="h-4 w-4 mr-2" />
                       Adicionar primeira automação
                     </Button>
@@ -343,7 +348,6 @@ const RecuperacaoVendas: React.FC = () => {
 
             <Separator />
 
-            {/* SMS Automations */}
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h2 className="text-xl font-semibold flex items-center">
@@ -353,9 +357,7 @@ const RecuperacaoVendas: React.FC = () => {
                     {settings.sms.triggers.length} automações
                   </Badge>
                 </h2>
-                <Button variant="outline" size="sm" onClick={() => {
-                  setIsAddingTrigger(true);
-                }}>
+                <Button variant="outline" size="sm" onClick={() => startNewAutomation('sms')}>
                   <Plus className="h-4 w-4 mr-2" />
                   Adicionar SMS
                 </Button>
@@ -447,7 +449,7 @@ const RecuperacaoVendas: React.FC = () => {
                       Você ainda não criou nenhuma automação de SMS. 
                       Clique no botão acima para começar.
                     </p>
-                    <Button onClick={() => setIsAddingTrigger(true)}>
+                    <Button onClick={() => startNewAutomation('sms')}>
                       <Plus className="h-4 w-4 mr-2" />
                       Adicionar primeira automação
                     </Button>
@@ -458,7 +460,6 @@ const RecuperacaoVendas: React.FC = () => {
 
             <Separator />
 
-            {/* WhatsApp Section (Coming Soon) */}
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h2 className="text-xl font-semibold flex items-center">
@@ -498,7 +499,6 @@ const RecuperacaoVendas: React.FC = () => {
         </Tabs>
       </div>
 
-      {/* Delete Confirmation Dialog */}
       <AlertDialog open={triggerToDelete !== null} onOpenChange={(open) => !open && setTriggerToDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
