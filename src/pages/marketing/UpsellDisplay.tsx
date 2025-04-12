@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
@@ -21,11 +20,9 @@ const defaultUpsellTemplate = {
   buttonText: 'Sim, quero adicionar!',
   declineText: 'Não, obrigado',
   redirectUrl: 'https://voltz.checkout/obrigado',
-  // New redirection fields
   redirectType: 'url',
   redirectUpsellId: '',
   fallbackRedirectUrl: 'https://voltz.checkout/obrigado',
-  // Downsell configuration
   hasDownsell: false,
   downsellProductId: '',
   downsellProductName: '',
@@ -35,7 +32,6 @@ const defaultUpsellTemplate = {
   downsellRedirectType: 'url',
   downsellRedirectUpsellId: '',
   downsellRedirectUrl: 'https://voltz.checkout/obrigado',
-  // Display options
   showOriginalPrice: true,
   showScarcityBadge: true,
   scarcityText: 'Restam poucas unidades!',
@@ -114,7 +110,11 @@ const mockUpsellData = {
   downsellDescription: 'Não quer o curso completo? Este e-book contém o básico para você começar!',
 };
 
-const UpsellDisplay: React.FC = () => {
+interface UpsellDisplayProps {
+  previewMode?: boolean;
+}
+
+const UpsellDisplay: React.FC<UpsellDisplayProps> = ({ previewMode = false }) => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -124,6 +124,12 @@ const UpsellDisplay: React.FC = () => {
   
   // In a real implementation, fetch upsell data based on ID
   useEffect(() => {
+    // Skip API fetch if in preview mode
+    if (previewMode) {
+      setUpsellData(mockUpsellData);
+      return;
+    }
+    
     // Simulating API fetch
     const fetchUpsellData = async () => {
       // Check if it's a downsell page
@@ -158,7 +164,7 @@ const UpsellDisplay: React.FC = () => {
     };
     
     fetchUpsellData();
-  }, [id]);
+  }, [id, previewMode]);
   
   // Countdown effect
   useEffect(() => {
@@ -185,6 +191,15 @@ const UpsellDisplay: React.FC = () => {
   
   // Handle redirection based on settings
   const handleRedirection = (accepted: boolean) => {
+    // If in preview mode, show toast instead of redirecting
+    if (previewMode) {
+      const actionType = accepted ? 'aceito' : 'recusado';
+      toast.info(`Simulação: Upsell ${actionType}`, {
+        description: `Em um ambiente real, o cliente seria redirecionado para ${accepted ? 'o próximo destino' : 'o downsell ou destino final'}.`,
+      });
+      return true;
+    }
+    
     // Different logic for downsell pages vs regular upsell pages
     if (isDownsell) {
       // Downsell redirection logic
@@ -265,11 +280,13 @@ const UpsellDisplay: React.FC = () => {
       const redirected = handleRedirection(true);
       
       // Only perform default redirect if handleRedirection didn't already redirect
-      if (!redirected) {
+      if (!redirected && !previewMode) {
         // Redirect after success
         setTimeout(() => {
           window.location.href = upsellData.redirectUrl;
         }, 1000);
+      } else {
+        setLoading(false);
       }
     } catch (error) {
       toast.error("Erro ao processar pagamento", {
@@ -288,7 +305,7 @@ const UpsellDisplay: React.FC = () => {
     const redirected = handleRedirection(false);
     
     // Only perform default redirect if handleRedirection didn't already redirect
-    if (!redirected) {
+    if (!redirected && !previewMode) {
       // Redirect to thank you page
       window.location.href = upsellData.redirectUrl;
     }
