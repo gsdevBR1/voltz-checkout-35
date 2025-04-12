@@ -94,7 +94,6 @@ const ClonadorShopifyPage: React.FC = () => {
   const [isConnecting, setIsConnecting] = useState(false);
   const { toast } = useToast();
 
-  // Add new state variables for enhanced cloning functionality
   const [cloneStatus, setCloneStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [cloneMessage, setCloneMessage] = useState<string>('');
   const [clonedProductId, setClonedProductId] = useState<string | null>(null);
@@ -106,7 +105,7 @@ const ClonadorShopifyPage: React.FC = () => {
     errorCount: 0,
     inProgress: false
   });
-  
+
   const singleProductForm = useForm<z.infer<typeof singleProductFormSchema>>({
     resolver: zodResolver(singleProductFormSchema),
     defaultValues: {
@@ -140,33 +139,21 @@ const ClonadorShopifyPage: React.FC = () => {
     },
   });
 
-  // Function to validate Shopify store credentials
   const validateShopifyCredentials = async (credentials: ShopifyAppCredentials): Promise<boolean> => {
     try {
-      // Simulating API validation - in a real implementation, this would check if the
-      // credentials are valid by making a request to the Shopify API
       await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // In a real implementation, we would check for errors and return false if any occurred
       return true;
     } catch (error) {
       console.error("Error validating Shopify credentials:", error);
       return false;
     }
   };
-  
-  // Function to create a product in the user's Shopify store via API
+
   const createProductInShopify = async (product: ShopifyProduct, credentials: ShopifyAppCredentials): Promise<ShopifyCloneResult> => {
     try {
-      // Simulate API call to create product in Shopify
       await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Generate a mock Shopify product ID
       const shopifyProductId = 'gid://shopify/Product/' + Math.floor(Math.random() * 10000000);
-      
-      // Generate a mock VOLTZ checkout URL
       const checkoutUrl = `https://pagamento.voltzcheckout.com/checkout?product=${shopifyProductId}`;
-      
       return {
         success: true,
         message: "Produto criado com sucesso na sua loja Shopify e vinculado ao checkout VOLTZ.",
@@ -181,9 +168,8 @@ const ClonadorShopifyPage: React.FC = () => {
       };
     }
   };
-  
+
   const isShopifyStore = (url: string): boolean => {
-    // More comprehensive check for Shopify stores
     return url.includes('shopify.com') || 
            url.includes('.myshopify.com') || 
            url.includes('/products/') || 
@@ -205,7 +191,6 @@ const ClonadorShopifyPage: React.FC = () => {
   const connectShopifyApp = async (values: z.infer<typeof shopifyAppFormSchema>) => {
     try {
       setIsConnecting(true);
-      
       const credentials: ShopifyAppCredentials = {
         apiKey: values.apiKey,
         apiSecret: values.apiSecret,
@@ -213,10 +198,7 @@ const ClonadorShopifyPage: React.FC = () => {
         shopDomain: values.shopDomain,
         isConnected: false
       };
-      
-      // Validate credentials
       const isValid = await validateShopifyCredentials(credentials);
-      
       if (!isValid) {
         toast({
           title: "Erro ao conectar App Shopify",
@@ -225,18 +207,14 @@ const ClonadorShopifyPage: React.FC = () => {
         });
         return;
       }
-      
-      // Mark as connected
       credentials.isConnected = true;
       setShopifyCredentials(credentials);
       setShopifyAppConnected(true);
-      
       toast({
         title: "App Shopify conectado com sucesso!",
         description: "Sua loja foi conectada e está pronta para receber produtos clonados.",
         variant: "default",
       });
-      
     } catch (error) {
       console.error("Error connecting Shopify app:", error);
       toast({
@@ -256,7 +234,6 @@ const ClonadorShopifyPage: React.FC = () => {
       setCloneMessage('');
       setClonedProductId(null);
       setVoltzCheckoutUrl(null);
-      
       if (!isShopifyStore(url)) {
         toast({
           title: "Erro ao verificar loja",
@@ -265,9 +242,7 @@ const ClonadorShopifyPage: React.FC = () => {
         });
         return;
       }
-
       let useScrapingFallback = !url.includes('.myshopify.com') && !url.includes('shopify.com');
-      
       if (useScrapingFallback) {
         setDetectionMethod('scraping');
         await new Promise(resolve => setTimeout(resolve, 2500));
@@ -275,8 +250,6 @@ const ClonadorShopifyPage: React.FC = () => {
         setDetectionMethod('api');
         await new Promise(resolve => setTimeout(resolve, 1500));
       }
-      
-      // Mock product data for demonstration
       const mockProduct: ShopifyProduct = {
         id: "shopify_" + Math.floor(Math.random() * 10000000),
         title: "Produto Demonstrativo Shopify" + (useScrapingFallback ? " (via Scraping)" : ""),
@@ -354,16 +327,13 @@ const ClonadorShopifyPage: React.FC = () => {
         url: url,
         status: 'pending'
       };
-
       setProductData(mockProduct);
       setSelectedImage(mockProduct.images[0]);
-      
       productForm.reset({
         title: mockProduct.title,
         description: mockProduct.description,
         price: mockProduct.price,
       });
-      
       toast({
         title: "Produto encontrado!",
         description: `Os dados do produto foram carregados com sucesso ${useScrapingFallback ? 'utilizando scraping estruturado' : 'via API Storefront'}.`,
@@ -384,7 +354,6 @@ const ClonadorShopifyPage: React.FC = () => {
   const scanShopifyStore = async (url: string) => {
     try {
       setIsStoreLoading(true);
-      
       if (!isShopifyStore(url)) {
         toast({
           title: "Erro ao verificar loja",
@@ -393,21 +362,15 @@ const ClonadorShopifyPage: React.FC = () => {
         });
         return;
       }
-      
       const useScrapingFallback = !url.includes('.myshopify.com') && !url.includes('shopify.com');
       setDetectionMethod(useScrapingFallback ? 'scraping' : 'api');
-      
       if (useScrapingFallback) {
         await new Promise(resolve => setTimeout(resolve, 3000));
       } else {
         await new Promise(resolve => setTimeout(resolve, 2000));
       }
-      
-      // Generate a realistic random product count
       const productCount = Math.floor(Math.random() * 30) + 5;
-      
       setFoundProducts(productCount);
-      
       toast({
         title: "Loja Shopify encontrada!",
         description: `Encontramos ${productCount} produtos disponíveis publicamente ${useScrapingFallback ? 'utilizando scraping estruturado' : 'via API Storefront'}.`,
@@ -429,11 +392,8 @@ const ClonadorShopifyPage: React.FC = () => {
     if (!shopifyCredentials || !shopifyCredentials.isConnected || !foundProducts) {
       return;
     }
-    
     try {
       setIsStoreCloningInProgress(true);
-      
-      // Initialize store cloning status
       const totalProducts = foundProducts;
       setStoreCloneStatus({
         totalProducts,
@@ -442,31 +402,22 @@ const ClonadorShopifyPage: React.FC = () => {
         errorCount: 0,
         inProgress: true
       });
-      
-      // Simulate progress updates
       for (let i = 1; i <= totalProducts; i++) {
         await new Promise(resolve => setTimeout(resolve, 500));
-        
-        // Simulate some errors (about 10% failure rate)
         const isSuccess = Math.random() > 0.1;
-        
         setStoreCloneStatus(prev => ({
           ...prev,
           processedProducts: i,
           successCount: isSuccess ? prev.successCount + 1 : prev.successCount,
           errorCount: !isSuccess ? prev.errorCount + 1 : prev.errorCount,
         }));
-        
         setStoreCloningProgress(Math.floor((i / totalProducts) * 100));
       }
-      
       toast({
         title: "Loja clonada com sucesso!",
         description: `${storeCloneStatus.successCount} produtos foram adicionados à sua loja e configurados com checkout VOLTZ.`,
         variant: "default",
       });
-      
-      // Reset forms after successful cloning
       setTimeout(() => {
         storeForm.reset();
         setFoundProducts(null);
@@ -475,7 +426,6 @@ const ClonadorShopifyPage: React.FC = () => {
         setStoreCloningProgress(0);
         setStoreCloneStatus(prev => ({ ...prev, inProgress: false }));
       }, 2000);
-      
     } catch (error) {
       console.error("Error cloning store:", error);
       toast({
@@ -483,7 +433,6 @@ const ClonadorShopifyPage: React.FC = () => {
         description: "Ocorreu um erro ao tentar clonar a loja. Tente novamente mais tarde.",
         variant: "destructive",
       });
-      
       setIsStoreCloningInProgress(false);
       setStoreCloningProgress(0);
       setStoreCloneStatus(prev => ({ ...prev, inProgress: false }));
@@ -499,7 +448,6 @@ const ClonadorShopifyPage: React.FC = () => {
       });
       return;
     }
-    
     await fetchProductData(values.productLink);
   };
 
@@ -512,7 +460,6 @@ const ClonadorShopifyPage: React.FC = () => {
       });
       return;
     }
-    
     await scanShopifyStore(values.storeLink);
   };
 
@@ -525,36 +472,27 @@ const ClonadorShopifyPage: React.FC = () => {
       });
       return;
     }
-    
     try {
       setIsCloning(true);
       setCloneStatus('loading');
       setCloneMessage('Clonando produto para sua loja Shopify...');
-      
-      // Update product with form values
       const productToClone = {
         ...productData,
         title: values.title,
         description: values.description,
         price: values.price
       };
-      
-      // Call function to create product in Shopify
       const result = await createProductInShopify(productToClone, shopifyCredentials);
-      
       if (result.success) {
         setCloneStatus('success');
         setCloneMessage(result.message);
         setClonedProductId(result.productId || null);
         setVoltzCheckoutUrl(result.checkoutUrl || null);
-        
         toast({
           title: "Produto clonado com sucesso!",
           description: "O produto foi adicionado à sua loja e vinculado ao checkout VOLTZ.",
           variant: "default",
         });
-        
-        // Reset forms after successful cloning
         setTimeout(() => {
           singleProductForm.reset();
           productForm.reset();
@@ -569,7 +507,6 @@ const ClonadorShopifyPage: React.FC = () => {
       } else {
         setCloneStatus('error');
         setCloneMessage(result.message);
-        
         toast({
           title: "Erro ao clonar produto",
           description: result.message,
@@ -580,7 +517,6 @@ const ClonadorShopifyPage: React.FC = () => {
       console.error("Error cloning product:", error);
       setCloneStatus('error');
       setCloneMessage("Ocorreu um erro ao tentar clonar o produto. Tente novamente mais tarde.");
-      
       toast({
         title: "Erro ao clonar produto",
         description: "Ocorreu um erro ao tentar clonar o produto. Tente novamente mais tarde.",
@@ -595,10 +531,8 @@ const ClonadorShopifyPage: React.FC = () => {
     setSelectedImage(image);
   };
 
-  // Component for showing cloning status
   const CloneStatusDisplay = () => {
     if (cloneStatus === 'idle') return null;
-    
     return (
       <Alert className={cloneStatus === 'loading' 
         ? 'bg-blue-50 border-blue-200 dark:bg-blue-950/20 dark:border-blue-800/30'
@@ -697,7 +631,6 @@ const ClonadorShopifyPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Shopify App Connection */}
         <Card className="mb-8 border-amber-200 dark:border-amber-800/30">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -826,4 +759,169 @@ const ClonadorShopifyPage: React.FC = () => {
                           <span className="inline-block h-1.5 w-1.5 rounded-full bg-amber-600"></span>
                           read_products
                         </div>
-                        <div className="flex items-center gap
+                        <div className="flex items-center gap-1">
+                          <span className="inline-block h-1.5 w-1.5 rounded-full bg-amber-600"></span>
+                          write_products
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <span className="inline-block h-1.5 w-1.5 rounded-full bg-amber-600"></span>
+                          read_inventory
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <span className="inline-block h-1.5 w-1.5 rounded-full bg-amber-600"></span>
+                          write_inventory
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <span className="inline-block h-1.5 w-1.5 rounded-full bg-amber-600"></span>
+                          read_files
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <span className="inline-block h-1.5 w-1.5 rounded-full bg-amber-600"></span>
+                          write_files
+                        </div>
+                      </div>
+                    </AlertDescription>
+                  </Alert>
+                  
+                  <div className="flex justify-end">
+                    <Button 
+                      type="submit" 
+                      disabled={isConnecting}
+                      className="min-w-32"
+                    >
+                      {isConnecting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      {isConnecting ? 'Conectando...' : 'Conectar Loja'}
+                    </Button>
+                  </div>
+                </form>
+              </Form>
+            )}
+          </CardContent>
+        </Card>
+        
+        <div className="flex flex-col space-y-4">
+          <Tabs defaultValue="product">
+            <TabsList className="mb-4">
+              <TabsTrigger value="product">Clonar Produto</TabsTrigger>
+              <TabsTrigger value="store">Clonar Loja</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="product">
+              <div className="flex flex-col space-y-4">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-xl font-bold">Clonar Produto</h2>
+                  <Button onClick={() => setCloneOption('product')}>Selecionar Produto</Button>
+                </div>
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-medium">Selecione um produto:</h3>
+                  <Button onClick={() => setCloneOption('store')}>Selecionar Loja</Button>
+                </div>
+                {cloneOption === 'product' && (
+                  <div className="flex flex-col space-y-4">
+                    <Form {...singleProductForm}>
+                      <form onSubmit={singleProductForm.handleSubmit(onSubmitSingleProduct)} className="space-y-4">
+                        <FormField
+                          control={singleProductForm.control}
+                          name="productLink"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Link do Produto</FormLabel>
+                              <FormControl>
+                                <Input placeholder="https://loja.com/products/nome-do-produto" {...field} />
+                              </FormControl>
+                              <FormDescription>
+                                Insira o link do produto que você deseja clonar
+                              </FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <Button type="submit" disabled={isLoading}>
+                          {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                          {isLoading ? 'Carregando...' : 'Clonar Produto'}
+                        </Button>
+                      </form>
+                    </Form>
+                  </div>
+                )}
+                {cloneOption === 'store' && (
+                  <div className="flex flex-col space-y-4">
+                    <Form {...storeForm}>
+                      <form onSubmit={storeForm.handleSubmit(onSubmitStore)} className="space-y-4">
+                        <FormField
+                          control={storeForm.control}
+                          name="storeLink"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Link da Loja</FormLabel>
+                              <FormControl>
+                                <Input placeholder="https://loja.com" {...field} />
+                              </FormControl>
+                              <FormDescription>
+                                Insira o link da loja que você deseja clonar
+                              </FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <Button type="submit" disabled={isLoading}>
+                          {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                          {isLoading ? 'Carregando...' : 'Clonar Loja'}
+                        </Button>
+                      </form>
+                    </Form>
+                  </div>
+                )}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="store">
+              <div className="flex flex-col space-y-4">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-xl font-bold">Clonar Loja</h2>
+                  <Button onClick={() => setCloneOption('store')}>Selecionar Loja</Button>
+                </div>
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-medium">Selecione uma loja:</h3>
+                  <Button onClick={() => setCloneOption('product')}>Selecionar Produto</Button>
+                </div>
+                {cloneOption === 'store' && (
+                  <div className="flex flex-col space-y-4">
+                    <Form {...storeForm}>
+                      <form onSubmit={storeForm.handleSubmit(onSubmitStore)} className="space-y-4">
+                        <FormField
+                          control={storeForm.control}
+                          name="storeLink"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Link da Loja</FormLabel>
+                              <FormControl>
+                                <Input placeholder="https://loja.com" {...field} />
+                              </FormControl>
+                              <FormDescription>
+                                Insira o link da loja que você deseja clonar
+                              </FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <Button type="submit" disabled={isLoading}>
+                          {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                          {isLoading ? 'Carregando...' : 'Clonar Loja'}
+                        </Button>
+                      </form>
+                    </Form>
+                  </div>
+                )}
+              </div>
+            </TabsContent>
+          </Tabs>
+
+          <CloneStatusDisplay />
+        </div>
+      </div>
+    </DashboardLayout>
+  );
+};
+
+export default ClonadorShopifyPage;
