@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -322,7 +323,7 @@ const PixelManagementPage: React.FC = () => {
         isOpen={isAddEditOpen}
         onClose={() => setIsAddEditOpen(false)}
         onSubmit={handleSavePixel}
-        pixel={currentPixel}
+        pixelData={currentPixel}
         platformId={integration.platform}
         isEdit={!!currentPixel}
       />
