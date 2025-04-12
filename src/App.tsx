@@ -40,6 +40,7 @@ import RedirecionamentoPage from "./pages/checkouts/RedirecionamentoPage";
 // Marketing Section Pages
 import UpsellOnePage from "./pages/marketing/UpsellOnePage";
 import CriarUpsellPage from "./pages/marketing/CriarUpsellPage";
+import UpsellDisplay from "./pages/marketing/UpsellDisplay"; // New import
 import OrderBumpsPage from "./pages/marketing/OrderBumpsPage";
 import CuponsPage from "./pages/marketing/CuponsPage";
 import CrossSellPage from "./pages/marketing/CrossSellPage";
@@ -95,6 +96,8 @@ const App: React.FC = () => {
                   {/* Marketing Section Routes */}
                   <Route path="/marketing/upsell" element={<UpsellOnePage />} />
                   <Route path="/marketing/upsell/criar" element={<CriarUpsellPage />} />
+                  <Route path="/marketing/upsell/:id/preview" element={<UpsellDisplay />} /> {/* New route */}
+                  <Route path="/marketing/upsell/display/:id" element={<UpsellDisplay />} /> {/* New route */}
                   <Route path="/marketing/order-bumps" element={<OrderBumpsPage />} />
                   <Route path="/marketing/cupons" element={<CuponsPage />} />
                   <Route path="/marketing/cross-sell" element={<CrossSellPage />} />
