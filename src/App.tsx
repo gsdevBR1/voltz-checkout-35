@@ -71,6 +71,12 @@ import PixelsIntegrations from "./pages/integracoes/PixelsIntegrations";
 import TrackingIntegrations from "./pages/integracoes/TrackingIntegrations";
 import PixelManagementPage from "./pages/integracoes/PixelManagementPage";
 
+// Admin imports
+import { AdminLayout } from "./components/admin/AdminLayout";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminStoresList from "./pages/admin/AdminStoresList";
+import AdminLoginPage from "./pages/admin/AdminLoginPage";
+
 const App: React.FC = () => {
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -158,6 +164,14 @@ const App: React.FC = () => {
                   <Route path="/configuracoes/dominios" element={<DominiosPage />} />
                   <Route path="/configuracoes/logistica" element={<LogisticaPage />} />
                   <Route path="/configuracoes/webhooks" element={<WebhooksPage />} />
+                  
+                  {/* Admin Routes */}
+                  <Route path="/admin/login" element={<AdminLoginPage />} />
+                  <Route path="/admin" element={<AdminLayout />}>
+                    <Route index element={<AdminDashboard />} />
+                    <Route path="lojas" element={<AdminStoresList />} />
+                    <Route path="*" element={<Navigate to="/admin" replace />} />
+                  </Route>
                   
                   <Route path="*" element={<NotFound />} />
                 </Routes>

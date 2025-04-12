@@ -1,75 +1,73 @@
+import { Link } from "react-router-dom"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Label } from "@/components/ui/label"
+import { SidebarTrigger } from "@/components/ui/sidebar"
+import { ThemeToggle } from "@/components/ThemeToggle"
+import { Button } from "@/components/ui/button"
+import { Settings, Shield } from "lucide-react"
 
-import React from 'react';
-import { ThemeToggle } from './ThemeToggle';
-import { StoreSelector } from './StoreSelector';
-import { useStores } from '@/contexts/StoreContext';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Link } from 'react-router-dom';
-import { Store, Settings } from 'lucide-react';
-import { useTheme } from '@/providers/ThemeProvider';
-
-export function DashboardHeader({ onCustomizeClick }: { onCustomizeClick?: () => void }) {
-  const { currentStore } = useStores();
-  const { theme } = useTheme();
-  const isDarkMode = theme === "dark";
-
+export function DashboardHeader() {
+  
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background">
-      <div className="container flex h-16 items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Link to="/" className="flex items-center gap-2">
-            {isDarkMode ? (
-              <img 
-                src="/lovable-uploads/6e7ee63b-0326-4a37-bc3f-0e31d8324441.png" 
-                alt="Voltz.Checkout Logo (Dark Mode)" 
-                className="h-10 w-10"
-              />
-            ) : (
-              <img 
-                src="/lovable-uploads/3aa07f77-7311-4155-8e6c-39abb8dca3df.png" 
-                alt="Voltz.Checkout Logo" 
-                className="h-10 w-10"
-              />
-            )}
-          </Link>
-          
-          {currentStore?.isDemo && (
-            <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
-              Demonstração
-            </Badge>
-          )}
-        </div>
+    <header className="border-b border-border bg-card h-16 flex items-center px-3 md:px-6 sticky top-0 z-50">
+      <div className="flex gap-2 items-center w-full max-w-screen-2xl mx-auto">
+        <SidebarTrigger />
+        
+        <Link to="/dashboard" className="flex items-center space-x-3 shrink-0">
+          <div className="flex items-center gap-3">
+            <Label className="text-xl md:text-2xl font-semibold text-white">
+              voltz
+              <span className="text-primary">.checkout</span>
+            </Label>
+          </div>
+        </Link>
+        
+        <div className="flex-1"></div>
         
         <div className="flex items-center gap-3">
-          <Button variant="ghost" asChild>
-            <Link to="/stores" className="flex items-center gap-2">
-              <Store className="h-4 w-4" />
-              <span className="hidden sm:inline">Gerenciar Lojas</span>
-            </Link>
-          </Button>
-          
           <ThemeToggle />
           
-          <StoreSelector />
-          
-          <Avatar>
-            <AvatarFallback className="bg-primary/10 text-primary">
-              {currentStore?.name.substring(0, 2).toUpperCase() || "LC"}
-            </AvatarFallback>
-          </Avatar>
+          {/* Add Admin Panel Link - discreet, only visible to those who know */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
+                <Settings className="h-5 w-5" />
+                <span className="sr-only">Settings</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Configurações</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem asChild>
+                <Link to="/configuracoes/gerais">Gerais</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/configuracoes/dominios">Domínios</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/configuracoes/logistica">Logística</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/configuracoes/webhooks">Webhooks</Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem asChild>
+                <Link to="/admin/login" className="text-[#10B981]">
+                  <Shield className="h-4 w-4 mr-2" />
+                  Admin
+                </Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
-      
-      {currentStore?.isDemo && (
-        <div className="w-full bg-amber-50 border-b border-amber-200 py-2 px-4 text-amber-800 text-sm text-center">
-          ⚠️ Esta é uma loja de demonstração. Nenhuma transação real será realizada. 
-          <Link to="/stores" className="underline font-medium ml-1">
-            Crie sua loja real clicando aqui
-          </Link>.
-        </div>
-      )}
     </header>
   );
 }
