@@ -10,8 +10,9 @@ import {
   Save, 
   X, 
   AlertCircle,
-  Image as ImageIcon,
-  Trash2
+  ImageIcon,
+  Trash2,
+  Check
 } from 'lucide-react';
 import MarketingLayout from '@/components/marketing/MarketingLayout';
 import { Button } from '@/components/ui/button';
@@ -24,6 +25,8 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { toast } from '@/hooks/use-toast';
+import { Checkbox } from '@/components/ui/checkbox';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Form,
   FormControl,
@@ -42,14 +45,15 @@ const mockProducts = [
   { id: "3", name: "Tênis Esportivo" },
   { id: "4", name: "Kit Skin Care" },
   { id: "5", name: "Fones de Ouvido Bluetooth" },
+  { id: "6", name: "Relógio Digital" },
+  { id: "7", name: "Mochila Escolar" },
+  { id: "8", name: "Caderno Universitário" },
 ];
 
 // Form schema using Zod
 const formSchema = z.object({
   name: z.string().min(3, "Nome deve ter pelo menos 3 caracteres"),
-  mainProductId: z.string({
-    required_error: "Selecione um produto principal",
-  }),
+  mainProductIds: z.array(z.string()).min(1, "Selecione pelo menos um produto principal"),
   upsellProductId: z.string({
     required_error: "Selecione um produto para upsell",
   }),
@@ -86,7 +90,8 @@ const CriarUpsellPage = () => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
-      message: "Adicione esta oferta por apenas R$ XX,XX",
+      mainProductIds: [],
+      message: "Adicione esta oferta por apenas R$ XX,XX e receba junto com seu pedido!",
       customPrice: 0,
       showOriginalPrice: false,
       limitOnePerCustomer: true,
@@ -163,7 +168,7 @@ const CriarUpsellPage = () => {
   return (
     <MarketingLayout 
       title="Criar Upsell One Click" 
-      description="Configure uma oferta especial que será exibida após a compra do produto principal."
+      description="Configure uma oferta especial que será exibida após a compra dos produtos principais."
       actions={actions}
     >
       <Form {...form}>
@@ -190,69 +195,87 @@ const CriarUpsellPage = () => {
                   )}
                 />
                 
-                <div className="grid gap-6 sm:grid-cols-2">
-                  <FormField
-                    control={form.control}
-                    name="mainProductId"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Produto Principal <span className="text-red-500">*</span></FormLabel>
-                        <FormDescription>
-                          Produto que, ao ser comprado, ativa este upsell
-                        </FormDescription>
-                        <Select 
-                          onValueChange={field.onChange} 
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Selecione o produto principal" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
+                <FormField
+                  control={form.control}
+                  name="mainProductIds"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Produtos Principais <span className="text-red-500">*</span></FormLabel>
+                      <FormDescription>
+                        Selecione os produtos que, ao serem comprados, ativam este upsell
+                      </FormDescription>
+                      <Card className="border border-input">
+                        <ScrollArea className="h-56 p-2">
+                          <div className="grid grid-cols-1 gap-2 p-2">
                             {mockProducts.map((product) => (
-                              <SelectItem key={product.id} value={product.id}>
-                                {product.name}
-                              </SelectItem>
+                              <FormItem
+                                key={product.id}
+                                className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-3"
+                              >
+                                <FormControl>
+                                  <Checkbox
+                                    checked={field.value?.includes(product.id)}
+                                    onCheckedChange={(checked) => {
+                                      return checked
+                                        ? field.onChange([...field.value, product.id])
+                                        : field.onChange(
+                                            field.value?.filter(
+                                              (value) => value !== product.id
+                                            )
+                                          )
+                                    }}
+                                  />
+                                </FormControl>
+                                <div className="space-y-1 leading-none">
+                                  <FormLabel>
+                                    {product.name}
+                                  </FormLabel>
+                                </div>
+                              </FormItem>
                             ))}
-                          </SelectContent>
-                        </Select>
+                          </div>
+                        </ScrollArea>
+                      </Card>
+                      <div className="flex items-center justify-between mt-2">
                         <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="upsellProductId"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Produto de Upsell <span className="text-red-500">*</span></FormLabel>
-                        <FormDescription>
-                          Produto que será oferecido após a compra
-                        </FormDescription>
-                        <Select 
-                          onValueChange={field.onChange} 
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Selecione o produto para upsell" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {mockProducts.map((product) => (
-                              <SelectItem key={product.id} value={product.id}>
-                                {product.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+                        <div className="text-sm text-muted-foreground">
+                          {field.value.length} produto(s) selecionado(s)
+                        </div>
+                      </div>
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="upsellProductId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Produto de Upsell <span className="text-red-500">*</span></FormLabel>
+                      <FormDescription>
+                        Produto que será oferecido após a compra
+                      </FormDescription>
+                      <Select 
+                        onValueChange={field.onChange} 
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione o produto para upsell" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {mockProducts.map((product) => (
+                            <SelectItem key={product.id} value={product.id}>
+                              {product.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
                 
                 <FormField
                   control={form.control}
@@ -266,7 +289,7 @@ const CriarUpsellPage = () => {
                       <FormControl>
                         <Textarea 
                           {...field} 
-                          placeholder="Ex: Adicione esta oferta por apenas R$ XX,XX" 
+                          placeholder="Ex: Adicione esta oferta por apenas R$ XX,XX e receba junto com seu pedido!" 
                           className="h-24"
                         />
                       </FormControl>
@@ -586,15 +609,15 @@ const CriarUpsellPage = () => {
                         >
                           <div className="flex items-center space-x-2">
                             <RadioGroupItem value="checkout" id="checkout" />
-                            <Label htmlFor="checkout">Checkout de pagamento</Label>
+                            <Label htmlFor="checkout">Ir para checkout de pagamento</Label>
                           </div>
                           <div className="flex items-center space-x-2">
                             <RadioGroupItem value="thankyou" id="thankyou" />
-                            <Label htmlFor="thankyou">Página de obrigado</Label>
+                            <Label htmlFor="thankyou">Ir para página de obrigado</Label>
                           </div>
                           <div className="flex items-center space-x-2">
                             <RadioGroupItem value="custom" id="custom" />
-                            <Label htmlFor="custom">Página personalizada</Label>
+                            <Label htmlFor="custom">URL personalizada</Label>
                           </div>
                         </RadioGroup>
                       </FormControl>
@@ -609,7 +632,7 @@ const CriarUpsellPage = () => {
                     name="customRedirectUrl"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>URL da página personalizada <span className="text-red-500">*</span></FormLabel>
+                        <FormLabel>URL personalizada <span className="text-red-500">*</span></FormLabel>
                         <FormDescription>
                           Link completo para onde o cliente será redirecionado
                         </FormDescription>

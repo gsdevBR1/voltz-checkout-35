@@ -11,7 +11,7 @@ import MarketingLayout from '@/components/marketing/MarketingLayout';
 type UpsellOffer = {
   id: string;
   name: string;
-  mainProduct: string;
+  mainProducts: string[];
   upsellProduct: string;
   price: number;
   isActive: boolean;
@@ -27,7 +27,7 @@ const UpsellOnePage = () => {
     {
       id: "1",
       name: "Oferta Especial – Kit 3 Sabonetes",
-      mainProduct: "Camiseta Premium",
+      mainProducts: ["Camiseta Premium", "Calça Jeans Slim"],
       upsellProduct: "Kit Skin Care",
       price: 29.90,
       isActive: true,
@@ -37,7 +37,7 @@ const UpsellOnePage = () => {
     {
       id: "2",
       name: "Frete Grátis - Adicione mais um item",
-      mainProduct: "Calça Jeans Slim",
+      mainProducts: ["Tênis Esportivo"],
       upsellProduct: "Camiseta Premium",
       price: 59.90,
       isActive: true,
@@ -47,7 +47,7 @@ const UpsellOnePage = () => {
     {
       id: "3",
       name: "Combo Especial - Economize 30%",
-      mainProduct: "Tênis Esportivo",
+      mainProducts: ["Tênis Esportivo", "Mochila Escolar", "Fones de Ouvido Bluetooth"],
       upsellProduct: "Meias Esportivas",
       price: 19.90,
       isActive: false,
@@ -67,7 +67,7 @@ const UpsellOnePage = () => {
   return (
     <MarketingLayout 
       title="Upsell One Click" 
-      description="Configure ofertas especiais que serão exibidas após a compra do produto principal."
+      description="Configure ofertas especiais que serão exibidas após a compra dos produtos principais."
       actions={actions}
     >
       <div>
@@ -117,10 +117,10 @@ const UpsellOnePage = () => {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-2 gap-4 text-sm mb-4">
+                <div className="grid grid-cols-1 gap-4 text-sm mb-4">
                   <div>
-                    <span className="text-muted-foreground">Produto Principal:</span>
-                    <p className="font-medium">{offer.mainProduct}</p>
+                    <span className="text-muted-foreground">Produtos Principais ({offer.mainProducts.length}):</span>
+                    <p className="font-medium">{offer.mainProducts.join(', ')}</p>
                   </div>
                   <div>
                     <span className="text-muted-foreground">Produto de Upsell:</span>
