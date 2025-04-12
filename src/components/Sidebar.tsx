@@ -156,14 +156,6 @@ export const AppSidebar: React.FC<SidebarProps> = ({ className }) => {
           title: 'Clonador Loja Shopify',
           path: '/produtos/clonador-shopify',
           icon: Copy,
-          badge: {
-            text: 'EXCLUSIVO',
-            variant: 'success' as const,
-            extraBadge: {
-              text: '🔥 Novo',
-              variant: 'warning' as const
-            }
-          }
         }
       ]
     },
@@ -327,24 +319,7 @@ export const AppSidebar: React.FC<SidebarProps> = ({ className }) => {
                                 )}
                                 aria-current={location.pathname === subItem.path ? "page" : undefined}
                               />
-                              <span className="flex items-center gap-2">
-                                {subItem.title}
-                                {subItem.badge && (
-                                  <div className="flex items-center gap-1">
-                                    <Badge variant={subItem.badge.variant} className="text-[10px] px-1 py-0">
-                                      {subItem.badge.text}
-                                    </Badge>
-                                    {subItem.badge.extraBadge && (
-                                      <Badge 
-                                        variant={subItem.badge.extraBadge.variant} 
-                                        className="text-[10px] px-1 py-0"
-                                      >
-                                        {subItem.badge.extraBadge.text}
-                                      </Badge>
-                                    )}
-                                  </div>
-                                )}
-                              </span>
+                              <span>{subItem.title}</span>
                             </Link>
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>

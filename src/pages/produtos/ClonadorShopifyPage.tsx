@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -34,7 +33,6 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { ShopifyProduct } from '@/types/shopifyProduct';
 
-// Form schema for the product link
 const formSchema = z.object({
   productLink: z.string()
     .url({ message: "O URL do produto é inválido." })
@@ -44,7 +42,6 @@ const formSchema = z.object({
     ),
 });
 
-// Form schema for the editable product details
 const productFormSchema = z.object({
   title: z.string().min(3, { message: "O título deve ter pelo menos 3 caracteres." }),
   description: z.string(),
@@ -58,7 +55,6 @@ const ClonadorShopifyPage: React.FC = () => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const { toast } = useToast();
 
-  // Form for the product link
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -66,7 +62,6 @@ const ClonadorShopifyPage: React.FC = () => {
     },
   });
 
-  // Form for the product details
   const productForm = useForm<z.infer<typeof productFormSchema>>({
     resolver: zodResolver(productFormSchema),
     defaultValues: {
@@ -76,17 +71,10 @@ const ClonadorShopifyPage: React.FC = () => {
     },
   });
 
-  // Function to fetch product data from Shopify
   const fetchProductData = async (url: string) => {
     try {
       setIsLoading(true);
-      // In a real implementation, this would be an API call to your backend
-      // which would then fetch the product data from Shopify
-      // For demo purposes, we'll simulate a response
-      
-      await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate API delay
-      
-      // Mock data for demonstration
+      await new Promise(resolve => setTimeout(resolve, 1500));
       const mockProduct: ShopifyProduct = {
         id: "shopify_1234567890",
         title: "Produto Demonstrativo Shopify",
@@ -165,7 +153,6 @@ const ClonadorShopifyPage: React.FC = () => {
       setProductData(mockProduct);
       setSelectedImage(mockProduct.images[0]);
       
-      // Set the form values
       productForm.reset({
         title: mockProduct.title,
         description: mockProduct.description,
@@ -189,23 +176,17 @@ const ClonadorShopifyPage: React.FC = () => {
     }
   };
 
-  // Handle form submission for the product link
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     await fetchProductData(values.productLink);
   };
 
-  // Handle cloning the product to the user's store
   const handleCloneProduct = async (values: z.infer<typeof productFormSchema>) => {
     if (!productData) return;
     
     try {
       setIsCloning(true);
       
-      // In a real implementation, this would be an API call to your backend
-      // which would then create the product in the user's Shopify store
-      // and create a corresponding product in the VOLTZ platform
-      
-      await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 2000));
       
       toast({
         title: "Produto clonado com sucesso!",
@@ -213,7 +194,6 @@ const ClonadorShopifyPage: React.FC = () => {
         variant: "success",
       });
       
-      // Reset the forms and state
       form.reset();
       productForm.reset();
       setProductData(null);
@@ -230,7 +210,6 @@ const ClonadorShopifyPage: React.FC = () => {
     }
   };
 
-  // Handle selecting an image
   const handleSelectImage = (image: string) => {
     setSelectedImage(image);
   };
@@ -243,7 +222,6 @@ const ClonadorShopifyPage: React.FC = () => {
             <h1 className="text-3xl font-bold tracking-tight">Clonador Loja Shopify</h1>
             <div className="flex items-center gap-2">
               <Badge variant="success" className="text-xs px-2 py-1">EXCLUSIVO</Badge>
-              <Badge variant="warning" className="text-xs px-2 py-1">🔥 Novo</Badge>
             </div>
           </div>
           <p className="text-muted-foreground">
