@@ -14,7 +14,7 @@ const trackingIntegrations: TrackingIntegration[] = [
     category: 'tracking',
     platform: 'utmify',
     status: 'not_integrated',
-    logo: 'https://placekitten.com/200/200', // Placeholder image
+    logo: 'https://media.licdn.com/dms/image/C4D0BAQFm9hiVZxp56g/company-logo_200_200/0/1660657124131/utmify_logo?e=1752451200&v=beta&t=sRwH-WTNfLb1upVbDTwSEHRX7hWdDaFEiAqkCAMa0jg',
     isNative: false,
     externalUrl: 'https://utmify.me'
   },
@@ -25,7 +25,7 @@ const trackingIntegrations: TrackingIntegration[] = [
     category: 'tracking',
     platform: 'xtracky',
     status: 'not_integrated',
-    logo: 'https://placekitten.com/201/201', // Placeholder image
+    logo: 'https://xtracky.com/branding/logo-full-white.svg',
     isNative: false,
     externalUrl: 'https://xtracky.com'
   }
