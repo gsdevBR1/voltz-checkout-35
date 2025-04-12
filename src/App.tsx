@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -71,7 +70,8 @@ import PixelsIntegrations from "./pages/integracoes/PixelsIntegrations";
 import TrackingIntegrations from "./pages/integracoes/TrackingIntegrations";
 import PixelManagementPage from "./pages/integracoes/PixelManagementPage";
 
-// Admin imports
+import AdminUsersList from './pages/admin/AdminUsersList';
+
 import { AdminLayout } from "./components/admin/AdminLayout";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminStoresList from "./pages/admin/AdminStoresList";
@@ -165,12 +165,13 @@ const App: React.FC = () => {
                   <Route path="/configuracoes/logistica" element={<LogisticaPage />} />
                   <Route path="/configuracoes/webhooks" element={<WebhooksPage />} />
                   
+                  <Route path="usuarios" element={<AdminUsersList />} />
+                  
                   {/* Admin Routes */}
                   <Route path="/admin/login" element={<AdminLoginPage />} />
                   <Route path="/admin" element={<AdminLayout />}>
                     <Route index element={<AdminDashboard />} />
                     <Route path="lojas" element={<AdminStoresList />} />
-                    {/* Redirect any other admin paths back to dashboard */}
                     <Route path="*" element={<Navigate to="/admin" replace />} />
                   </Route>
                   
