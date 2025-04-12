@@ -16,3 +16,13 @@ export interface Webhook {
   status: 'active' | 'inactive';
   createdAt: string;
 }
+
+export interface WebhookLog {
+  id: string;
+  webhookId: string;
+  timestamp: string;
+  status: number;
+  duration: number;
+  event: WebhookEvent;
+  payload: string;
+}

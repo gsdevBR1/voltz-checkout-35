@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
-import { Plus, Link, ExternalLink, Check, X, AlertCircle } from 'lucide-react';
+import { Plus, Link, ExternalLink, Check, X, AlertCircle, Clipboard, History } from 'lucide-react';
 import { 
   Table, 
   TableBody, 
@@ -13,11 +13,15 @@ import {
 } from '@/components/ui/table';
 import { Switch } from '@/components/ui/switch';
 import { AddWebhookModal } from '@/components/configuracoes/AddWebhookModal';
+import { EditWebhookModal } from '@/components/configuracoes/EditWebhookModal';
+import { DeleteWebhookDialog } from '@/components/configuracoes/DeleteWebhookDialog';
+import { WebhookLogsDrawer } from '@/components/configuracoes/WebhookLogsDrawer';
 import { Webhook, WebhookEvent } from '@/types/webhook';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
+// Mock data for testing
 const mockWebhooks: Webhook[] = [
   {
     id: '1',
@@ -51,6 +55,10 @@ const eventLabels: Record<WebhookEvent, string> = {
 const WebhooksPage: React.FC = () => {
   const [webhooks, setWebhooks] = useState<Webhook[]>(mockWebhooks);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [selectedWebhook, setSelectedWebhook] = useState<Webhook | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isLogsDrawerOpen, setIsLogsDrawerOpen] = useState(false);
   const { toast } = useToast();
 
   const handleAddWebhook = (data: { 
@@ -78,6 +86,35 @@ const WebhooksPage: React.FC = () => {
     });
   };
 
+  const handleEditWebhook = (data: { 
+    name: string; 
+    url: string; 
+    events: string[];
+  }) => {
+    if (!selectedWebhook) return;
+    
+    setWebhooks(hooks => 
+      hooks.map(hook => 
+        hook.id === selectedWebhook.id 
+          ? { 
+              ...hook, 
+              name: data.name, 
+              url: data.url, 
+              events: data.events as WebhookEvent[] 
+            } 
+          : hook
+      )
+    );
+    
+    setIsEditModalOpen(false);
+    setSelectedWebhook(null);
+    
+    toast({
+      title: "Webhook atualizado",
+      description: `As alterações no webhook "${data.name}" foram salvas.`,
+    });
+  };
+
   const handleToggleStatus = (id: string) => {
     setWebhooks(hooks => 
       hooks.map(hook => 
@@ -86,6 +123,34 @@ const WebhooksPage: React.FC = () => {
           : hook
       )
     );
+  };
+
+  const handleDeleteWebhook = () => {
+    if (!selectedWebhook) return;
+    
+    setWebhooks(hooks => hooks.filter(hook => hook.id !== selectedWebhook.id));
+    setIsDeleteDialogOpen(false);
+    setSelectedWebhook(null);
+    
+    toast({
+      title: "Webhook removido",
+      description: `O webhook "${selectedWebhook.name}" foi removido com sucesso.`,
+    });
+  };
+
+  const openEditModal = (webhook: Webhook) => {
+    setSelectedWebhook(webhook);
+    setIsEditModalOpen(true);
+  };
+
+  const openDeleteDialog = (webhook: Webhook) => {
+    setSelectedWebhook(webhook);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const openLogsDrawer = (webhook: Webhook) => {
+    setSelectedWebhook(webhook);
+    setIsLogsDrawerOpen(true);
   };
 
   const formatUrl = (url: string) => {
@@ -197,18 +262,43 @@ const WebhooksPage: React.FC = () => {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end space-x-2">
-                        <Button variant="ghost" size="sm">
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => openEditModal(webhook)}
+                        >
                           Editar
                         </Button>
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger asChild>
-                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                                <AlertCircle className="h-4 w-4" />
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className="h-8 w-8 p-0"
+                                onClick={() => openLogsDrawer(webhook)}
+                              >
+                                <History className="h-4 w-4" />
                                 <span className="sr-only">Logs</span>
                               </Button>
                             </TooltipTrigger>
                             <TooltipContent>Ver logs de entrega</TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className="h-8 w-8 p-0 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20"
+                                onClick={() => openDeleteDialog(webhook)}
+                              >
+                                <X className="h-4 w-4" />
+                                <span className="sr-only">Remover</span>
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Remover webhook</TooltipContent>
                           </Tooltip>
                         </TooltipProvider>
                       </div>
@@ -221,11 +311,45 @@ const WebhooksPage: React.FC = () => {
         </div>
       </div>
 
+      {/* Modals and Dialogs */}
       <AddWebhookModal 
         isOpen={isAddModalOpen} 
         onClose={() => setIsAddModalOpen(false)} 
         onSubmit={handleAddWebhook} 
       />
+      
+      {selectedWebhook && (
+        <>
+          <EditWebhookModal 
+            webhook={selectedWebhook}
+            isOpen={isEditModalOpen} 
+            onClose={() => {
+              setIsEditModalOpen(false);
+              setSelectedWebhook(null);
+            }} 
+            onSubmit={handleEditWebhook} 
+          />
+          
+          <DeleteWebhookDialog 
+            webhook={selectedWebhook}
+            isOpen={isDeleteDialogOpen}
+            onCancel={() => {
+              setIsDeleteDialogOpen(false);
+              setSelectedWebhook(null);
+            }}
+            onConfirm={handleDeleteWebhook}
+          />
+          
+          <WebhookLogsDrawer 
+            webhook={selectedWebhook}
+            open={isLogsDrawerOpen}
+            onClose={() => {
+              setIsLogsDrawerOpen(false);
+              setSelectedWebhook(null);
+            }}
+          />
+        </>
+      )}
     </DashboardLayout>
   );
 };
