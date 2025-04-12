@@ -8,20 +8,29 @@ interface MarketingLayoutProps {
   children: React.ReactNode;
   title: string;
   description?: string;
+  actions?: React.ReactNode;
 }
 
 const MarketingLayout: React.FC<MarketingLayoutProps> = ({ 
   children, 
   title,
-  description 
+  description,
+  actions
 }) => {
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">{title}</h1>
-          {description && (
-            <p className="text-muted-foreground mt-2">{description}</p>
+        <div className="flex items-start justify-between">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">{title}</h1>
+            {description && (
+              <p className="text-muted-foreground mt-2">{description}</p>
+            )}
+          </div>
+          {actions && (
+            <div className="flex-shrink-0">
+              {actions}
+            </div>
           )}
         </div>
         <Separator />
