@@ -25,6 +25,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { AnyIntegration } from '@/types/integration';
+import { useNavigate } from 'react-router-dom';
 
 interface IntegrationCardProps {
   integration: AnyIntegration;
@@ -45,6 +46,8 @@ const IntegrationCard: React.FC<IntegrationCardProps> = ({
   actionText,
   statusText
 }) => {
+  const navigate = useNavigate();
+
   // Helper function for status badge
   const renderStatusBadge = () => {
     switch (integration.status) {
@@ -90,6 +93,21 @@ const IntegrationCard: React.FC<IntegrationCardProps> = ({
       );
     }
 
+    // Handle Shopify specific navigation
+    if (integration.id === 'shopify') {
+      return (
+        <Button 
+          size="sm" 
+          variant={integration.status === 'integrated' ? "outline" : "default"} 
+          className="gap-1"
+          onClick={() => navigate('/steps/shopify')}
+        >
+          <LinkIcon className="h-4 w-4 mr-1" />
+          <span>{integration.status === 'integrated' ? 'Atualizar' : 'Conectar'}</span>
+        </Button>
+      );
+    }
+
     if (integration.status === 'integrated') {
       return (
         <div className="flex gap-2">
@@ -118,10 +136,16 @@ const IntegrationCard: React.FC<IntegrationCardProps> = ({
     return (
       <Button 
         size="sm" 
-        onClick={() => onConnect(integration)}
+        onClick={() => {
+          if (integration.category === 'pixel') {
+            navigate(`/integracoes/${integration.platform}`);
+          } else {
+            onConnect(integration);
+          }
+        }}
       >
         <LinkIcon className="h-4 w-4 mr-1" />
-        <span>{actionText || 'Conectar'}</span>
+        <span>{actionText || (integration.category === 'pixel' ? 'Gerenciar Pixels' : 'Conectar')}</span>
       </Button>
     );
   };
