@@ -12,7 +12,6 @@ type PixelPlatform = {
   name: string;
   description: string;
   isConfigured: boolean;
-  icon: string;
 };
 
 const PixelsPage = () => {
@@ -23,70 +22,60 @@ const PixelsPage = () => {
       name: "Google Ads",
       description: "Integração nativa com pixel do Google Ads para rastreamento de vendas.",
       isConfigured: true,
-      icon: "https://tse2.mm.bing.net/th?id=OIP.Tqx7gOOsvJhvnfknSNwbPQHaFj&w=355&h=355&c=7"
     },
     {
       id: "ga4",
       name: "Google Analytics 4",
       description: "Monitoramento completo do desempenho da loja.",
       isConfigured: false,
-      icon: "https://tse3.mm.bing.net/th?id=OIP.jJQ5ZPfoFvRTyvQHVikEmQHaD3&w=247&h=247&c=7"
     },
     {
       id: "gtm",
       name: "Google Tag Manager",
       description: "Gerenciamento de tags para atualização dinâmica.",
       isConfigured: true,
-      icon: "https://tse4.mm.bing.net/th/id/OIP.zNsN36KtL902OLZcR4eg2wHaHk?w=474&h=474&c=7"
     },
     {
       id: "kwai",
       name: "Kwai",
       description: "Rastreamento de vendas através do pixel do Kwai.",
       isConfigured: false,
-      icon: "https://tse2.mm.bing.net/th?id=OIP.XPJeIyUqGd0pL-u5GFL-qAHaHa&w=474&h=474&c=7"
     },
     {
       id: "meta",
       name: "Meta",
       description: "Integração com pixel do Meta para Facebook e Instagram.",
       isConfigured: true,
-      icon: "/lovable-uploads/3aa07f77-7311-4155-8e6c-39abb8dca3df.png"
     },
     {
       id: "mgid",
       name: "Mgid",
       description: "Rastreamento de vendas com o pixel do Mgid.",
       isConfigured: false,
-      icon: "/lovable-uploads/3aa07f77-7311-4155-8e6c-39abb8dca3df.png"
     },
     {
       id: "outbrain",
       name: "Outbrain",
       description: "Integração com pixel do Outbrain para campanhas.",
       isConfigured: false,
-      icon: "/lovable-uploads/3aa07f77-7311-4155-8e6c-39abb8dca3df.png"
     },
     {
       id: "pinterest",
       name: "Pinterest",
       description: "Rastreamento de conversões via pixel do Pinterest.",
       isConfigured: false,
-      icon: "/lovable-uploads/3aa07f77-7311-4155-8e6c-39abb8dca3df.png"
     },
     {
       id: "taboola",
       name: "Taboola",
       description: "Integração com pixel do Taboola para anúncios.",
       isConfigured: false,
-      icon: "/lovable-uploads/3aa07f77-7311-4155-8e6c-39abb8dca3df.png"
     },
     {
       id: "tiktok",
       name: "TikTok",
       description: "Rastreamento de vendas através do pixel do TikTok.",
       isConfigured: true,
-      icon: "/lovable-uploads/3aa07f77-7311-4155-8e6c-39abb8dca3df.png"
     }
   ];
 
@@ -108,11 +97,9 @@ const PixelsPage = () => {
             <CardHeader className="pb-3 flex flex-row items-center justify-between space-y-0">
               <div className="flex items-center">
                 <div className="w-10 h-10 mr-3 flex items-center justify-center rounded-md bg-primary/10">
-                  <img 
-                    src={platform.icon} 
-                    alt={`${platform.name} logo`} 
-                    className="w-6 h-6 object-contain" 
-                  />
+                  <div className="w-6 h-6 text-primary flex items-center justify-center font-bold">
+                    {platform.name.charAt(0)}
+                  </div>
                 </div>
                 <div>
                   <CardTitle className="text-base flex items-center">
