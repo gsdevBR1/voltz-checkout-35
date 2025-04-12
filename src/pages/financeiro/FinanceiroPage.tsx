@@ -16,7 +16,8 @@ import {
   CheckCircle,
   AlertCircle,
   History,
-  RefreshCw
+  RefreshCw,
+  Percent
 } from "lucide-react";
 import {
   Table,
@@ -40,13 +41,12 @@ import CreditCardModal from "@/components/financeiro/CreditCardModal";
 const financialData = {
   cycle: {
     totalBilled: 78.45,
-    currentLimit: 100, // Changed to 100 as per requirement
-    freeLimit: 100, // New field to represent the free tier limit
-    usagePercentage: 78.45, // Updated percentage based on new limit
+    currentLimit: 100, // Limit set to R$100
+    usagePercentage: 78.45, // Usage percentage based on R$100 limit
+    transactionFeePercentage: 2.5, // 2.5% transaction fee
     status: "active", // active, warning, overdue
     startDate: "01/04/2025",
     endDate: "30/04/2025",
-    isFreeUsage: true, // New field to indicate free tier usage
   },
   paymentMethod: {
     type: "credit_card",
@@ -56,23 +56,21 @@ const financialData = {
     expiryYear: 2027,
   },
   billingHistory: [
-    { id: 1, date: "02/03/2025", amount: 125.50, status: "paid" },
-    { id: 2, date: "01/02/2025", amount: 89.25, status: "paid" },
-    { id: 3, date: "01/01/2025", amount: 112.75, status: "paid" },
-    { id: 4, date: "01/12/2024", amount: 95.00, status: "paid" },
+    { id: 1, date: "02/03/2025", amount: 100, status: "paid", description: "Taxa de processamento - Ciclo de Março/2025" },
+    { id: 2, date: "01/02/2025", amount: 100, status: "paid", description: "Taxa de processamento - Ciclo de Fevereiro/2025" },
+    { id: 3, date: "01/01/2025", amount: 100, status: "paid", description: "Taxa de processamento - Ciclo de Janeiro/2025" },
+    { id: 4, date: "01/12/2024", amount: 95, status: "paid", description: "Taxa de processamento - Ciclo de Dezembro/2024" },
   ],
   nextBilling: {
     date: "01/05/2025",
-    estimatedAmount: 90,
+    estimatedAmount: 100,
   }
 };
 
 const FinanceiroPage: React.FC = () => {
   const [isCardModalOpen, setIsCardModalOpen] = useState(false);
   const [showLimitWarning, setShowLimitWarning] = useState(financialData.cycle.usagePercentage > 90);
-  const [showFreeUsageAlert, setShowFreeUsageAlert] = useState(
-    financialData.cycle.isFreeUsage && financialData.cycle.usagePercentage > 90
-  );
+  const [showCardMissingAlert, setShowCardMissingAlert] = useState(!financialData.paymentMethod && financialData.cycle.usagePercentage > 60);
   
   const handleManualCharge = () => {
     // In a real app, this would trigger a manual charge
@@ -95,13 +93,30 @@ const FinanceiroPage: React.FC = () => {
     }
   };
 
+  // Function to calculate estimated days until next billing based on current rate
+  const calculateDaysUntilBilling = () => {
+    const remainingAmount = financialData.cycle.currentLimit - financialData.cycle.totalBilled;
+    // Assuming an average daily accumulation rate based on current cycle
+    const daysElapsed = 12; // For this example, let's assume 12 days elapsed in the current cycle
+    const dailyRate = financialData.cycle.totalBilled / daysElapsed;
+    
+    if (dailyRate <= 0) return "30+ dias"; // If no daily accumulation, show long timeframe
+    
+    const daysUntilBilling = Math.ceil(remainingAmount / dailyRate);
+    
+    if (daysUntilBilling <= 0) return "Hoje";
+    if (daysUntilBilling === 1) return "Amanhã";
+    if (daysUntilBilling > 30) return "30+ dias";
+    return `${daysUntilBilling} dias`;
+  };
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Financeiro</h1>
           <p className="text-muted-foreground mt-2">
-            Gerencie seu ciclo de faturamento, limites e método de pagamento.
+            Gerencie seu ciclo de faturamento, taxas e método de pagamento.
           </p>
         </div>
 
@@ -110,29 +125,18 @@ const FinanceiroPage: React.FC = () => {
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>Nenhum método de pagamento cadastrado</AlertTitle>
             <AlertDescription>
-              Adicione um método de pagamento para evitar interrupções no seu serviço após atingir o limite gratuito de R$ 100,00.
+              Adicione um método de pagamento para garantir a continuidade dos seus checkouts quando atingir o limite do ciclo de R$ {financialData.cycle.currentLimit.toLocaleString('pt-BR')}.
             </AlertDescription>
           </Alert>
         )}
 
-        {showFreeUsageAlert && (
-          <Alert className="bg-amber-50 border-amber-200 text-amber-800">
-            <AlertTriangle className="h-4 w-4" />
-            <AlertTitle>Atenção: Limite gratuito quase atingido</AlertTitle>
-            <AlertDescription>
-              Seu faturamento está próximo do limite gratuito de R$ 100,00. Cadastre um cartão de crédito 
-              para evitar interrupções no seu serviço quando o limite for atingido.
-            </AlertDescription>
-          </Alert>
-        )}
-
-        {showLimitWarning && !financialData.cycle.isFreeUsage && (
+        {showLimitWarning && (
           <Alert className="bg-amber-50 border-amber-200 text-amber-800">
             <AlertTriangle className="h-4 w-4" />
             <AlertTitle>Atenção: Utilização próxima ao limite</AlertTitle>
             <AlertDescription>
-              Seu faturamento no ciclo atual está se aproximando do limite estabelecido.
-              Entre em contato com o suporte caso precise aumentar seu limite.
+              Seu faturamento no ciclo atual está se aproximando do limite estabelecido de R$ {financialData.cycle.currentLimit.toLocaleString('pt-BR')}.
+              Quando atingir esse valor, será feita uma cobrança automática no seu cartão cadastrado.
             </AlertDescription>
           </Alert>
         )}
@@ -143,11 +147,9 @@ const FinanceiroPage: React.FC = () => {
             <CardHeader className="pb-2">
               <div className="flex items-start justify-between">
                 <div>
-                  <CardTitle className="text-xl">Ciclo de Uso</CardTitle>
+                  <CardTitle className="text-xl">Ciclo de Taxas de Processamento</CardTitle>
                   <CardDescription>
-                    {financialData.cycle.isFreeUsage 
-                      ? "Ciclo gratuito inicial - R$ 100,00 de uso" 
-                      : "Informações sobre seu ciclo atual"}
+                    Taxa de {financialData.cycle.transactionFeePercentage}% por transação aprovada
                   </CardDescription>
                 </div>
                 <div>
@@ -161,9 +163,8 @@ const FinanceiroPage: React.FC = () => {
                       </TooltipTrigger>
                       <TooltipContent className="max-w-sm">
                         <p>
-                          Você possui R$ 100,00 de uso gratuito inicial. Após atingir este limite, 
-                          a cobrança é realizada automaticamente ao final do ciclo 
-                          baseada no seu consumo total, via cartão de crédito previamente cadastrado.
+                          A VOLTZ aplica {financialData.cycle.transactionFeePercentage}% por transação confirmada. 
+                          A cobrança é feita apenas quando o valor atinge R$ {financialData.cycle.currentLimit.toLocaleString('pt-BR')}.
                         </p>
                       </TooltipContent>
                     </Tooltip>
@@ -174,16 +175,14 @@ const FinanceiroPage: React.FC = () => {
             <CardContent className="space-y-6">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <span className="text-sm text-muted-foreground">Faturamento do ciclo</span>
+                  <span className="text-sm text-muted-foreground">Taxas acumuladas</span>
                   <div className="text-2xl font-bold flex items-center">
                     <DollarSign className="h-5 w-5 mr-1 text-muted-foreground" />
                     R$ {financialData.cycle.totalBilled.toLocaleString('pt-BR', {minimumFractionDigits: 2})}
                   </div>
                 </div>
                 <div className="space-y-1">
-                  <span className="text-sm text-muted-foreground">
-                    {financialData.cycle.isFreeUsage ? "Limite gratuito" : "Limite atual liberado"}
-                  </span>
+                  <span className="text-sm text-muted-foreground">Limite do ciclo</span>
                   <div className="text-2xl font-bold flex items-center">
                     <DollarSign className="h-5 w-5 mr-1 text-muted-foreground" />
                     R$ {financialData.cycle.currentLimit.toLocaleString('pt-BR')}
@@ -193,7 +192,7 @@ const FinanceiroPage: React.FC = () => {
               
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span>Utilização</span>
+                  <span>Utilização do ciclo</span>
                   <span className="font-medium">{financialData.cycle.usagePercentage}%</span>
                 </div>
                 <Progress 
@@ -206,9 +205,13 @@ const FinanceiroPage: React.FC = () => {
                         : "bg-slate-100"
                   }
                 />
-                <div className="text-xs text-muted-foreground">
-                  Você está usando R$ {financialData.cycle.totalBilled.toLocaleString('pt-BR', {minimumFractionDigits: 2})} de 
-                  R$ {financialData.cycle.freeLimit.toLocaleString('pt-BR')} disponíveis nesse ciclo
+                <div className="flex justify-between text-xs text-muted-foreground">
+                  <div>
+                    Taxa por transação: <span className="font-medium">{financialData.cycle.transactionFeePercentage}%</span>
+                  </div>
+                  <div>
+                    Próxima cobrança em: <span className="font-medium">{calculateDaysUntilBilling()}</span>
+                  </div>
                 </div>
               </div>
               
@@ -232,9 +235,7 @@ const FinanceiroPage: React.FC = () => {
             <CardHeader className="pb-2">
               <CardTitle className="text-xl">Método de Pagamento</CardTitle>
               <CardDescription>
-                {financialData.cycle.isFreeUsage && !financialData.paymentMethod 
-                  ? "Cadastre seu cartão para uso após o ciclo gratuito" 
-                  : "Dados do seu cartão e próxima cobrança"}
+                Usado para cobranças automáticas quando as taxas atingem R$ {financialData.cycle.currentLimit.toLocaleString('pt-BR')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -253,7 +254,7 @@ const FinanceiroPage: React.FC = () => {
                       </>
                     ) : (
                       <div className="text-sm text-red-500 font-medium">
-                        Nenhum método cadastrado
+                        Nenhum cartão cadastrado
                       </div>
                     )}
                   </div>
@@ -270,25 +271,67 @@ const FinanceiroPage: React.FC = () => {
                 </div>
                 <div className="flex justify-between items-center bg-slate-50 p-3 rounded-md">
                   <div className="text-sm">
-                    <span className="text-muted-foreground">Data:</span> {financialData.nextBilling.date}
+                    <span className="text-muted-foreground">Prevista para:</span> {financialData.nextBilling.date}
                   </div>
                   <div>
                     <span className="font-medium">
                       R$ {financialData.nextBilling.estimatedAmount.toLocaleString('pt-BR')}
                     </span>
-                    <span className="text-xs text-muted-foreground ml-1">(estimado)</span>
+                    <span className="text-xs text-muted-foreground ml-1">(valor máximo)</span>
                   </div>
                 </div>
-                {financialData.cycle.isFreeUsage && (
-                  <div className="text-xs text-muted-foreground mt-1">
-                    Cobranças serão realizadas automaticamente após atingir o limite gratuito
-                    de R$ {financialData.cycle.freeLimit.toLocaleString('pt-BR')}.
-                  </div>
-                )}
+                <div className="text-xs text-muted-foreground mt-1 italic">
+                  A cobrança ocorrerá automaticamente quando as taxas acumuladas atingirem R$ {financialData.cycle.currentLimit} ou ao final do ciclo, o que ocorrer primeiro.
+                </div>
               </div>
             </CardContent>
           </Card>
         </div>
+
+        {/* Política de Taxas */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-xl">Política de Taxas</CardTitle>
+            <CardDescription>Detalhes sobre a cobrança de taxas de processamento</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-slate-50 p-4 rounded-md">
+                <div className="flex items-center mb-2">
+                  <Percent className="h-5 w-5 mr-2 text-green-600" />
+                  <h3 className="font-medium">Taxa por Transação</h3>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  {financialData.cycle.transactionFeePercentage}% sobre cada pedido processado e aprovado na plataforma.
+                </p>
+              </div>
+              
+              <div className="bg-slate-50 p-4 rounded-md">
+                <div className="flex items-center mb-2">
+                  <DollarSign className="h-5 w-5 mr-2 text-amber-600" />
+                  <h3 className="font-medium">Ciclo Acumulativo</h3>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  As taxas são acumuladas até atingirem R$ {financialData.cycle.currentLimit.toLocaleString('pt-BR')}, quando então é realizada a cobrança.
+                </p>
+              </div>
+              
+              <div className="bg-slate-50 p-4 rounded-md">
+                <div className="flex items-center mb-2">
+                  <CreditCard className="h-5 w-5 mr-2 text-blue-600" />
+                  <h3 className="font-medium">Forma de Cobrança</h3>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Cobrança automática no cartão de crédito cadastrado, apenas quando o limite de R$ {financialData.cycle.currentLimit.toLocaleString('pt-BR')} é atingido.
+                </p>
+              </div>
+            </div>
+            
+            <div className="text-sm text-muted-foreground">
+              <p>A taxa de {financialData.cycle.transactionFeePercentage}% se aplica somente às transações aprovadas. Não há cobrança por vendas canceladas, estornos ou falhas de pagamento. As taxas são transparentes e aparecem detalhadas no seu Extrato de Transações.</p>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Histórico de Cobranças */}
         <Card>
@@ -300,13 +343,14 @@ const FinanceiroPage: React.FC = () => {
                 Reemitir cobrança manual
               </Button>
             </div>
-            <CardDescription>Registro de todas as cobranças relacionadas à sua conta</CardDescription>
+            <CardDescription>Registro de todas as cobranças de taxas relacionadas à sua conta</CardDescription>
           </CardHeader>
           <CardContent>
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>Data</TableHead>
+                  <TableHead>Descrição</TableHead>
                   <TableHead>Valor</TableHead>
                   <TableHead>Status</TableHead>
                 </TableRow>
@@ -315,6 +359,7 @@ const FinanceiroPage: React.FC = () => {
                 {financialData.billingHistory.map((item) => (
                   <TableRow key={item.id}>
                     <TableCell>{item.date}</TableCell>
+                    <TableCell className="max-w-[300px] truncate">{item.description}</TableCell>
                     <TableCell>R$ {item.amount.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</TableCell>
                     <TableCell>{getStatusBadge(item.status)}</TableCell>
                   </TableRow>

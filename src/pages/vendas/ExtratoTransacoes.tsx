@@ -18,7 +18,8 @@ import {
   Clock, 
   XCircle,
   Info,
-  FileText
+  FileText,
+  Percent
 } from 'lucide-react';
 import { formatCurrency, formatDateTime } from '@/lib/utils';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
@@ -40,13 +41,13 @@ const mockTransactions = [
   },
   {
     id: 'TR0002',
-    date: new Date(2023, 3, 15, 14, 35),
+    date: new Date(2023, 3, 15, 14, 31),
     type: 'Taxa da VOLTZ',
-    product: 'Comissão sobre Smartphone XYZ Pro',
-    amount: 64.99,
+    product: 'Taxa de processamento (2.5%) - Smartphone XYZ Pro',
+    amount: 32.50,
     status: 'Aprovado',
     isIncoming: false,
-    details: 'Taxa de 5% sobre venda'
+    details: 'Taxa de 2.5% sobre venda'
   },
   {
     id: 'TR0003',
@@ -60,13 +61,13 @@ const mockTransactions = [
   },
   {
     id: 'TR0004',
-    date: new Date(2023, 3, 16, 10, 25),
+    date: new Date(2023, 3, 16, 10, 21),
     type: 'Taxa da VOLTZ',
-    product: 'Comissão sobre Notebook Ultra',
-    amount: 229.99,
+    product: 'Taxa de processamento (2.5%) - Notebook Ultra',
+    amount: 115.00,
     status: 'Aprovado',
     isIncoming: false,
-    details: 'Taxa de 5% sobre venda'
+    details: 'Taxa de 2.5% sobre venda'
   },
   {
     id: 'TR0005',
@@ -107,6 +108,16 @@ const mockTransactions = [
     status: 'Cancelado',
     isIncoming: true,
     details: 'Cancelado por falta de estoque'
+  },
+  {
+    id: 'TR0009',
+    date: new Date(2023, 3, 21, 13, 45),
+    type: 'Cobrança de Taxas',
+    product: 'Ciclo de taxas Abril/2023',
+    amount: 147.50,
+    status: 'Aprovado',
+    isIncoming: false,
+    details: 'Cobrança automática de taxas acumuladas do ciclo'
   }
 ];
 
@@ -137,19 +148,39 @@ const getStatusIcon = (status: string) => {
 };
 
 const getTransactionTypeDisplay = (type: string) => {
-  const typeMap: Record<string, { color: string }> = {
-    'Venda': { color: 'text-blue-600 dark:text-blue-400' },
-    'Taxa da VOLTZ': { color: 'text-orange-600 dark:text-orange-400' },
-    'Reembolso': { color: 'text-red-600 dark:text-red-400' },
-    'Estorno': { color: 'text-purple-600 dark:text-purple-400' },
+  const typeMap: Record<string, { color: string; icon: React.ReactNode }> = {
+    'Venda': { 
+      color: 'text-blue-600 dark:text-blue-400',
+      icon: <ArrowUp className="h-3.5 w-3.5 mr-1 text-blue-500" />
+    },
+    'Taxa da VOLTZ': { 
+      color: 'text-orange-600 dark:text-orange-400',
+      icon: <Percent className="h-3.5 w-3.5 mr-1 text-orange-500" />
+    },
+    'Cobrança de Taxas': { 
+      color: 'text-orange-600 dark:text-orange-400',
+      icon: <Percent className="h-3.5 w-3.5 mr-1 text-orange-500" />
+    },
+    'Reembolso': { 
+      color: 'text-red-600 dark:text-red-400',
+      icon: <ArrowDown className="h-3.5 w-3.5 mr-1 text-red-500" />
+    },
+    'Estorno': { 
+      color: 'text-purple-600 dark:text-purple-400',
+      icon: <ArrowDown className="h-3.5 w-3.5 mr-1 text-purple-500" />
+    },
   };
   
-  const typeStyle = typeMap[type] || { color: 'text-gray-600 dark:text-gray-400' };
+  const typeStyle = typeMap[type] || { 
+    color: 'text-gray-600 dark:text-gray-400',
+    icon: <Info className="h-3.5 w-3.5 mr-1 text-gray-500" />
+  };
   
   return (
-    <span className={`font-medium ${typeStyle.color}`}>
+    <div className={`font-medium ${typeStyle.color} flex items-center`}>
+      {typeStyle.icon}
       {type}
-    </span>
+    </div>
   );
 };
 
@@ -165,7 +196,7 @@ const ExtratoTransacoes: React.FC = () => {
   
   const filteredTransactions = mockTransactions.filter(transaction => {
     const matchesSearch = 
-      transaction.id.includes(searchTerm) || 
+      transaction.id.toLowerCase().includes(searchTerm.toLowerCase()) || 
       transaction.product.toLowerCase().includes(searchTerm.toLowerCase());
       
     const matchesType = typeFilter === 'all' || transaction.type === typeFilter;
@@ -256,6 +287,7 @@ const ExtratoTransacoes: React.FC = () => {
                 <SelectItem value="all">Todos os Tipos</SelectItem>
                 <SelectItem value="Venda">Venda</SelectItem>
                 <SelectItem value="Taxa da VOLTZ">Taxa da VOLTZ</SelectItem>
+                <SelectItem value="Cobrança de Taxas">Cobrança de Taxas</SelectItem>
                 <SelectItem value="Reembolso">Reembolso</SelectItem>
                 <SelectItem value="Estorno">Estorno</SelectItem>
               </SelectContent>
@@ -286,12 +318,21 @@ const ExtratoTransacoes: React.FC = () => {
           <CardContent>
             {filteredTransactions.length > 0 ? (
               <>
+                <div className="rounded-md border mb-4 p-3 bg-slate-50">
+                  <p className="text-sm text-muted-foreground flex items-center">
+                    <Info className="h-4 w-4 mr-2 text-blue-500" />
+                    As Taxas da VOLTZ (2,5%) são cobradas automaticamente a cada transação aprovada e acumuladas 
+                    até atingir R$ 100. Estas taxas não afetam o valor recebido pelo cliente final, sendo visíveis 
+                    apenas no seu painel administrativo.
+                  </p>
+                </div>
+                
                 <Table>
                   <TableHeader>
                     <TableRow>
                       <TableHead className="w-[120px]">Data/Hora</TableHead>
                       <TableHead>Tipo</TableHead>
-                      <TableHead className="min-w-[250px]">Produto</TableHead>
+                      <TableHead className="min-w-[250px]">Descrição</TableHead>
                       <TableHead>Valor</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead className="w-[80px]">Ações</TableHead>
@@ -299,7 +340,10 @@ const ExtratoTransacoes: React.FC = () => {
                   </TableHeader>
                   <TableBody>
                     {currentItems.map((transaction) => (
-                      <TableRow key={transaction.id}>
+                      <TableRow 
+                        key={transaction.id}
+                        className={transaction.type.includes('Taxa') ? 'bg-orange-50/30' : ''}
+                      >
                         <TableCell className="font-medium">
                           {formatDateTime(transaction.date)}
                         </TableCell>
