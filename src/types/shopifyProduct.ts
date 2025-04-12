@@ -28,6 +28,11 @@ export interface ShopifyProduct {
   handle: string;
   tags: string[];
   url: string;
+  // New fields for tracking the cloning process
+  status?: 'pending' | 'cloning' | 'complete' | 'error';
+  errorMessage?: string;
+  clonedProductId?: string;
+  voltzCheckoutUrl?: string;
 }
 
 export interface ShopifyAppCredentials {
@@ -38,3 +43,17 @@ export interface ShopifyAppCredentials {
   isConnected: boolean;
 }
 
+export interface ShopifyCloneResult {
+  success: boolean;
+  message: string;
+  productId?: string;
+  checkoutUrl?: string;
+}
+
+export interface ShopifyStoreCloneStatus {
+  totalProducts: number;
+  processedProducts: number;
+  successCount: number;
+  errorCount: number;
+  inProgress: boolean;
+}

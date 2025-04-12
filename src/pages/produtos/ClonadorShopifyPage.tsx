@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import DashboardLayout from '@/components/DashboardLayout';
 import { 
@@ -16,7 +15,9 @@ import {
   Code,
   LockKeyhole,
   Key,
-  ShieldCheck
+  ShieldCheck,
+  CheckCircle2,
+  XCircle
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -40,14 +41,16 @@ import { useToast } from '@/hooks/use-toast';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import { ShopifyProduct, ShopifyAppCredentials } from '@/types/shopifyProduct';
+import { ShopifyProduct, ShopifyAppCredentials, ShopifyCloneResult, ShopifyStoreCloneStatus } from '@/types/shopifyProduct';
 import { formatCurrency } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Progress } from "@/components/ui/progress";
 
 const singleProductFormSchema = z.object({
   productLink: z.string()
     .url({ message: "O URL do produto é inválido. Insira um link completo incluindo https://" })
     .refine(url => {
+      // Accept any URL that contains /products/ or /produto/ or /collection/
       const hasProductsPath = url.includes('/products/') || url.includes('/produto/') || url.includes('/collection/');
       return hasProductsPath;
     }, { message: "O URL deve ser um link direto para um produto (ex: loja.com/products/nome-do-produto)" })
@@ -91,6 +94,19 @@ const ClonadorShopifyPage: React.FC = () => {
   const [isConnecting, setIsConnecting] = useState(false);
   const { toast } = useToast();
 
+  // Add new state variables for enhanced cloning functionality
+  const [cloneStatus, setCloneStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [cloneMessage, setCloneMessage] = useState<string>('');
+  const [clonedProductId, setClonedProductId] = useState<string | null>(null);
+  const [voltzCheckoutUrl, setVoltzCheckoutUrl] = useState<string | null>(null);
+  const [storeCloneStatus, setStoreCloneStatus] = useState<ShopifyStoreCloneStatus>({
+    totalProducts: 0,
+    processedProducts: 0,
+    successCount: 0,
+    errorCount: 0,
+    inProgress: false
+  });
+  
   const singleProductForm = useForm<z.infer<typeof singleProductFormSchema>>({
     resolver: zodResolver(singleProductFormSchema),
     defaultValues: {
@@ -124,7 +140,50 @@ const ClonadorShopifyPage: React.FC = () => {
     },
   });
 
+  // Function to validate Shopify store credentials
+  const validateShopifyCredentials = async (credentials: ShopifyAppCredentials): Promise<boolean> => {
+    try {
+      // Simulating API validation - in a real implementation, this would check if the
+      // credentials are valid by making a request to the Shopify API
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // In a real implementation, we would check for errors and return false if any occurred
+      return true;
+    } catch (error) {
+      console.error("Error validating Shopify credentials:", error);
+      return false;
+    }
+  };
+  
+  // Function to create a product in the user's Shopify store via API
+  const createProductInShopify = async (product: ShopifyProduct, credentials: ShopifyAppCredentials): Promise<ShopifyCloneResult> => {
+    try {
+      // Simulate API call to create product in Shopify
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Generate a mock Shopify product ID
+      const shopifyProductId = 'gid://shopify/Product/' + Math.floor(Math.random() * 10000000);
+      
+      // Generate a mock VOLTZ checkout URL
+      const checkoutUrl = `https://pagamento.voltzcheckout.com/checkout?product=${shopifyProductId}`;
+      
+      return {
+        success: true,
+        message: "Produto criado com sucesso na sua loja Shopify e vinculado ao checkout VOLTZ.",
+        productId: shopifyProductId,
+        checkoutUrl: checkoutUrl
+      };
+    } catch (error) {
+      console.error("Error creating product in Shopify:", error);
+      return {
+        success: false,
+        message: "Erro ao criar produto na sua loja Shopify. Verifique as credenciais e tente novamente."
+      };
+    }
+  };
+  
   const isShopifyStore = (url: string): boolean => {
+    // More comprehensive check for Shopify stores
     return url.includes('shopify.com') || 
            url.includes('.myshopify.com') || 
            url.includes('/products/') || 
@@ -147,17 +206,28 @@ const ClonadorShopifyPage: React.FC = () => {
     try {
       setIsConnecting(true);
       
-      // Simulate API connection
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
       const credentials: ShopifyAppCredentials = {
         apiKey: values.apiKey,
         apiSecret: values.apiSecret,
         accessToken: values.accessToken,
         shopDomain: values.shopDomain,
-        isConnected: true
+        isConnected: false
       };
       
+      // Validate credentials
+      const isValid = await validateShopifyCredentials(credentials);
+      
+      if (!isValid) {
+        toast({
+          title: "Erro ao conectar App Shopify",
+          description: "As credenciais fornecidas são inválidas ou não têm permissões suficientes.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      // Mark as connected
+      credentials.isConnected = true;
       setShopifyCredentials(credentials);
       setShopifyAppConnected(true);
       
@@ -182,6 +252,10 @@ const ClonadorShopifyPage: React.FC = () => {
   const fetchProductData = async (url: string) => {
     try {
       setIsLoading(true);
+      setCloneStatus('idle');
+      setCloneMessage('');
+      setClonedProductId(null);
+      setVoltzCheckoutUrl(null);
       
       if (!isShopifyStore(url)) {
         toast({
@@ -202,8 +276,9 @@ const ClonadorShopifyPage: React.FC = () => {
         await new Promise(resolve => setTimeout(resolve, 1500));
       }
       
+      // Mock product data for demonstration
       const mockProduct: ShopifyProduct = {
-        id: "shopify_1234567890",
+        id: "shopify_" + Math.floor(Math.random() * 10000000),
         title: "Produto Demonstrativo Shopify" + (useScrapingFallback ? " (via Scraping)" : ""),
         description: "<p>Esta é uma descrição de produto de exemplo com <strong>formatação HTML</strong> que foi importada de uma loja Shopify" + 
                     (useScrapingFallback ? " utilizando scraping estruturado.</p>" : " utilizando a API Storefront.</p>") + 
@@ -276,7 +351,8 @@ const ClonadorShopifyPage: React.FC = () => {
         productType: "Acessórios",
         handle: "produto-demonstrativo",
         tags: ["demo", "exemplo", "shopify"],
-        url: url
+        url: url,
+        status: 'pending'
       };
 
       setProductData(mockProduct);
@@ -327,6 +403,7 @@ const ClonadorShopifyPage: React.FC = () => {
         await new Promise(resolve => setTimeout(resolve, 2000));
       }
       
+      // Generate a realistic random product count
       const productCount = Math.floor(Math.random() * 30) + 5;
       
       setFoundProducts(productCount);
@@ -349,24 +426,56 @@ const ClonadorShopifyPage: React.FC = () => {
   };
 
   const startStoreCloning = async () => {
+    if (!shopifyCredentials || !shopifyCredentials.isConnected || !foundProducts) {
+      return;
+    }
+    
     try {
       setIsStoreCloningInProgress(true);
-      setStoreCloningProgress(0);
       
-      for (let i = 1; i <= 10; i++) {
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        setStoreCloningProgress(i * 10);
+      // Initialize store cloning status
+      const totalProducts = foundProducts;
+      setStoreCloneStatus({
+        totalProducts,
+        processedProducts: 0,
+        successCount: 0,
+        errorCount: 0,
+        inProgress: true
+      });
+      
+      // Simulate progress updates
+      for (let i = 1; i <= totalProducts; i++) {
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        // Simulate some errors (about 10% failure rate)
+        const isSuccess = Math.random() > 0.1;
+        
+        setStoreCloneStatus(prev => ({
+          ...prev,
+          processedProducts: i,
+          successCount: isSuccess ? prev.successCount + 1 : prev.successCount,
+          errorCount: !isSuccess ? prev.errorCount + 1 : prev.errorCount,
+        }));
+        
+        setStoreCloningProgress(Math.floor((i / totalProducts) * 100));
       }
       
       toast({
         title: "Loja clonada com sucesso!",
-        description: `${foundProducts} produtos foram adicionados à sua loja e configurados com checkout VOLTZ.`,
+        description: `${storeCloneStatus.successCount} produtos foram adicionados à sua loja e configurados com checkout VOLTZ.`,
         variant: "default",
       });
       
-      storeForm.reset();
-      setFoundProducts(null);
-      setDetectionMethod(null);
+      // Reset forms after successful cloning
+      setTimeout(() => {
+        storeForm.reset();
+        setFoundProducts(null);
+        setDetectionMethod(null);
+        setIsStoreCloningInProgress(false);
+        setStoreCloningProgress(0);
+        setStoreCloneStatus(prev => ({ ...prev, inProgress: false }));
+      }, 2000);
+      
     } catch (error) {
       console.error("Error cloning store:", error);
       toast({
@@ -374,9 +483,10 @@ const ClonadorShopifyPage: React.FC = () => {
         description: "Ocorreu um erro ao tentar clonar a loja. Tente novamente mais tarde.",
         variant: "destructive",
       });
-    } finally {
+      
       setIsStoreCloningInProgress(false);
       setStoreCloningProgress(0);
+      setStoreCloneStatus(prev => ({ ...prev, inProgress: false }));
     }
   };
 
@@ -407,26 +517,70 @@ const ClonadorShopifyPage: React.FC = () => {
   };
 
   const handleCloneProduct = async (values: z.infer<typeof productFormSchema>) => {
-    if (!productData || !shopifyAppConnected) return;
+    if (!productData || !shopifyCredentials || !shopifyCredentials.isConnected) {
+      toast({
+        title: "Erro ao clonar produto",
+        description: "Verifique se o App Shopify está conectado e se o produto foi carregado.",
+        variant: "destructive",
+      });
+      return;
+    }
     
     try {
       setIsCloning(true);
+      setCloneStatus('loading');
+      setCloneMessage('Clonando produto para sua loja Shopify...');
       
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Update product with form values
+      const productToClone = {
+        ...productData,
+        title: values.title,
+        description: values.description,
+        price: values.price
+      };
       
-      toast({
-        title: "Produto clonado com sucesso!",
-        description: "O produto foi adicionado à sua loja e vinculado ao checkout VOLTZ.",
-        variant: "default",
-      });
+      // Call function to create product in Shopify
+      const result = await createProductInShopify(productToClone, shopifyCredentials);
       
-      singleProductForm.reset();
-      productForm.reset();
-      setProductData(null);
-      setSelectedImage(null);
-      setDetectionMethod(null);
+      if (result.success) {
+        setCloneStatus('success');
+        setCloneMessage(result.message);
+        setClonedProductId(result.productId || null);
+        setVoltzCheckoutUrl(result.checkoutUrl || null);
+        
+        toast({
+          title: "Produto clonado com sucesso!",
+          description: "O produto foi adicionado à sua loja e vinculado ao checkout VOLTZ.",
+          variant: "default",
+        });
+        
+        // Reset forms after successful cloning
+        setTimeout(() => {
+          singleProductForm.reset();
+          productForm.reset();
+          setProductData(null);
+          setSelectedImage(null);
+          setDetectionMethod(null);
+          setCloneStatus('idle');
+          setCloneMessage('');
+          setClonedProductId(null);
+          setVoltzCheckoutUrl(null);
+        }, 5000);
+      } else {
+        setCloneStatus('error');
+        setCloneMessage(result.message);
+        
+        toast({
+          title: "Erro ao clonar produto",
+          description: result.message,
+          variant: "destructive",
+        });
+      }
     } catch (error) {
       console.error("Error cloning product:", error);
+      setCloneStatus('error');
+      setCloneMessage("Ocorreu um erro ao tentar clonar o produto. Tente novamente mais tarde.");
+      
       toast({
         title: "Erro ao clonar produto",
         description: "Ocorreu um erro ao tentar clonar o produto. Tente novamente mais tarde.",
@@ -439,6 +593,74 @@ const ClonadorShopifyPage: React.FC = () => {
 
   const handleSelectImage = (image: string) => {
     setSelectedImage(image);
+  };
+
+  // Component for showing cloning status
+  const CloneStatusDisplay = () => {
+    if (cloneStatus === 'idle') return null;
+    
+    return (
+      <Alert className={cloneStatus === 'loading' 
+        ? 'bg-blue-50 border-blue-200 dark:bg-blue-950/20 dark:border-blue-800/30'
+        : cloneStatus === 'success'
+        ? 'bg-green-50 border-green-200 dark:bg-green-950/20 dark:border-green-800/30'
+        : 'bg-red-50 border-red-200 dark:bg-red-950/20 dark:border-red-800/30'
+      }>
+        {cloneStatus === 'loading' && <Loader2 className="h-4 w-4 text-blue-600 dark:text-blue-400 animate-spin" />}
+        {cloneStatus === 'success' && <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" />}
+        {cloneStatus === 'error' && <XCircle className="h-4 w-4 text-red-600 dark:text-red-400" />}
+        
+        <AlertTitle className={
+          cloneStatus === 'loading' ? 'text-blue-800 dark:text-blue-300' :
+          cloneStatus === 'success' ? 'text-green-800 dark:text-green-300' :
+          'text-red-800 dark:text-red-300'
+        }>
+          {cloneStatus === 'loading' ? 'Clonando produto...' :
+           cloneStatus === 'success' ? 'Produto clonado com sucesso!' :
+           'Erro ao clonar produto'}
+        </AlertTitle>
+        <AlertDescription className={
+          cloneStatus === 'loading' ? 'text-blue-700 dark:text-blue-400' :
+          cloneStatus === 'success' ? 'text-green-700 dark:text-green-400' :
+          'text-red-700 dark:text-red-400'
+        }>
+          {cloneMessage}
+          
+          {cloneStatus === 'success' && voltzCheckoutUrl && (
+            <div className="mt-2 space-y-2">
+              <div className="flex items-center gap-2 text-sm">
+                <span>ID do produto na Shopify:</span>
+                <code className="bg-black/10 dark:bg-white/10 px-2 py-1 rounded text-xs">{clonedProductId}</code>
+              </div>
+              
+              <div className="space-y-1">
+                <div className="text-sm font-medium">Link do Checkout VOLTZ:</div>
+                <div className="flex items-center gap-2">
+                  <Input 
+                    value={voltzCheckoutUrl} 
+                    readOnly 
+                    className="text-xs font-mono"
+                  />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      navigator.clipboard.writeText(voltzCheckoutUrl);
+                      toast({
+                        title: "Link copiado!",
+                        description: "O link do checkout VOLTZ foi copiado para a área de transferência.",
+                      });
+                    }}
+                  >
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+        </AlertDescription>
+      </Alert>
+    );
   };
 
   return (
@@ -604,526 +826,4 @@ const ClonadorShopifyPage: React.FC = () => {
                           <span className="inline-block h-1.5 w-1.5 rounded-full bg-amber-600"></span>
                           read_products
                         </div>
-                        <div className="flex items-center gap-1">
-                          <span className="inline-block h-1.5 w-1.5 rounded-full bg-amber-600"></span>
-                          write_products
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <span className="inline-block h-1.5 w-1.5 rounded-full bg-amber-600"></span>
-                          read_inventory
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <span className="inline-block h-1.5 w-1.5 rounded-full bg-amber-600"></span>
-                          write_inventory
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <span className="inline-block h-1.5 w-1.5 rounded-full bg-amber-600"></span>
-                          read_files
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <span className="inline-block h-1.5 w-1.5 rounded-full bg-amber-600"></span>
-                          write_files
-                        </div>
-                      </div>
-                    </AlertDescription>
-                  </Alert>
-                  
-                  <div className="flex justify-end">
-                    <Button 
-                      type="submit" 
-                      disabled={isConnecting}
-                      className="flex gap-2"
-                    >
-                      {isConnecting ? (
-                        <>
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                          Conectando...
-                        </>
-                      ) : (
-                        <>
-                          <ShieldCheck className="h-4 w-4" />
-                          Conectar Loja Shopify
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                </form>
-              </Form>
-            )}
-          </CardContent>
-        </Card>
-
-        <Alert variant="destructive" className="mb-6">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Atenção: Responsabilidade legal</AlertTitle>
-          <AlertDescription>
-            Você é responsável legal por clonar e comercializar produtos de terceiros. Use essa funcionalidade com responsabilidade e respeite direitos autorais e marcas registradas.
-          </AlertDescription>
-        </Alert>
-
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold mb-4">Escolha o que deseja clonar:</h2>
-          
-          <RadioGroup 
-            className="flex flex-col md:flex-row gap-4 mb-6"
-            value={cloneOption}
-            onValueChange={(value) => setCloneOption(value as 'product' | 'store')}
-          >
-            <div className={`flex items-start space-x-2 border rounded-lg p-4 ${cloneOption === 'product' ? 'border-primary bg-primary/5' : 'border-border'} flex-1`}>
-              <RadioGroupItem value="product" id="product" className="mt-1" />
-              <div className="flex-1">
-                <Label htmlFor="product" className="flex items-center text-base font-medium mb-1">
-                  <BoxSelect className="mr-2 h-5 w-5 text-primary" />
-                  Clonar um Produto Específico
-                </Label>
-                <p className="text-sm text-muted-foreground">
-                  Insira o link direto do produto Shopify que deseja clonar para sua loja
-                </p>
-              </div>
-            </div>
-            
-            <div className={`flex items-start space-x-2 border rounded-lg p-4 ${cloneOption === 'store' ? 'border-primary bg-primary/5' : 'border-border'} flex-1`}>
-              <RadioGroupItem value="store" id="store" className="mt-1" />
-              <div className="flex-1">
-                <Label htmlFor="store" className="flex items-center text-base font-medium mb-1">
-                  <Store className="mr-2 h-5 w-5 text-primary" />
-                  Clonar Loja Completa
-                </Label>
-                <p className="text-sm text-muted-foreground">
-                  Insira o domínio da loja Shopify para clonar todos os produtos disponíveis publicamente
-                </p>
-              </div>
-            </div>
-          </RadioGroup>
-          
-          {cloneOption === 'product' ? (
-            <Card className="mb-8">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <LinkIcon className="h-5 w-5 text-primary" />
-                  Insira o link do produto Shopify
-                </CardTitle>
-                <CardDescription>
-                  Cole o link completo de qualquer produto público de uma loja Shopify (domínio próprio ou myshopify.com)
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Form {...singleProductForm}>
-                  <form onSubmit={singleProductForm.handleSubmit(onSubmitSingleProduct)} className="space-y-4">
-                    <FormField
-                      control={singleProductForm.control}
-                      name="productLink"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Link do Produto Shopify</FormLabel>
-                          <FormControl>
-                            <div className="flex gap-2">
-                              <Input 
-                                placeholder="https://lojachic.com.br/products/produto-x" 
-                                {...field} 
-                                className="flex-1"
-                              />
-                              <Button 
-                                type="submit" 
-                                disabled={isLoading || !shopifyAppConnected}
-                                className="whitespace-nowrap"
-                              >
-                                {isLoading ? (
-                                  <>
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                    Carregando...
-                                  </>
-                                ) : (
-                                  <>
-                                    Importar Produto
-                                  </>
-                                )}
-                              </Button>
-                            </div>
-                          </FormControl>
-                          <FormDescription>
-                            Suporta links de produtos de qualquer domínio Shopify (ex: lojachic.com.br/products/produto-x)
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </form>
-                </Form>
-                
-                {isLoading && (
-                  <div className="mt-4">
-                    <Alert className="bg-blue-50 border-blue-200 dark:bg-blue-950/20 dark:border-blue-800/30">
-                      <Loader2 className="h-4 w-4 text-blue-600 dark:text-blue-400 animate-spin" />
-                      <AlertTitle className="text-blue-800 dark:text-blue-300">Verificando produto...</AlertTitle>
-                      <AlertDescription className="text-blue-700 dark:text-blue-400">
-                        {detectionMethod === 'scraping' 
-                          ? "Usando scraping estruturado para identificar o produto de domínio personalizado..." 
-                          : "Acessando API da loja Shopify para obter os dados do produto..."}
-                      </AlertDescription>
-                    </Alert>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          ) : (
-            <Card className="mb-8">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Store className="h-5 w-5 text-primary" />
-                  Insira o domínio da loja Shopify
-                </CardTitle>
-                <CardDescription>
-                  Cole o domínio completo de uma loja Shopify para importar todos os produtos (myshopify.com ou domínio próprio)
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Form {...storeForm}>
-                  <form onSubmit={storeForm.handleSubmit(onSubmitStore)} className="space-y-4">
-                    <FormField
-                      control={storeForm.control}
-                      name="storeLink"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Domínio da Loja Shopify</FormLabel>
-                          <FormControl>
-                            <div className="flex gap-2">
-                              <Input 
-                                placeholder="https://superloja.com.br" 
-                                {...field} 
-                                className="flex-1"
-                              />
-                              <Button 
-                                type="submit" 
-                                disabled={isStoreLoading}
-                                className="whitespace-nowrap"
-                              >
-                                {isStoreLoading ? (
-                                  <>
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                    Verificando...
-                                  </>
-                                ) : (
-                                  <>
-                                    Verificar Loja
-                                  </>
-                                )}
-                              </Button>
-                            </div>
-                          </FormControl>
-                          <FormDescription>
-                            Agora também suporta domínios personalizados (ex: superloja.com.br)
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </form>
-                </Form>
-                
-                {isStoreLoading && (
-                  <div className="mt-4">
-                    <Alert className="bg-blue-50 border-blue-200 dark:bg-blue-950/20 dark:border-blue-800/30">
-                      <Loader2 className="h-4 w-4 text-blue-600 dark:text-blue-400 animate-spin" />
-                      <AlertTitle className="text-blue-800 dark:text-blue-300">Verificando loja...</AlertTitle>
-                      <AlertDescription className="text-blue-700 dark:text-blue-400">
-                        {detectionMethod === 'scraping' 
-                          ? "Realizando varredura estruturada para identificar produtos no domínio personalizado..." 
-                          : "Acessando API da loja Shopify para listar os produtos disponíveis..."}
-                      </AlertDescription>
-                    </Alert>
-                  </div>
-                )}
-                
-                {foundProducts && (
-                  <div className="mt-6 space-y-4">
-                    <Alert className="bg-green-50 border-green-200 dark:bg-green-950/20 dark:border-green-800/30">
-                      <PackageCheck className="h-4 w-4 text-green-600 dark:text-green-400" />
-                      <AlertTitle className="text-green-800 dark:text-green-300">Loja verificada com sucesso!</AlertTitle>
-                      <AlertDescription className="text-green-700 dark:text-green-400">
-                        Encontramos {foundProducts} produtos disponíveis publicamente nesta loja Shopify.
-                        {detectionMethod === 'scraping' && (
-                          <div className="mt-1 flex items-center text-sm gap-1">
-                            <Code className="h-3.5 w-3.5" /> 
-                            Método: Scraping estruturado (domínio personalizado)
-                          </div>
-                        )}
-                        {detectionMethod === 'api' && (
-                          <div className="mt-1 flex items-center text-sm gap-1">
-                            <Code className="h-3.5 w-3.5" /> 
-                            Método: API Storefront (domínio Shopify padrão)
-                          </div>
-                        )}
-                      </AlertDescription>
-                    </Alert>
-                    
-                    {isStoreCloningInProgress ? (
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-sm">
-                          <span>Progresso: {storeCloningProgress}%</span>
-                          <span>Clonando produtos...</span>
-                        </div>
-                        <div className="w-full bg-muted rounded-full h-2.5">
-                          <div 
-                            className="bg-primary h-2.5 rounded-full" 
-                            style={{ width: `${storeCloningProgress}%` }}
-                          ></div>
-                        </div>
-                        <p className="text-sm text-muted-foreground">
-                          Por favor, aguarde enquanto clonamos todos os produtos desta loja...
-                        </p>
-                      </div>
-                    ) : (
-                      <Button 
-                        onClick={startStoreCloning} 
-                        className="w-full flex gap-2 h-12"
-                      >
-                        <Copy className="h-5 w-5" />
-                        Clonar {foundProducts} Produtos para Minha Loja
-                      </Button>
-                    )}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          )}
-        </div>
-
-        {productData && cloneOption === 'product' && (
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold mb-4">Preview do Produto</h2>
-            
-            <Form {...productForm}>
-              <form onSubmit={productForm.handleSubmit(handleCloneProduct)} className="space-y-6">
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div className="space-y-4">
-                    <div className="rounded-lg overflow-hidden border border-border aspect-square">
-                      {selectedImage && (
-                        <img 
-                          src={selectedImage} 
-                          alt={productData.title} 
-                          className="w-full h-full object-cover"
-                        />
-                      )}
-                    </div>
-                    
-                    <div className="flex gap-2 overflow-x-auto py-2">
-                      {productData.images.map((image, index) => (
-                        <div 
-                          key={index}
-                          className={`
-                            cursor-pointer border rounded-md overflow-hidden w-16 h-16 flex-shrink-0
-                            ${selectedImage === image ? 'border-primary border-2' : 'border-border'}
-                          `}
-                          onClick={() => handleSelectImage(image)}
-                        >
-                          <img 
-                            src={image} 
-                            alt={`${productData.title} - Imagem ${index + 1}`} 
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                      ))}
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <h3 className="font-medium">Informações da Loja Original:</h3>
-                      <div className="grid grid-cols-2 gap-2 text-sm">
-                        <div className="text-muted-foreground">Vendedor:</div>
-                        <div>{productData.vendor}</div>
-                        
-                        <div className="text-muted-foreground">Categoria:</div>
-                        <div>{productData.productType}</div>
-                        
-                        <div className="text-muted-foreground">Tags:</div>
-                        <div className="flex flex-wrap gap-1">
-                          {productData.tags.map((tag, index) => (
-                            <Badge key={index} variant="outline" className="text-xs">
-                              {tag}
-                            </Badge>
-                          ))}
-                        </div>
-                        
-                        <div className="text-muted-foreground">Método de detecção:</div>
-                        <div className="flex items-center gap-1">
-                          <Code className="h-3.5 w-3.5 text-primary" />
-                          <span className="text-primary font-medium">
-                            {detectionMethod === 'scraping' ? 'Scraping estruturado' : 'API Storefront'}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center justify-between">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        className="flex items-center gap-1"
-                        onClick={() => window.open(productData.url, '_blank')}
-                      >
-                        <ExternalLink className="h-4 w-4" />
-                        Ver original
-                      </Button>
-                      
-                      <div className="text-xs text-muted-foreground">
-                        ID: {productData.id}
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-4">
-                    <FormField
-                      control={productForm.control}
-                      name="title"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Título do Produto</FormLabel>
-                          <FormControl>
-                            <Input {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={productForm.control}
-                      name="description"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Descrição do Produto</FormLabel>
-                          <FormControl>
-                            <Textarea 
-                              {...field} 
-                              rows={6}
-                              className="resize-none"
-                            />
-                          </FormControl>
-                          <FormDescription>
-                            A descrição pode conter HTML básico para formatação.
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={productForm.control}
-                      name="price"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Preço (R$)</FormLabel>
-                          <FormControl>
-                            <Input 
-                              type="number" 
-                              step="0.01" 
-                              {...field} 
-                              onChange={(e) => {
-                                const value = parseFloat(e.target.value);
-                                field.onChange(isNaN(value) ? 0 : value);
-                              }}
-                            />
-                          </FormControl>
-                          <FormDescription>
-                            Preço de venda do produto na sua loja
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <div className="space-y-2">
-                      <h3 className="font-medium">Variantes do Produto</h3>
-                      <div className="border rounded-md overflow-hidden">
-                        <table className="w-full text-sm">
-                          <thead className="bg-muted/50">
-                            <tr>
-                              <th className="px-4 py-2 text-left font-medium">Variante</th>
-                              <th className="px-4 py-2 text-left font-medium">Preço</th>
-                              <th className="px-4 py-2 text-left font-medium">SKU</th>
-                              <th className="px-4 py-2 text-left font-medium">Disponível</th>
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y">
-                            {productData.variants.map((variant) => (
-                              <tr key={variant.id}>
-                                <td className="px-4 py-2">{variant.title}</td>
-                                <td className="px-4 py-2">{formatCurrency(parseFloat(variant.price))}</td>
-                                <td className="px-4 py-2">{variant.sku}</td>
-                                <td className="px-4 py-2">
-                                  {variant.available ? (
-                                    <span className="text-green-600 flex items-center gap-1">
-                                      <span className="inline-block w-2 h-2 rounded-full bg-green-600"></span>
-                                      Sim
-                                    </span>
-                                  ) : (
-                                    <span className="text-red-600 flex items-center gap-1">
-                                      <span className="inline-block w-2 h-2 rounded-full bg-red-600"></span>
-                                      Não
-                                    </span>
-                                  )}
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-                    
-                    <Alert className="bg-amber-50 border-amber-200 dark:bg-amber-950/20 dark:border-amber-800/30">
-                      <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-                      <AlertTitle className="text-amber-800 dark:text-amber-300">Nota importante</AlertTitle>
-                      <AlertDescription className="text-amber-700 dark:text-amber-400">
-                        Esta funcionalidade é exclusiva para fins de escalabilidade e demonstração. Respeite direitos autorais e marcas de terceiros.
-                      </AlertDescription>
-                    </Alert>
-                  </div>
-                </div>
-                
-                <Separator />
-                
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center gap-2">
-                    <PackageCheck className="h-5 w-5 text-primary" />
-                    <span className="text-sm text-muted-foreground">
-                      Ao clonar, este produto será adicionado à sua loja Shopify e configurado com checkout VOLTZ
-                    </span>
-                  </div>
-                  
-                  <Button
-                    type="submit"
-                    size="lg"
-                    className="gap-2"
-                    disabled={isCloning}
-                  >
-                    {isCloning ? (
-                      <>
-                        <Loader2 className="h-5 w-5 animate-spin" />
-                        Clonando Produto...
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="h-5 w-5" />
-                        Clonar Produto para Minha Loja
-                      </>
-                    )}
-                  </Button>
-                </div>
-                
-                <Alert className="bg-muted border-muted-foreground/20">
-                  <ShoppingCart className="h-4 w-4 text-muted-foreground" />
-                  <AlertDescription className="text-muted-foreground text-sm">
-                    Após a clonagem, o produto estará disponível na sua loja Shopify e terá um link de checkout VOLTZ: <span className="font-mono text-xs bg-muted-foreground/10 px-2 py-1 rounded">https://pagamento.voltzcheckout.com/checkout?product=XYZ</span>
-                  </AlertDescription>
-                </Alert>
-              </form>
-            </Form>
-          </div>
-        )}
-      </div>
-    </DashboardLayout>
-  );
-};
-
-export default ClonadorShopifyPage;
+                        <div className="flex items-center gap
