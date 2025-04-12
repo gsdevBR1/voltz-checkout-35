@@ -31,6 +31,7 @@ import EditarProduto from "./pages/produtos/EditarProduto";
 import NovoFisico from "./pages/produtos/NovoFisico";
 import EditarProdutoFisico from "./pages/produtos/EditarProdutoFisico";
 import VerProduto from "./pages/produtos/VerProduto";
+import ClonadorShopifyPage from "./pages/produtos/ClonadorShopifyPage";
 import DescontosPage from "./pages/checkouts/DescontosPage";
 import PersonalizarCheckoutPage from "./pages/checkouts/PersonalizarCheckoutPage";
 import ProvasSociaisPage from "./pages/checkouts/ProvasSociaisPage";
@@ -93,6 +94,7 @@ const App: React.FC = () => {
                   <Route path="/produtos/editar/:id" element={<EditarProduto />} />
                   <Route path="/produtos/:id/editar" element={<EditarProdutoFisico />} />
                   <Route path="/produtos/:id/ver" element={<VerProduto />} />
+                  <Route path="/produtos/clonador-shopify" element={<ClonadorShopifyPage />} />
                   
                   <Route path="/marketing/upsell" element={<UpsellOnePage />} />
                   <Route path="/marketing/upsell/criar" element={<CriarUpsellPage />} />

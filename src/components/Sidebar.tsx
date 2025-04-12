@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -26,7 +27,9 @@ import {
   MousePointer,
   Tag,
   RefreshCw,
-  BarChart
+  BarChart,
+  Copy,
+  Flame
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { StoreSelector } from '@/components/StoreSelector';
@@ -48,6 +51,7 @@ import {
   useSidebar
 } from '@/components/ui/sidebar';
 import { useTheme } from '@/providers/ThemeProvider';
+import { Badge } from '@/components/ui/badge';
 
 interface SidebarProps {
   className?: string;
@@ -143,6 +147,26 @@ export const AppSidebar: React.FC<SidebarProps> = ({ className }) => {
       title: 'Produtos',
       path: '/produtos',
       icon: Package,
+      subItems: [
+        {
+          title: 'Ver Todos',
+          path: '/produtos', 
+          icon: Package,
+        },
+        {
+          title: 'Clonador Loja Shopify',
+          path: '/produtos/clonador-shopify',
+          icon: Copy,
+          badge: {
+            text: 'EXCLUSIVO',
+            variant: 'success',
+            extraBadge: {
+              text: '🔥 Novo',
+              variant: 'warning'
+            }
+          }
+        }
+      ]
     },
     {
       title: 'Marketing',
@@ -304,7 +328,24 @@ export const AppSidebar: React.FC<SidebarProps> = ({ className }) => {
                                 )}
                                 aria-current={location.pathname === subItem.path ? "page" : undefined}
                               />
-                              <span>{subItem.title}</span>
+                              <span className="flex items-center gap-2">
+                                {subItem.title}
+                                {subItem.badge && (
+                                  <div className="flex items-center gap-1">
+                                    <Badge variant={subItem.badge.variant} className="text-[10px] px-1 py-0">
+                                      {subItem.badge.text}
+                                    </Badge>
+                                    {subItem.badge.extraBadge && (
+                                      <Badge 
+                                        variant={subItem.badge.extraBadge.variant} 
+                                        className="text-[10px] px-1 py-0 bg-amber-600 hover:bg-amber-700 text-white"
+                                      >
+                                        {subItem.badge.extraBadge.text}
+                                      </Badge>
+                                    )}
+                                  </div>
+                                )}
+                              </span>
                             </Link>
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
