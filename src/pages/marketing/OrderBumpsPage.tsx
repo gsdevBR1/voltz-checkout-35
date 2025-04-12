@@ -1,14 +1,16 @@
 
 import React, { useState } from 'react';
-import { Plus } from 'lucide-react';
+import { Plus, Copy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
 import MarketingLayout from '@/components/marketing/MarketingLayout';
-import ProductSelector from '@/components/marketing/ProductSelector';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Product, ProductType, ProductStatus } from '@/types/product';
+import { OrderBump, OrderBumpFormData } from '@/types/orderBump';
+import OrderBumpForm from '@/components/marketing/OrderBumpForm';
+import { toast } from 'sonner';
 
 // Mock products for demo
 const mockProducts: Product[] = [
@@ -47,28 +49,84 @@ const mockProducts: Product[] = [
   }
 ];
 
+// Mock OrderBumps
+const mockOrderBumps: OrderBump[] = [
+  {
+    id: "ob_1",
+    name: "Garantia Estendida",
+    description: "Estenda a garantia do seu produto por mais 12 meses",
+    isActive: true,
+    triggerProductIds: ["prod_1", "prod_2"],
+    offerProductIds: ["prod_3"],
+    conversionRate: 23,
+    createdAt: new Date(),
+    updatedAt: new Date()
+  }
+];
+
 const OrderBumpsPage = () => {
+  const [orderBumps, setOrderBumps] = useState<OrderBump[]>(mockOrderBumps);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
-  const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
-  const [applyToAllProducts, setApplyToAllProducts] = useState(false);
+  const [editingOrderBump, setEditingOrderBump] = useState<OrderBump | null>(null);
+  const [duplicatingOrderBump, setDuplicatingOrderBump] = useState<OrderBump | null>(null);
 
-  const handleSelectProduct = (productId: string) => {
-    if (selectedProductIds.includes(productId)) {
-      setSelectedProductIds(prev => prev.filter(id => id !== productId));
-    } else {
-      setSelectedProductIds(prev => [...prev, productId]);
-    }
+  const handleCreate = (data: OrderBumpFormData) => {
+    const newOrderBump: OrderBump = {
+      id: `ob_${Date.now()}`,
+      ...data,
+      conversionRate: 0,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    
+    setOrderBumps(prev => [...prev, newOrderBump]);
+    setShowCreateDialog(false);
+    toast.success("Order Bump criado com sucesso!");
   };
 
-  const handleSelectAllFiltered = () => {
-    setSelectedProductIds(mockProducts.map(p => p.id));
+  const handleUpdate = (data: OrderBumpFormData) => {
+    if (!editingOrderBump) return;
+    
+    setOrderBumps(prev => prev.map(ob => 
+      ob.id === editingOrderBump.id ? { 
+        ...ob, 
+        ...data,
+        updatedAt: new Date() 
+      } : ob
+    ));
+    
+    setEditingOrderBump(null);
+    toast.success("Order Bump atualizado com sucesso!");
   };
 
-  const handleApplyToAllProducts = (checked: boolean) => {
-    setApplyToAllProducts(checked);
-    if (checked) {
-      setSelectedProductIds([]);
-    }
+  const handleDuplicate = (orderBump: OrderBump) => {
+    setDuplicatingOrderBump({
+      ...orderBump,
+      id: `ob_${Date.now()}`,
+      name: `${orderBump.name} (Cópia)`,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    });
+  };
+
+  const handleDelete = (id: string) => {
+    setOrderBumps(prev => prev.filter(ob => ob.id !== id));
+    toast.success("Order Bump excluído com sucesso!");
+  };
+
+  const handleToggleActive = (id: string, isActive: boolean) => {
+    setOrderBumps(prev => prev.map(ob => 
+      ob.id === id ? { ...ob, isActive, updatedAt: new Date() } : ob
+    ));
+    
+    toast.success(`Order Bump ${isActive ? 'ativado' : 'desativado'} com sucesso!`);
+  };
+
+  // Helper to get product names for display
+  const getProductNames = (productIds: string[]) => {
+    return productIds
+      .map(id => mockProducts.find(p => p.id === id)?.name || 'Produto desconhecido')
+      .join(', ');
   };
 
   return (
@@ -90,50 +148,82 @@ const OrderBumpsPage = () => {
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
-        {/* Exemplo de card de Order Bump */}
-        <Card className="group transition-all duration-200 hover:shadow-md">
-          <CardHeader className="pb-3 space-y-1">
-            <div className="flex justify-between items-start">
-              <div>
-                <CardTitle className="text-base">Garantia Estendida</CardTitle>
-                <CardDescription>Associado a 5 produtos</CardDescription>
+        {orderBumps.map((orderBump) => (
+          <Card key={orderBump.id} className="group transition-all duration-200 hover:shadow-md">
+            <CardHeader className="pb-3 space-y-1">
+              <div className="flex justify-between items-start">
+                <div>
+                  <CardTitle className="text-base">{orderBump.name}</CardTitle>
+                  <CardDescription>
+                    Associado a {orderBump.triggerProductIds.length} produto{orderBump.triggerProductIds.length !== 1 ? 's' : ''}
+                  </CardDescription>
+                </div>
+                <Switch 
+                  checked={orderBump.isActive} 
+                  onCheckedChange={(checked) => handleToggleActive(orderBump.id, checked)}
+                />
               </div>
-              <Switch checked={true} />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-muted-foreground">Produtos aplicáveis:</span>
-                <span className="font-medium">Todos eletrônicos</span>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-muted-foreground">Produtos aplicáveis:</span>
+                  <span className="font-medium">{getProductNames(orderBump.triggerProductIds)}</span>
+                </div>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-muted-foreground">Oferta:</span>
+                  <span className="font-medium">{getProductNames(orderBump.offerProductIds)}</span>
+                </div>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-muted-foreground">Valor:</span>
+                  <span className="font-medium">
+                    {orderBump.offerProductIds.map(id => {
+                      const product = mockProducts.find(p => p.id === id);
+                      return product ? `R$ ${product.price.toFixed(2)}` : '';
+                    }).join(', ')}
+                  </span>
+                </div>
+                {orderBump.conversionRate !== undefined && (
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-muted-foreground">Taxa de conversão:</span>
+                    <span className="font-medium text-success">{orderBump.conversionRate}%</span>
+                  </div>
+                )}
+                <Separator className="my-1" />
+                <div className="flex justify-end pt-2 gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => handleDuplicate(orderBump)}
+                  >
+                    <Copy className="mr-1 h-3.5 w-3.5" />
+                    Duplicar
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => setEditingOrderBump(orderBump)}
+                  >
+                    Editar
+                  </Button>
+                  <Button 
+                    variant="destructive" 
+                    size="sm"
+                    onClick={() => handleDelete(orderBump.id)}
+                  >
+                    Excluir
+                  </Button>
+                </div>
               </div>
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-muted-foreground">Oferta:</span>
-                <span className="font-medium">Garantia Estendida 12 meses</span>
-              </div>
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-muted-foreground">Valor:</span>
-                <span className="font-medium">R$ 49,90</span>
-              </div>
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-muted-foreground">Taxa de conversão:</span>
-                <span className="font-medium text-success">23%</span>
-              </div>
-              <Separator className="my-1" />
-              <div className="flex justify-end pt-2">
-                <Button variant="outline" size="sm" className="mr-2">
-                  Editar
-                </Button>
-                <Button variant="destructive" size="sm">
-                  Excluir
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        ))}
 
-        {/* Placeholder para novo card */}
-        <Card className="border-dashed flex items-center justify-center h-[270px] cursor-pointer hover:bg-accent/30 transition-all duration-200" onClick={() => setShowCreateDialog(true)}>
+        {/* Placeholder for new card */}
+        <Card 
+          className="border-dashed flex items-center justify-center h-[270px] cursor-pointer hover:bg-accent/30 transition-all duration-200" 
+          onClick={() => setShowCreateDialog(true)}
+        >
           <div className="text-center">
             <div className="mx-auto bg-primary/10 h-12 w-12 rounded-full flex items-center justify-center mb-3">
               <Plus className="h-6 w-6 text-primary" />
@@ -146,32 +236,48 @@ const OrderBumpsPage = () => {
         </Card>
       </div>
 
-      <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-        <DialogContent className="max-w-3xl">
-          <DialogHeader>
-            <DialogTitle>Criar novo Order Bump</DialogTitle>
-            <DialogDescription>
-              Selecione os produtos aos quais este Order Bump será aplicado
-            </DialogDescription>
-          </DialogHeader>
-          
-          <ProductSelector
+      {/* Create New OrderBump Dialog */}
+      <Dialog 
+        open={showCreateDialog} 
+        onOpenChange={(open) => {
+          setShowCreateDialog(open);
+          if (!open) setDuplicatingOrderBump(null);
+        }}
+      >
+        <DialogContent className="max-w-4xl">
+          <OrderBumpForm
             products={mockProducts}
-            selectedProductIds={selectedProductIds}
-            onSelectProduct={handleSelectProduct}
-            onSelectAllFiltered={handleSelectAllFiltered}
-            onApplyToAllProducts={handleApplyToAllProducts}
-            applyToAllProducts={applyToAllProducts}
-            title="Aplicar este Order Bump em massa"
-            description="Selecione quais produtos terão esta oferta no checkout"
+            initialData={duplicatingOrderBump || undefined}
+            onSubmit={handleCreate}
+            onCancel={() => {
+              setShowCreateDialog(false);
+              setDuplicatingOrderBump(null);
+            }}
           />
-          
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowCreateDialog(false)}>Cancelar</Button>
-            <Button disabled={selectedProductIds.length === 0 && !applyToAllProducts}>
-              Continuar
-            </Button>
-          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit OrderBump Dialog */}
+      <Dialog 
+        open={!!editingOrderBump} 
+        onOpenChange={(open) => {
+          if (!open) setEditingOrderBump(null);
+        }}
+      >
+        <DialogContent className="max-w-4xl">
+          {editingOrderBump && (
+            <OrderBumpForm
+              products={mockProducts}
+              initialData={editingOrderBump}
+              onSubmit={handleUpdate}
+              onCancel={() => setEditingOrderBump(null)}
+              onDuplicate={() => {
+                handleDuplicate(editingOrderBump);
+                setEditingOrderBump(null);
+                setShowCreateDialog(true);
+              }}
+            />
+          )}
         </DialogContent>
       </Dialog>
     </MarketingLayout>

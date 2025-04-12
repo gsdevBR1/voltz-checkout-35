@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -37,11 +36,11 @@ import ProvasSociaisPage from "./pages/checkouts/ProvasSociaisPage";
 import GatewaysPage from "./pages/checkouts/GatewaysPage";
 import RedirecionamentoPage from "./pages/checkouts/RedirecionamentoPage";
 
-// Marketing Section Pages
 import UpsellOnePage from "./pages/marketing/UpsellOnePage";
 import CriarUpsellPage from "./pages/marketing/CriarUpsellPage";
-import UpsellDisplay from "./pages/marketing/UpsellDisplay"; // New import
+import UpsellDisplay from "./pages/marketing/UpsellDisplay";
 import OrderBumpsPage from "./pages/marketing/OrderBumpsPage";
+import EditarOrderBumpPage from "./pages/marketing/EditarOrderBumpPage";
 import CuponsPage from "./pages/marketing/CuponsPage";
 import CrossSellPage from "./pages/marketing/CrossSellPage";
 import PixelsPage from "./pages/marketing/PixelsPage";
@@ -51,11 +50,10 @@ import { StoreProvider } from "./contexts/StoreContext";
 import { ThemeProvider } from "./providers/ThemeProvider";
 
 const App: React.FC = () => {
-  // Create a new QueryClient instance for each render to avoid shared state issues
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
-        staleTime: 1000 * 60 * 5, // 5 minutes
+        staleTime: 1000 * 60 * 5,
         retry: 1
       },
     },
@@ -93,7 +91,6 @@ const App: React.FC = () => {
                   <Route path="/produtos/:id/editar" element={<EditarProdutoFisico />} />
                   <Route path="/produtos/:id/ver" element={<VerProduto />} />
                   
-                  {/* Marketing Section Routes */}
                   <Route path="/marketing/upsell" element={<UpsellOnePage />} />
                   <Route path="/marketing/upsell/criar" element={<CriarUpsellPage />} />
                   <Route path="/marketing/upsell/criar/:productId" element={<CriarUpsellPage />} />
@@ -101,6 +98,7 @@ const App: React.FC = () => {
                   <Route path="/marketing/upsell/display/:id" element={<UpsellDisplay />} />
                   <Route path="/marketing/upsell/editar/:id" element={<CriarUpsellPage />} />
                   <Route path="/marketing/order-bumps" element={<OrderBumpsPage />} />
+                  <Route path="/marketing/order-bumps/editar/:id" element={<EditarOrderBumpPage />} />
                   <Route path="/marketing/cupons" element={<CuponsPage />} />
                   <Route path="/marketing/cross-sell" element={<CrossSellPage />} />
                   <Route path="/marketing/pixels" element={<PixelsPage />} />
