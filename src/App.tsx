@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -54,7 +53,8 @@ import CriarCrossSellPage from "./pages/marketing/CriarCrossSellPage";
 import EditarCrossSellPage from "./pages/marketing/EditarCrossSellPage";
 import PixelsPage from "./pages/marketing/PixelsPage";
 
-// New Settings Pages
+import FinanceiroPage from './pages/financeiro/FinanceiroPage';
+
 import DominiosPage from "./pages/configuracoes/DominiosPage";
 import LogisticaPage from "./pages/configuracoes/LogisticaPage";
 import WebhooksPage from "./pages/configuracoes/WebhooksPage";
@@ -142,13 +142,14 @@ const App: React.FC = () => {
                   <Route path="/steps/shipping" element={<ShippingStep />} />
                   <Route path="/steps/shopify" element={<ShopifyStep />} />
                   
+                  <Route path="/financeiro" element={<FinanceiroPage />} />
+                  
                   <Route path="/integracoes" element={<Navigate to="/integracoes/ecommerce" replace />} />
                   <Route path="/integracoes/ecommerce" element={<EcommerceIntegrations />} />
                   <Route path="/integracoes/pixels" element={<PixelsIntegrations />} />
                   <Route path="/integracoes/trackeamento" element={<TrackingIntegrations />} />
                   <Route path="/integracoes/:platform" element={<PixelManagementPage />} />
                   
-                  {/* Settings Routes */}
                   <Route path="/configuracoes" element={<Navigate to="/configuracoes/gerais" replace />} />
                   <Route path="/configuracoes/gerais" element={<GeraisPage />} />
                   <Route path="/configuracoes/dominios" element={<DominiosPage />} />
