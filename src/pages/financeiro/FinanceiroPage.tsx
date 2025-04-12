@@ -39,12 +39,14 @@ import CreditCardModal from "@/components/financeiro/CreditCardModal";
 // Mock data - in a real application, this would come from an API
 const financialData = {
   cycle: {
-    totalBilled: 5850.75,
-    currentLimit: 10000,
-    usagePercentage: 58.5,
+    totalBilled: 78.45,
+    currentLimit: 100, // Changed to 100 as per requirement
+    freeLimit: 100, // New field to represent the free tier limit
+    usagePercentage: 78.45, // Updated percentage based on new limit
     status: "active", // active, warning, overdue
     startDate: "01/04/2025",
     endDate: "30/04/2025",
+    isFreeUsage: true, // New field to indicate free tier usage
   },
   paymentMethod: {
     type: "credit_card",
@@ -54,20 +56,23 @@ const financialData = {
     expiryYear: 2027,
   },
   billingHistory: [
-    { id: 1, date: "02/03/2025", amount: 4325.50, status: "paid" },
-    { id: 2, date: "01/02/2025", amount: 3875.25, status: "paid" },
-    { id: 3, date: "01/01/2025", amount: 5125.75, status: "paid" },
-    { id: 4, date: "01/12/2024", amount: 4950.00, status: "paid" },
+    { id: 1, date: "02/03/2025", amount: 125.50, status: "paid" },
+    { id: 2, date: "01/02/2025", amount: 89.25, status: "paid" },
+    { id: 3, date: "01/01/2025", amount: 112.75, status: "paid" },
+    { id: 4, date: "01/12/2024", amount: 95.00, status: "paid" },
   ],
   nextBilling: {
     date: "01/05/2025",
-    estimatedAmount: 6000,
+    estimatedAmount: 90,
   }
 };
 
 const FinanceiroPage: React.FC = () => {
   const [isCardModalOpen, setIsCardModalOpen] = useState(false);
-  const [showLimitWarning, setShowLimitWarning] = useState(financialData.cycle.usagePercentage > 80);
+  const [showLimitWarning, setShowLimitWarning] = useState(financialData.cycle.usagePercentage > 90);
+  const [showFreeUsageAlert, setShowFreeUsageAlert] = useState(
+    financialData.cycle.isFreeUsage && financialData.cycle.usagePercentage > 90
+  );
   
   const handleManualCharge = () => {
     // In a real app, this would trigger a manual charge
@@ -105,12 +110,23 @@ const FinanceiroPage: React.FC = () => {
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>Nenhum método de pagamento cadastrado</AlertTitle>
             <AlertDescription>
-              Adicione um método de pagamento para evitar interrupções no seu serviço.
+              Adicione um método de pagamento para evitar interrupções no seu serviço após atingir o limite gratuito de R$ 100,00.
             </AlertDescription>
           </Alert>
         )}
 
-        {showLimitWarning && (
+        {showFreeUsageAlert && (
+          <Alert className="bg-amber-50 border-amber-200 text-amber-800">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertTitle>Atenção: Limite gratuito quase atingido</AlertTitle>
+            <AlertDescription>
+              Seu faturamento está próximo do limite gratuito de R$ 100,00. Cadastre um cartão de crédito 
+              para evitar interrupções no seu serviço quando o limite for atingido.
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {showLimitWarning && !financialData.cycle.isFreeUsage && (
           <Alert className="bg-amber-50 border-amber-200 text-amber-800">
             <AlertTriangle className="h-4 w-4" />
             <AlertTitle>Atenção: Utilização próxima ao limite</AlertTitle>
@@ -128,7 +144,11 @@ const FinanceiroPage: React.FC = () => {
               <div className="flex items-start justify-between">
                 <div>
                   <CardTitle className="text-xl">Ciclo de Uso</CardTitle>
-                  <CardDescription>Informações sobre seu ciclo atual</CardDescription>
+                  <CardDescription>
+                    {financialData.cycle.isFreeUsage 
+                      ? "Ciclo gratuito inicial - R$ 100,00 de uso" 
+                      : "Informações sobre seu ciclo atual"}
+                  </CardDescription>
                 </div>
                 <div>
                   <TooltipProvider>
@@ -141,9 +161,9 @@ const FinanceiroPage: React.FC = () => {
                       </TooltipTrigger>
                       <TooltipContent className="max-w-sm">
                         <p>
-                          A cobrança é realizada automaticamente ao final do ciclo 
-                          baseada no seu consumo total. O limite define o máximo de 
-                          processamento permitido neste ciclo.
+                          Você possui R$ 100,00 de uso gratuito inicial. Após atingir este limite, 
+                          a cobrança é realizada automaticamente ao final do ciclo 
+                          baseada no seu consumo total, via cartão de crédito previamente cadastrado.
                         </p>
                       </TooltipContent>
                     </Tooltip>
@@ -161,7 +181,9 @@ const FinanceiroPage: React.FC = () => {
                   </div>
                 </div>
                 <div className="space-y-1">
-                  <span className="text-sm text-muted-foreground">Limite atual liberado</span>
+                  <span className="text-sm text-muted-foreground">
+                    {financialData.cycle.isFreeUsage ? "Limite gratuito" : "Limite atual liberado"}
+                  </span>
                   <div className="text-2xl font-bold flex items-center">
                     <DollarSign className="h-5 w-5 mr-1 text-muted-foreground" />
                     R$ {financialData.cycle.currentLimit.toLocaleString('pt-BR')}
@@ -177,13 +199,17 @@ const FinanceiroPage: React.FC = () => {
                 <Progress 
                   value={financialData.cycle.usagePercentage} 
                   className={
-                    financialData.cycle.usagePercentage > 80 
+                    financialData.cycle.usagePercentage > 90 
                       ? "bg-amber-100" 
                       : financialData.cycle.usagePercentage > 95 
                         ? "bg-red-100" 
                         : "bg-slate-100"
                   }
                 />
+                <div className="text-xs text-muted-foreground">
+                  Você está usando R$ {financialData.cycle.totalBilled.toLocaleString('pt-BR', {minimumFractionDigits: 2})} de 
+                  R$ {financialData.cycle.freeLimit.toLocaleString('pt-BR')} disponíveis nesse ciclo
+                </div>
               </div>
               
               <div className="flex justify-between items-center pt-2">
@@ -205,7 +231,11 @@ const FinanceiroPage: React.FC = () => {
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-xl">Método de Pagamento</CardTitle>
-              <CardDescription>Dados do seu cartão e próxima cobrança</CardDescription>
+              <CardDescription>
+                {financialData.cycle.isFreeUsage && !financialData.paymentMethod 
+                  ? "Cadastre seu cartão para uso após o ciclo gratuito" 
+                  : "Dados do seu cartão e próxima cobrança"}
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="flex justify-between items-center">
@@ -249,6 +279,12 @@ const FinanceiroPage: React.FC = () => {
                     <span className="text-xs text-muted-foreground ml-1">(estimado)</span>
                   </div>
                 </div>
+                {financialData.cycle.isFreeUsage && (
+                  <div className="text-xs text-muted-foreground mt-1">
+                    Cobranças serão realizadas automaticamente após atingir o limite gratuito
+                    de R$ {financialData.cycle.freeLimit.toLocaleString('pt-BR')}.
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
