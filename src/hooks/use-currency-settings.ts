@@ -1,16 +1,6 @@
 
 import { useState, useEffect } from 'react';
-
-export interface CurrencySettings {
-  detectCountryViaIp: boolean;
-  convertCurrencyAutomatically: boolean;
-  translateLanguageAutomatically: boolean;
-  showConversionNotice: boolean;
-  fixedCurrency: string;
-  fixedLanguage: string;
-  supportsMultipleCurrencies?: boolean;
-  updatedAt?: string;
-}
+import { CurrencySettings } from '@/types/currency';
 
 export const useCurrencySettings = () => {
   const [isLoading, setIsLoading] = useState(false);

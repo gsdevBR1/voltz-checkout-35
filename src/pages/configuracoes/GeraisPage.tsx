@@ -120,11 +120,11 @@ const GeraisPage: React.FC = () => {
     const formattedTime = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
     setLastUpdated(`${formattedDate} às ${formattedTime}`);
     
-    // Mostrar toast de sucesso
+    // Mostrar toast de sucesso - usando variant "default" em vez de "success"
     toast({
       title: "Sucesso!",
       description: "Alterações salvas com sucesso!",
-      variant: "success",
+      variant: "default",
     });
   };
   

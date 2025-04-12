@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel } from '@/components/ui/form';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useCurrencySettings } from '@/hooks/use-currency-settings';
+import { CurrencySettings } from '@/types/currency';
 
 const formSchema = z.object({
   detectCountryViaIp: z.boolean().default(false),
@@ -43,7 +44,20 @@ const MoedaIdiomaPage = () => {
 
   const onSubmit = async (data: FormValues) => {
     try {
-      await updateSettings(data);
+      // Ensure all required properties are included for CurrencySettings
+      const settingsToUpdate: CurrencySettings = {
+        detectCountryViaIp: data.detectCountryViaIp,
+        convertCurrencyAutomatically: data.convertCurrencyAutomatically,
+        translateLanguageAutomatically: data.translateLanguageAutomatically,
+        showConversionNotice: data.showConversionNotice,
+        fixedCurrency: data.fixedCurrency,
+        fixedLanguage: data.fixedLanguage,
+        // Include other required properties from the existing settings or with defaults
+        supportsMultipleCurrencies: settings?.supportsMultipleCurrencies || false,
+        updatedAt: new Date().toISOString(),
+      };
+      
+      await updateSettings(settingsToUpdate);
       toast.success('Configurações de moeda e idioma salvas com sucesso!');
     } catch (error) {
       toast.error('Erro ao salvar configurações.');
