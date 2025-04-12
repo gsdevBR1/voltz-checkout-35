@@ -17,7 +17,9 @@ import {
   AlertCircle,
   History,
   RefreshCw,
-  Percent
+  Percent,
+  Pencil,
+  Settings
 } from "lucide-react";
 import {
   Table,
@@ -121,7 +123,7 @@ const FinanceiroPage: React.FC = () => {
         </div>
 
         {!financialData.paymentMethod && (
-          <Alert className="bg-amber-50 border-amber-200 text-amber-800">
+          <Alert className="bg-amber-50 border-amber-200 text-amber-800 dark:bg-amber-950/30 dark:border-amber-900 dark:text-amber-300">
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>Nenhum método de pagamento cadastrado</AlertTitle>
             <AlertDescription>
@@ -131,7 +133,7 @@ const FinanceiroPage: React.FC = () => {
         )}
 
         {showLimitWarning && (
-          <Alert className="bg-amber-50 border-amber-200 text-amber-800">
+          <Alert className="bg-amber-50 border-amber-200 text-amber-800 dark:bg-amber-950/30 dark:border-amber-900 dark:text-amber-300">
             <AlertTriangle className="h-4 w-4" />
             <AlertTitle>Atenção: Utilização próxima ao limite</AlertTitle>
             <AlertDescription>
@@ -195,16 +197,28 @@ const FinanceiroPage: React.FC = () => {
                   <span>Utilização do ciclo</span>
                   <span className="font-medium">{financialData.cycle.usagePercentage}%</span>
                 </div>
-                <Progress 
-                  value={financialData.cycle.usagePercentage} 
-                  className={
-                    financialData.cycle.usagePercentage > 90 
-                      ? "bg-amber-100" 
-                      : financialData.cycle.usagePercentage > 95 
-                        ? "bg-red-100" 
-                        : "bg-slate-100"
-                  }
-                />
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="relative">
+                        <Progress 
+                          value={financialData.cycle.usagePercentage} 
+                          className={
+                            financialData.cycle.usagePercentage > 90 
+                              ? "bg-amber-100 dark:bg-amber-950/30" 
+                              : financialData.cycle.usagePercentage > 95 
+                                ? "bg-red-100 dark:bg-red-950/30" 
+                                : "bg-slate-100 dark:bg-slate-800"
+                          }
+                          indicatorClassName="bg-emerald-500"
+                        />
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Próxima cobrança automática ao atingir R$ 100 ou em {calculateDaysUntilBilling()}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
                 <div className="flex justify-between text-xs text-muted-foreground">
                   <div>
                     Taxa por transação: <span className="font-medium">{financialData.cycle.transactionFeePercentage}%</span>
@@ -241,8 +255,8 @@ const FinanceiroPage: React.FC = () => {
             <CardContent className="space-y-6">
               <div className="flex justify-between items-center">
                 <div className="flex items-center space-x-3">
-                  <div className="h-10 w-10 rounded-full bg-slate-100 flex items-center justify-center">
-                    <CreditCard className="h-5 w-5 text-slate-600" />
+                  <div className="h-10 w-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+                    <CreditCard className="h-5 w-5 text-slate-600 dark:text-slate-300" />
                   </div>
                   <div>
                     {financialData.paymentMethod ? (
@@ -260,6 +274,7 @@ const FinanceiroPage: React.FC = () => {
                   </div>
                 </div>
                 <Button variant="outline" size="sm" onClick={() => setIsCardModalOpen(true)}>
+                  <CreditCard className="h-4 w-4 mr-2" />
                   {financialData.paymentMethod ? "Alterar cartão" : "Adicionar cartão"}
                 </Button>
               </div>
@@ -269,8 +284,9 @@ const FinanceiroPage: React.FC = () => {
                   <Clock className="h-4 w-4 mr-2 text-muted-foreground" />
                   <span className="text-sm font-medium">Próxima cobrança</span>
                 </div>
-                <div className="flex justify-between items-center bg-slate-50 p-3 rounded-md">
-                  <div className="text-sm">
+                <div className="flex justify-between items-center bg-slate-50 dark:bg-slate-800/60 p-3 rounded-md border dark:border-slate-700">
+                  <div className="flex items-center text-sm">
+                    <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
                     <span className="text-muted-foreground">Prevista para:</span> {financialData.nextBilling.date}
                   </div>
                   <div>
@@ -291,37 +307,46 @@ const FinanceiroPage: React.FC = () => {
         {/* Política de Taxas */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-xl">Política de Taxas</CardTitle>
+            <div className="flex items-center">
+              <Settings className="h-5 w-5 mr-2 text-muted-foreground" />
+              <CardTitle className="text-xl">Política de Taxas</CardTitle>
+            </div>
             <CardDescription>Detalhes sobre a cobrança de taxas de processamento</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-slate-50 p-4 rounded-md">
+              <div className="bg-slate-50 dark:bg-[#1E1E1E] dark:bg-opacity-50 p-4 rounded-lg border border-slate-200 dark:border-white/5 shadow-sm hover:shadow-md transition-all duration-200 dark:shadow-black/10">
                 <div className="flex items-center mb-2">
-                  <Percent className="h-5 w-5 mr-2 text-green-600" />
-                  <h3 className="font-medium">Taxa por Transação</h3>
+                  <div className="rounded-full bg-green-100 dark:bg-green-900/30 p-2">
+                    <Percent className="h-5 w-5 text-green-600 dark:text-green-400" />
+                  </div>
+                  <h3 className="font-semibold ml-2">Taxa por Transação</h3>
                 </div>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-muted-foreground dark:text-[#B3B3B3]">
                   {financialData.cycle.transactionFeePercentage}% sobre cada pedido processado e aprovado na plataforma.
                 </p>
               </div>
               
-              <div className="bg-slate-50 p-4 rounded-md">
+              <div className="bg-slate-50 dark:bg-[#1E1E1E] dark:bg-opacity-50 p-4 rounded-lg border border-slate-200 dark:border-white/5 shadow-sm hover:shadow-md transition-all duration-200 dark:shadow-black/10">
                 <div className="flex items-center mb-2">
-                  <DollarSign className="h-5 w-5 mr-2 text-amber-600" />
-                  <h3 className="font-medium">Ciclo Acumulativo</h3>
+                  <div className="rounded-full bg-amber-100 dark:bg-amber-900/30 p-2">
+                    <DollarSign className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                  </div>
+                  <h3 className="font-semibold ml-2">Ciclo Acumulativo</h3>
                 </div>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-muted-foreground dark:text-[#B3B3B3]">
                   As taxas são acumuladas até atingirem R$ {financialData.cycle.currentLimit.toLocaleString('pt-BR')}, quando então é realizada a cobrança.
                 </p>
               </div>
               
-              <div className="bg-slate-50 p-4 rounded-md">
+              <div className="bg-slate-50 dark:bg-[#1E1E1E] dark:bg-opacity-50 p-4 rounded-lg border border-slate-200 dark:border-white/5 shadow-sm hover:shadow-md transition-all duration-200 dark:shadow-black/10">
                 <div className="flex items-center mb-2">
-                  <CreditCard className="h-5 w-5 mr-2 text-blue-600" />
-                  <h3 className="font-medium">Forma de Cobrança</h3>
+                  <div className="rounded-full bg-blue-100 dark:bg-blue-900/30 p-2">
+                    <CreditCard className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <h3 className="font-semibold ml-2">Forma de Cobrança</h3>
                 </div>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-muted-foreground dark:text-[#B3B3B3]">
                   Cobrança automática no cartão de crédito cadastrado, apenas quando o limite de R$ {financialData.cycle.currentLimit.toLocaleString('pt-BR')} é atingido.
                 </p>
               </div>
