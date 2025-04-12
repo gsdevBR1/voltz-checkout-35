@@ -34,7 +34,8 @@ import {
   Settings,
   Globe,
   Truck,
-  Webhook
+  Webhook,
+  Store
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { StoreSelector } from '@/components/StoreSelector';
@@ -256,6 +257,11 @@ export const AppSidebar: React.FC<SidebarProps> = ({ className }) => {
       path: '/configuracoes',
       icon: Settings,
       subItems: [
+        {
+          title: 'Gerais',
+          path: '/configuracoes/gerais',
+          icon: Store,
+        },
         {
           title: 'Domínios',
           path: '/configuracoes/dominios',
