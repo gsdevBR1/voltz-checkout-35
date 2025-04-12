@@ -92,7 +92,7 @@ const CriarOrderBumpPage = () => {
       <Breadcrumb className="mb-6">
         <BreadcrumbList>
           <BreadcrumbItem>
-            <BreadcrumbLink href="/marketing/order-bumps">Marketing</BreadcrumbLink>
+            <BreadcrumbLink href="/marketing">Marketing</BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>

@@ -57,7 +57,6 @@ const mockOrderBumps: OrderBump[] = [
   {
     id: "ob_1",
     name: "Garantia Estendida",
-    description: "Estenda a garantia do seu produto por mais 12 meses",
     isActive: true,
     triggerProductIds: ["prod_1", "prod_2"],
     offerProductIds: ["prod_3"],
@@ -172,7 +171,7 @@ const EditarOrderBumpPage = () => {
       <Breadcrumb className="mb-6">
         <BreadcrumbList>
           <BreadcrumbItem>
-            <BreadcrumbLink href="/marketing/order-bumps">Marketing</BreadcrumbLink>
+            <BreadcrumbLink href="/marketing">Marketing</BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
