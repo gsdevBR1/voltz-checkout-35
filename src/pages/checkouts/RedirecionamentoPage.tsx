@@ -9,6 +9,13 @@ import { CreditCard, BanknoteIcon, QrCode, ArrowDownRight } from 'lucide-react';
 import { toast } from 'sonner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const RedirecionamentoPage = () => {
   const [urls, setUrls] = useState({
@@ -46,10 +53,11 @@ const RedirecionamentoPage = () => {
   };
 
   return (
-    <CheckoutLayout 
-      title="Redirecionamento" 
-      description="Configure as URLs de redirecionamento após o pagamento e a exibição de upsells para cada método de pagamento."
-    >
+    <CheckoutLayout>
+      <div>
+        <h1>Redirecionamento</h1>
+        <p>Configure as URLs de redirecionamento após o pagamento e a exibição de upsells para cada método de pagamento.</p>
+      </div>
       <Card>
         <CardHeader>
           <CardTitle>Configurar Redirecionamentos e Upsells</CardTitle>
