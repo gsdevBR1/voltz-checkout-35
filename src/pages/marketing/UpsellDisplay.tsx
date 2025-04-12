@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import MarketingLayout from '@/components/marketing/MarketingLayout';
-import { ArrowRight, Clock, CreditCard, QrCode, CheckCircle, X, Badge } from 'lucide-react';
+import { ArrowRight, Clock, CreditCard, QrCode, CheckCircle, X, Badge, AlertTriangle } from 'lucide-react';
 
 // Default template for One Click Upsells
 const defaultUpsellTemplate = {
@@ -35,6 +35,40 @@ const defaultUpsellTemplate = {
   showOriginalPrice: true,
   showScarcityBadge: true,
   scarcityText: 'Restam poucas unidades!',
+  layout: 'vertical',
+  theme: {
+    background: '#F3F4F8',
+    cardBackground: '#FFFFFF',
+    title: '#222222',
+    text: '#555555',
+    button: '#2BBA00',
+    buttonText: '#FFFFFF',
+    border: '8px',
+    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+    font: 'Arial, sans-serif',
+  }
+};
+
+// Default template for Downsell pages
+const defaultDownsellTemplate = {
+  title: '⚠️ Espera um pouco… antes de ir embora!',
+  description: 'Temos uma última oferta especial que pode fazer toda a diferença.',
+  productImage: 'https://placehold.co/1000x1000',
+  productName: 'Oferta de última chance!',
+  originalPrice: 89.0,
+  discountPrice: 37.0,
+  countdown: true,
+  countdownMinutes: 15,
+  paymentMethod: 'card',
+  buttonText: 'Sim, quero aproveitar essa chance!',
+  declineText: 'Não, obrigado',
+  redirectUrl: 'https://voltz.checkout/obrigado',
+  redirectType: 'url',
+  redirectUpsellId: '',
+  fallbackRedirectUrl: 'https://voltz.checkout/obrigado',
+  showOriginalPrice: true,
+  showScarcityBadge: true,
+  scarcityText: 'Restam apenas 9 unidades!',
   layout: 'vertical',
   theme: {
     background: '#F3F4F8',
@@ -146,14 +180,14 @@ const UpsellDisplay: React.FC<UpsellDisplayProps> = ({ previewMode = false }) =>
         // Find the downsell for this upsell ID
         const downsell = mockDownsells.find(d => d.upsellId === id);
         if (downsell) {
+          // For downsell pages, use the downsell template with specific product data
           setUpsellData({
-            ...upsellData,
-            title: '🔥 Espere! Temos uma oferta especial para você!',
-            description: downsell.description,
+            ...defaultDownsellTemplate,
             productName: downsell.productName,
             productImage: downsell.imageUrl,
             discountPrice: downsell.price,
             originalPrice: downsell.price * 1.5, // Just for demonstration
+            description: downsell.description,
             id: downsell.id,
           });
         }
@@ -194,8 +228,8 @@ const UpsellDisplay: React.FC<UpsellDisplayProps> = ({ previewMode = false }) =>
     // If in preview mode, show toast instead of redirecting
     if (previewMode) {
       const actionType = accepted ? 'aceito' : 'recusado';
-      toast.info(`Simulação: Upsell ${actionType}`, {
-        description: `Em um ambiente real, o cliente seria redirecionado para ${accepted ? 'o próximo destino' : 'o downsell ou destino final'}.`,
+      toast.info(`Simulação: ${isDownsell ? 'Downsell' : 'Upsell'} ${actionType}`, {
+        description: `Em um ambiente real, o cliente seria redirecionado para ${accepted ? 'o próximo destino' : isDownsell ? 'o destino final' : 'o downsell ou destino final'}.`,
       });
       return true;
     }
@@ -374,9 +408,15 @@ const UpsellDisplay: React.FC<UpsellDisplayProps> = ({ previewMode = false }) =>
             
             {/* Offer Content */}
             <div className={`${upsellData.layout === 'vertical' ? 'md:w-1/2' : 'w-full'} p-6 md:p-8 space-y-6`}>
-              {/* Title */}
+              {/* Title with alert icon for downsell */}
               <h1 className="text-2xl md:text-3xl font-semibold" style={titleStyles}>
-                {upsellData.title}
+                {isDownsell && (
+                  <span className="flex items-center gap-2">
+                    <AlertTriangle className="h-6 w-6 text-amber-500" />
+                    {upsellData.title}
+                  </span>
+                )}
+                {!isDownsell && upsellData.title}
               </h1>
               
               {/* Countdown timer if enabled */}
