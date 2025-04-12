@@ -97,116 +97,115 @@ const OrderBumpForm: React.FC<OrderBumpFormProps> = ({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card>
-            <CardContent className="pt-6">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-medium">Detalhes do OrderBump</h3>
-                  <FormField
-                    control={form.control}
-                    name="isActive"
-                    render={({ field }) => (
-                      <FormItem className="flex items-center space-x-2">
-                        <FormLabel className="mt-0">Ativo</FormLabel>
-                        <FormControl>
-                          <Switch 
-                            checked={field.value} 
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <Card className="shadow-sm hover:shadow-md transition-shadow duration-200">
+            <CardContent className="pt-6 space-y-6">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xl font-medium">Detalhes do OrderBump</h3>
                 <FormField
                   control={form.control}
-                  name="name"
+                  name="isActive"
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Nome do OrderBump</FormLabel>
+                    <FormItem className="flex items-center space-x-2">
+                      <FormLabel className="mt-0 text-base">Ativo</FormLabel>
                       <FormControl>
-                        <Input placeholder="Ex: Garantia Estendida" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="description"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Descrição (será exibida no checkout)</FormLabel>
-                      <FormControl>
-                        <Textarea 
-                          placeholder="Ex: Adicione 12 meses de garantia ao seu produto" 
-                          className="h-20 resize-none"
-                          {...field} 
+                        <Switch 
+                          checked={field.value} 
+                          onCheckedChange={field.onChange}
                         />
                       </FormControl>
-                      <FormMessage />
                     </FormItem>
                   )}
                 />
               </div>
+              
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem className="mb-6">
+                    <FormLabel className="text-base">Nome do OrderBump</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Ex: Garantia Estendida" className="h-11" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-base">Descrição (será exibida no checkout)</FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        placeholder="Ex: Adicione 12 meses de garantia ao seu produto" 
+                        className="h-28 resize-none text-base"
+                        {...field} 
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </CardContent>
           </Card>
 
-          <Card>
-            <CardContent className="pt-6">
-              <div className="space-y-4">
-                <h3 className="text-lg font-medium">Resumo Visual</h3>
-                
-                <div className="space-y-3 bg-accent/30 p-4 rounded-md">
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium text-muted-foreground">
-                      Este OrderBump aparece em:
-                    </p>
-                    <p className="font-medium">
-                      {getTriggerProductsNames()}
-                    </p>
-                  </div>
-                  
-                  <Separator />
-                  
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium text-muted-foreground">
-                      Oferta:
-                    </p>
-                    <p className="font-medium">
-                      {getOfferProductsNames()}
-                    </p>
-                  </div>
+          <Card className="shadow-sm hover:shadow-md transition-shadow duration-200">
+            <CardContent className="pt-6 space-y-6">
+              <h3 className="text-xl font-medium mb-6">Resumo Visual</h3>
+              
+              <div className="space-y-5 bg-accent/30 p-6 rounded-md">
+                <div className="space-y-2">
+                  <p className="text-base font-medium text-muted-foreground">
+                    Este OrderBump aparece em:
+                  </p>
+                  <p className="font-medium text-base">
+                    {getTriggerProductsNames()}
+                  </p>
                 </div>
                 
-                {initialData && onDuplicate && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="w-full"
-                    onClick={onDuplicate}
-                  >
-                    <Copy className="mr-2 h-4 w-4" />
-                    Duplicar este OrderBump
-                  </Button>
-                )}
+                <Separator className="my-2" />
+                
+                <div className="space-y-2">
+                  <p className="text-base font-medium text-muted-foreground">
+                    Oferta:
+                  </p>
+                  <p className="font-medium text-base">
+                    {getOfferProductsNames()}
+                  </p>
+                </div>
               </div>
+              
+              {initialData && onDuplicate && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full h-12 text-base mt-4"
+                  onClick={onDuplicate}
+                >
+                  <Copy className="mr-2 h-5 w-5" />
+                  Duplicar este OrderBump
+                </Button>
+              )}
             </CardContent>
           </Card>
         </div>
 
-        <Card>
-          <CardContent className="pt-6">
+        <Card className="shadow-sm hover:shadow-md transition-shadow duration-200">
+          <CardContent className="pt-6 pb-8">
             <FormField
               control={form.control}
               name="triggerProductIds"
               render={() => (
                 <FormItem>
-                  <div onClick={() => setShowTriggerProducts(!showTriggerProducts)} className="cursor-pointer">
-                    <FormLabel className="text-lg font-medium">
+                  <div 
+                    onClick={() => setShowTriggerProducts(!showTriggerProducts)} 
+                    className="cursor-pointer mb-6"
+                  >
+                    <FormLabel className="text-xl font-medium">
                       Este OrderBump será exibido nos checkouts dos seguintes produtos:
                     </FormLabel>
                   </div>
@@ -246,15 +245,18 @@ const OrderBumpForm: React.FC<OrderBumpFormProps> = ({
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="pt-6">
+        <Card className="shadow-sm hover:shadow-md transition-shadow duration-200">
+          <CardContent className="pt-6 pb-8">
             <FormField
               control={form.control}
               name="offerProductIds"
               render={() => (
                 <FormItem>
-                  <div onClick={() => setShowOfferProducts(!showOfferProducts)} className="cursor-pointer">
-                    <FormLabel className="text-lg font-medium">
+                  <div 
+                    onClick={() => setShowOfferProducts(!showOfferProducts)} 
+                    className="cursor-pointer mb-6"
+                  >
+                    <FormLabel className="text-xl font-medium">
                       Produto(s) que serão oferecidos como OrderBump:
                     </FormLabel>
                   </div>
@@ -306,13 +308,14 @@ const OrderBumpForm: React.FC<OrderBumpFormProps> = ({
           </Alert>
         )}
 
-        <div className="flex justify-end space-x-4">
-          <Button variant="outline" type="button" onClick={onCancel}>
+        <div className="flex justify-end space-x-4 border-t pt-8 mt-10">
+          <Button variant="outline" type="button" onClick={onCancel} className="h-12 text-base px-6">
             Cancelar
           </Button>
           <Button 
             type="submit" 
             disabled={watchTriggerProductIds.length === 0 || watchOfferProductIds.length === 0}
+            className="h-12 text-base px-6"
           >
             {initialData ? "Atualizar" : "Criar"} OrderBump
           </Button>

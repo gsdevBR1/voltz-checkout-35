@@ -244,16 +244,20 @@ const OrderBumpsPage = () => {
           if (!open) setDuplicatingOrderBump(null);
         }}
       >
-        <DialogContent className="max-w-5xl mx-auto my-8 p-6">
-          <OrderBumpForm
-            products={mockProducts}
-            initialData={duplicatingOrderBump || undefined}
-            onSubmit={handleCreate}
-            onCancel={() => {
-              setShowCreateDialog(false);
-              setDuplicatingOrderBump(null);
-            }}
-          />
+        <DialogContent 
+          className="w-[90vw] max-w-[960px] p-0 gap-0 rounded-xl shadow-lg animate-in fade-in-0 zoom-in-95 duration-200"
+        >
+          <div className="p-8 md:p-10 overflow-y-auto max-h-[85vh]">
+            <OrderBumpForm
+              products={mockProducts}
+              initialData={duplicatingOrderBump || undefined}
+              onSubmit={handleCreate}
+              onCancel={() => {
+                setShowCreateDialog(false);
+                setDuplicatingOrderBump(null);
+              }}
+            />
+          </div>
         </DialogContent>
       </Dialog>
 
@@ -264,20 +268,24 @@ const OrderBumpsPage = () => {
           if (!open) setEditingOrderBump(null);
         }}
       >
-        <DialogContent className="max-w-5xl mx-auto my-8 p-6">
-          {editingOrderBump && (
-            <OrderBumpForm
-              products={mockProducts}
-              initialData={editingOrderBump}
-              onSubmit={handleUpdate}
-              onCancel={() => setEditingOrderBump(null)}
-              onDuplicate={() => {
-                handleDuplicate(editingOrderBump);
-                setEditingOrderBump(null);
-                setShowCreateDialog(true);
-              }}
-            />
-          )}
+        <DialogContent 
+          className="w-[90vw] max-w-[960px] p-0 gap-0 rounded-xl shadow-lg animate-in fade-in-0 zoom-in-95 duration-200"
+        >
+          <div className="p-8 md:p-10 overflow-y-auto max-h-[85vh]">
+            {editingOrderBump && (
+              <OrderBumpForm
+                products={mockProducts}
+                initialData={editingOrderBump}
+                onSubmit={handleUpdate}
+                onCancel={() => setEditingOrderBump(null)}
+                onDuplicate={() => {
+                  handleDuplicate(editingOrderBump);
+                  setEditingOrderBump(null);
+                  setShowCreateDialog(true);
+                }}
+              />
+            )}
+          </div>
         </DialogContent>
       </Dialog>
     </MarketingLayout>

@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import MarketingLayout from '@/components/marketing/MarketingLayout';
@@ -9,7 +8,6 @@ import { ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import { Product, ProductType, ProductStatus } from '@/types/product';
 
-// Mock products for demo - in a real app this would come from an API
 const mockProducts: Product[] = [
   {
     id: "prod_1",
@@ -46,7 +44,6 @@ const mockProducts: Product[] = [
   }
 ];
 
-// Mock order bumps - in a real app this would come from an API
 const mockOrderBumps: OrderBump[] = [
   {
     id: "ob_1",
@@ -68,11 +65,9 @@ const EditarOrderBumpPage = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Simulating API call to fetch order bump
     const fetchOrderBump = () => {
       setLoading(true);
       try {
-        // Find order bump in mock data
         const found = mockOrderBumps.find(ob => ob.id === id);
         if (found) {
           setOrderBump(found);
@@ -92,11 +87,8 @@ const EditarOrderBumpPage = () => {
   }, [id, navigate]);
 
   const handleSubmit = (data: OrderBumpFormData) => {
-    // Simulating API call to update order bump
     try {
-      // In a real app, this would be an API call
       console.log("Updated order bump data:", data);
-      
       toast.success("Order Bump atualizado com sucesso");
       navigate("/marketing/order-bumps");
     } catch (error) {
@@ -168,7 +160,7 @@ const EditarOrderBumpPage = () => {
         </Button>
       }
     >
-      <div className="max-w-5xl mx-auto p-2">
+      <div className="bg-background rounded-xl shadow-sm p-8 md:p-10 max-w-[960px] mx-auto">
         <OrderBumpForm
           initialData={orderBump}
           products={mockProducts}
