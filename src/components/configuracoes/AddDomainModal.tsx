@@ -13,17 +13,13 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { InfoIcon } from 'lucide-react';
 
 const formSchema = z.object({
   name: z.string().min(3, {
     message: 'O nome do domínio deve ter pelo menos 3 caracteres.',
-  }),
-  type: z.enum(['checkout', 'secure', 'pay', 'seguro'], {
-    required_error: 'Por favor selecione um tipo de subdomínio.',
+  }).refine(value => /^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]\.[a-zA-Z]{2,}(\.[a-zA-Z]{2,})?$/.test(value), {
+    message: "Insira um domínio válido (ex: seudominio.com.br)",
   }),
 });
 
@@ -40,7 +36,6 @@ export const AddDomainModal: React.FC<AddDomainModalProps> = ({ isOpen, onClose,
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: '',
-      type: 'checkout',
     },
   });
 
@@ -55,7 +50,7 @@ export const AddDomainModal: React.FC<AddDomainModalProps> = ({ isOpen, onClose,
         <DialogHeader>
           <DialogTitle>Adicionar Novo Domínio</DialogTitle>
           <DialogDescription>
-            Configure um novo domínio para o seu checkout
+            Insira o domínio base que você deseja configurar para o seu checkout
           </DialogDescription>
         </DialogHeader>
         
@@ -66,54 +61,18 @@ export const AddDomainModal: React.FC<AddDomainModalProps> = ({ isOpen, onClose,
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Nome do domínio</FormLabel>
+                  <FormLabel>Domínio personalizado</FormLabel>
                   <FormControl>
-                    <Input placeholder="checkout.sualoja.com" {...field} />
+                    <Input placeholder="seudominio.com.br" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
             
-            <FormField
-              control={form.control}
-              name="type"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Tipo de subdomínio</FormLabel>
-                  <Select 
-                    onValueChange={field.onChange} 
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione um tipo" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="checkout">checkout</SelectItem>
-                      <SelectItem value="secure">secure</SelectItem>
-                      <SelectItem value="pay">pay</SelectItem>
-                      <SelectItem value="seguro">seguro</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <Alert variant="outline" className="bg-muted">
-              <InfoIcon className="h-4 w-4 mr-2" />
-              <AlertDescription>
-                <h4 className="font-medium mb-2">Instruções de DNS</h4>
-                <p className="text-sm">Configure um registro CNAME no seu provedor de DNS apontando para:</p>
-                <code className="text-xs bg-background p-1 rounded mt-1 block">checkout.voltz.app</code>
-              </AlertDescription>
-            </Alert>
-            
             <DialogFooter>
               <Button variant="outline" type="button" onClick={onClose}>Cancelar</Button>
-              <Button type="submit">Adicionar Domínio</Button>
+              <Button type="submit">Avançar</Button>
             </DialogFooter>
           </form>
         </Form>

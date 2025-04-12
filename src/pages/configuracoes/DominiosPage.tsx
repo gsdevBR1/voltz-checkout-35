@@ -15,44 +15,99 @@ import { AddDomainModal } from '@/components/configuracoes/AddDomainModal';
 import { Domain } from '@/types/domain';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
+import { DomainConfigDetails } from '@/components/configuracoes/DomainConfigDetails';
 
 const mockDomains: Domain[] = [
   {
     id: '1',
-    name: 'checkout.minhaloja.com',
+    name: 'minhaloja.com',
     type: 'checkout',
     status: 'active',
     createdAt: '2023-10-15T10:30:00Z',
+    dnsVerified: true,
+    sslStatus: 'active'
   },
   {
     id: '2',
-    name: 'secure.minhaloja.com',
+    name: 'outraloja.com',
     type: 'secure',
     status: 'pending',
     createdAt: '2023-10-20T14:45:00Z',
+    dnsVerified: false,
+    sslStatus: 'pending'
   },
 ];
 
 const DominiosPage: React.FC = () => {
   const [domains, setDomains] = useState<Domain[]>(mockDomains);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [selectedDomain, setSelectedDomain] = useState<Domain | null>(null);
   const { toast } = useToast();
 
-  const handleAddDomain = (data: { name: string; type: 'checkout' | 'secure' | 'pay' | 'seguro' }) => {
+  const handleAddDomain = (data: { name: string }) => {
     const newDomain: Domain = {
       id: Math.random().toString(36).substring(2, 9),
       name: data.name,
-      type: data.type,
+      type: 'checkout',
       status: 'pending',
       createdAt: new Date().toISOString(),
+      dnsVerified: false,
+      sslStatus: 'pending'
     };
 
+    // Add the domain to the list
     setDomains([...domains, newDomain]);
     setIsAddModalOpen(false);
     
+    // Directly go to the domain configuration page
+    setSelectedDomain(newDomain);
+    
     toast({
       title: "Domínio adicionado",
-      description: "O domínio está em processo de configuração e verificação.",
+      description: "Configure os registros DNS para ativar seu domínio",
+    });
+  };
+
+  const handleVerifyDNS = () => {
+    if (!selectedDomain) return;
+    
+    // Update the selected domain with verification status
+    const updatedDomain = {
+      ...selectedDomain,
+      dnsVerified: true,
+      sslStatus: 'active',
+      status: 'active'
+    };
+    
+    // Update the domain in the list
+    setDomains(domains.map(domain => 
+      domain.id === selectedDomain.id ? updatedDomain : domain
+    ));
+    
+    // Update the selected domain
+    setSelectedDomain(updatedDomain);
+  };
+
+  const handleSubdomainChange = (type: 'checkout' | 'secure' | 'pay' | 'seguro') => {
+    if (!selectedDomain) return;
+    
+    // Update the selected domain with the new subdomain type
+    const updatedDomain = {
+      ...selectedDomain,
+      type
+    };
+    
+    // Update the domain in the list
+    setDomains(domains.map(domain => 
+      domain.id === selectedDomain.id ? updatedDomain : domain
+    ));
+    
+    // Update the selected domain
+    setSelectedDomain(updatedDomain);
+    
+    toast({
+      title: "Tipo atualizado",
+      description: `O tipo do subdomínio foi alterado para ${type}`,
     });
   };
 
@@ -84,68 +139,106 @@ const DominiosPage: React.FC = () => {
     }
   };
 
+  const handleConfigureDomain = (domain: Domain) => {
+    setSelectedDomain(domain);
+  };
+
   return (
     <DashboardLayout>
       <div className="container mx-auto px-4 py-6">
-        <div className="flex justify-between items-center mb-6">
-          <div>
-            <h1 className="text-2xl font-bold">Domínios</h1>
-            <p className="text-muted-foreground">Gerencie os domínios conectados ao seu checkout</p>
-          </div>
-          <Button onClick={() => setIsAddModalOpen(true)}>
-            <Plus className="w-4 h-4 mr-2" />
-            Adicionar Domínio
-          </Button>
-        </div>
+        {selectedDomain ? (
+          <DomainConfigDetails 
+            domain={selectedDomain}
+            onVerifyDNS={handleVerifyDNS}
+            onSubdomainChange={handleSubdomainChange}
+            onBack={() => setSelectedDomain(null)}
+          />
+        ) : (
+          <>
+            <div className="flex justify-between items-center mb-6">
+              <div>
+                <h1 className="text-2xl font-bold">Domínios</h1>
+                <p className="text-muted-foreground">Gerencie os domínios conectados ao seu checkout</p>
+              </div>
+              <Button onClick={() => setIsAddModalOpen(true)}>
+                <Plus className="w-4 h-4 mr-2" />
+                Adicionar Domínio
+              </Button>
+            </div>
 
-        <div className="bg-card border rounded-lg overflow-hidden">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Nome do domínio</TableHead>
-                <TableHead>Tipo</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Data de Criação</TableHead>
-                <TableHead className="text-right">Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {domains.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                    Nenhum domínio configurado ainda
-                  </TableCell>
-                </TableRow>
-              ) : (
-                domains.map((domain) => (
-                  <TableRow key={domain.id}>
-                    <TableCell className="font-medium">{domain.name}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline">{domain.type}</Badge>
-                    </TableCell>
-                    <TableCell>{getStatusBadge(domain.status)}</TableCell>
-                    <TableCell>{new Date(domain.createdAt).toLocaleDateString('pt-BR')}</TableCell>
-                    <TableCell className="text-right">
-                      {domain.status === 'active' && (
-                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                          <ExternalLink className="h-4 w-4" />
-                          <span className="sr-only">Visitar</span>
-                        </Button>
-                      )}
-                    </TableCell>
+            <div className="bg-card border rounded-lg overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Nome do domínio</TableHead>
+                    <TableHead>Tipo</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>DNS Verificado</TableHead>
+                    <TableHead>SSL</TableHead>
+                    <TableHead className="text-right">Ações</TableHead>
                   </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </div>
-      </div>
+                </TableHeader>
+                <TableBody>
+                  {domains.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                        Nenhum domínio configurado ainda
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    domains.map((domain) => (
+                      <TableRow key={domain.id}>
+                        <TableCell className="font-medium">{domain.name}</TableCell>
+                        <TableCell>
+                          <Badge variant="outline">{domain.type}</Badge>
+                        </TableCell>
+                        <TableCell>{getStatusBadge(domain.status)}</TableCell>
+                        <TableCell>
+                          {domain.dnsVerified ? (
+                            <Badge className="bg-green-100 text-green-800">Verificado</Badge>
+                          ) : (
+                            <Badge variant="outline" className="text-yellow-800 border-yellow-300 bg-yellow-50">Pendente</Badge>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {domain.sslStatus === 'active' ? (
+                            <Badge className="bg-green-100 text-green-800">Ativo</Badge>
+                          ) : (
+                            <Badge variant="outline" className="text-yellow-800 border-yellow-300 bg-yellow-50">Pendente</Badge>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-2">
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              onClick={() => handleConfigureDomain(domain)}
+                            >
+                              Configurar
+                            </Button>
+                            {domain.status === 'active' && (
+                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                <ExternalLink className="h-4 w-4" />
+                                <span className="sr-only">Visitar</span>
+                              </Button>
+                            )}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </>
+        )}
 
-      <AddDomainModal 
-        isOpen={isAddModalOpen} 
-        onClose={() => setIsAddModalOpen(false)} 
-        onSubmit={handleAddDomain} 
-      />
+        <AddDomainModal 
+          isOpen={isAddModalOpen} 
+          onClose={() => setIsAddModalOpen(false)} 
+          onSubmit={handleAddDomain} 
+        />
+      </div>
     </DashboardLayout>
   );
 };
