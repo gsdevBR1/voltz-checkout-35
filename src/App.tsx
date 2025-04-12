@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -58,6 +59,7 @@ import IntegrationLayout from "./pages/integracoes/IntegrationLayout";
 import EcommerceIntegrations from "./pages/integracoes/EcommerceIntegrations";
 import PixelsIntegrations from "./pages/integracoes/PixelsIntegrations";
 import TrackingIntegrations from "./pages/integracoes/TrackingIntegrations";
+import PixelManagementPage from "./pages/integracoes/PixelManagementPage";
 
 const App: React.FC = () => {
   const queryClient = new QueryClient({
@@ -134,6 +136,7 @@ const App: React.FC = () => {
                   <Route path="/integracoes/ecommerce" element={<EcommerceIntegrations />} />
                   <Route path="/integracoes/pixels" element={<PixelsIntegrations />} />
                   <Route path="/integracoes/trackeamento" element={<TrackingIntegrations />} />
+                  <Route path="/integracoes/:platform" element={<PixelManagementPage />} />
                   
                   <Route path="*" element={<NotFound />} />
                 </Routes>

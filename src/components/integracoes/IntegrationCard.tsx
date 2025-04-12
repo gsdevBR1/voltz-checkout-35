@@ -32,6 +32,8 @@ interface IntegrationCardProps {
   onDisconnect: (integration: AnyIntegration) => void;
   onUpdate: (integration: AnyIntegration) => void;
   tooltipContent?: React.ReactNode;
+  actionText?: string;
+  statusText?: string | null;
 }
 
 const IntegrationCard: React.FC<IntegrationCardProps> = ({
@@ -39,7 +41,9 @@ const IntegrationCard: React.FC<IntegrationCardProps> = ({
   onConnect,
   onDisconnect,
   onUpdate,
-  tooltipContent
+  tooltipContent,
+  actionText,
+  statusText
 }) => {
   // Helper function for status badge
   const renderStatusBadge = () => {
@@ -96,7 +100,7 @@ const IntegrationCard: React.FC<IntegrationCardProps> = ({
             onClick={() => onUpdate(integration)}
           >
             <RefreshCw className="h-4 w-4" />
-            <span>Atualizar</span>
+            <span>{actionText || 'Atualizar'}</span>
           </Button>
           <Button 
             size="sm" 
@@ -117,7 +121,7 @@ const IntegrationCard: React.FC<IntegrationCardProps> = ({
         onClick={() => onConnect(integration)}
       >
         <LinkIcon className="h-4 w-4 mr-1" />
-        <span>Conectar</span>
+        <span>{actionText || 'Conectar'}</span>
       </Button>
     );
   };
@@ -164,7 +168,12 @@ const IntegrationCard: React.FC<IntegrationCardProps> = ({
         <CardDescription>{integration.description}</CardDescription>
       </CardHeader>
       <CardContent className="pt-0">
-        {integration.lastSync && (
+        {statusText && (
+          <p className="text-xs text-muted-foreground">
+            {statusText}
+          </p>
+        )}
+        {integration.lastSync && !statusText && (
           <p className="text-xs text-muted-foreground">
             Última sincronização: {new Date(integration.lastSync).toLocaleString()}
           </p>

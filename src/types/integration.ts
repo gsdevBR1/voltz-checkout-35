@@ -26,7 +26,18 @@ export interface EcommerceIntegration extends Integration {
 export interface PixelIntegration extends Integration {
   category: 'pixel';
   platform: 'google_ads' | 'google_analytics' | 'google_tag_manager' | 'meta' | 'tiktok' | 'pinterest' | 'kwai' | 'taboola' | 'mgid' | 'outbrain';
-  credentials?: {
+  pixels?: PixelConfig[];
+}
+
+export interface PixelConfig {
+  id: string;
+  name: string;
+  platform: PixelIntegration['platform'];
+  status: 'active' | 'inactive';
+  createdAt: Date;
+  updatedAt: Date;
+  integrationType?: 'classic' | 'conversion_api'; // For Meta
+  credentials: {
     pixelId?: string;
     conversionId?: string;
     conversionLabel?: string;
@@ -34,6 +45,11 @@ export interface PixelIntegration extends Integration {
     containerId?: string;
     eventId?: string;
     trackingCode?: string;
+    token?: string; // For Meta conversion API
+  };
+  rules?: {
+    trackBoleto?: boolean;
+    trackPix?: boolean;
   };
 }
 
