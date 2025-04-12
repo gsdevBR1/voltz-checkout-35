@@ -96,8 +96,10 @@ const App: React.FC = () => {
                   {/* Marketing Section Routes */}
                   <Route path="/marketing/upsell" element={<UpsellOnePage />} />
                   <Route path="/marketing/upsell/criar" element={<CriarUpsellPage />} />
-                  <Route path="/marketing/upsell/:id/preview" element={<UpsellDisplay />} /> {/* New route */}
-                  <Route path="/marketing/upsell/display/:id" element={<UpsellDisplay />} /> {/* New route */}
+                  <Route path="/marketing/upsell/criar/:productId" element={<CriarUpsellPage />} />
+                  <Route path="/marketing/upsell/:id/preview" element={<UpsellDisplay />} />
+                  <Route path="/marketing/upsell/display/:id" element={<UpsellDisplay />} />
+                  <Route path="/marketing/upsell/editar/:id" element={<CriarUpsellPage />} />
                   <Route path="/marketing/order-bumps" element={<OrderBumpsPage />} />
                   <Route path="/marketing/cupons" element={<CuponsPage />} />
                   <Route path="/marketing/cross-sell" element={<CrossSellPage />} />

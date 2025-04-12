@@ -3,12 +3,13 @@ import React, { useState } from 'react';
 import MarketingLayout from '@/components/marketing/MarketingLayout';
 import UpsellBuilder from '@/components/marketing/UpsellBuilder';
 import { toast } from 'sonner';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 
 const CriarUpsellPage = () => {
   const navigate = useNavigate();
+  const { productId } = useParams<{ productId?: string }>();
   
   const handleSave = (data: any) => {
     // In a real implementation, this would save the data to your backend
@@ -40,7 +41,7 @@ const CriarUpsellPage = () => {
         </Button>
       }
     >
-      <UpsellBuilder onSave={handleSave} />
+      <UpsellBuilder onSave={handleSave} productId={productId} />
     </MarketingLayout>
   );
 };

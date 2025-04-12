@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,8 +8,69 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useNavigate } from 'react-router-dom';
-import { ChevronRight, Eye, Save, Clock, Paintbrush, Type, Layout } from 'lucide-react';
+import { ChevronRight, Eye, Save, Clock, Paintbrush, Type, Layout, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Product } from '@/types/product';
+
+const mockProducts: Product[] = [
+  {
+    id: "prod_1",
+    name: "Curso Avançado de Marketing Digital",
+    type: "digital",
+    price: 197.0,
+    description: "Aprenda estratégias avançadas de marketing digital com este curso completo. Inclui módulos de SEO, mídia paga, e-mail marketing e análise de dados.",
+    status: "active",
+    imageUrl: "https://placehold.co/1000x1000/2563eb/ffffff?text=Curso+Marketing",
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    downloadUrl: "https://example.com/download"
+  },
+  {
+    id: "prod_2",
+    name: "E-book: Transformação Digital para Empresas",
+    type: "digital",
+    price: 47.0,
+    description: "Guia completo para implementar a transformação digital no seu negócio. Casos de sucesso e passo a passo prático.",
+    status: "active",
+    imageUrl: "https://placehold.co/1000x1000/10b981/ffffff?text=E-book",
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    downloadUrl: "https://example.com/ebook"
+  },
+  {
+    id: "prod_3",
+    name: "Template de Planilha para Gestão Financeira",
+    type: "digital",
+    price: 29.90,
+    description: "Controle suas finanças com esta planilha profissional. Inclui dashboards, controle de gastos e projeções financeiras.",
+    status: "active",
+    imageUrl: "https://placehold.co/1000x1000/f59e0b/ffffff?text=Planilha",
+    createdAt: new Date(),
+    updatedAt: new Date()
+  },
+  {
+    id: "prod_4",
+    name: "Smartphone XPhone 12 Pro",
+    type: "physical",
+    price: 4999.0,
+    description: "O mais avançado smartphone do mercado com câmera de 108MP, tela AMOLED de 6.7\" e processador ultrarrápido.",
+    status: "active",
+    stock: 15,
+    imageUrl: "https://placehold.co/1000x1000/ef4444/ffffff?text=Smartphone",
+    createdAt: new Date(),
+    updatedAt: new Date()
+  }
+];
 
 interface UpsellBuilderProps {
   initialData?: any;
@@ -21,12 +81,20 @@ interface UpsellBuilderProps {
 const UpsellBuilder: React.FC<UpsellBuilderProps> = ({ initialData, onSave, productId }) => {
   const navigate = useNavigate();
   const [saving, setSaving] = useState(false);
+  const [fieldsEdited, setFieldsEdited] = useState({
+    title: false,
+    description: false,
+    productImage: false
+  });
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [pendingProductId, setPendingProductId] = useState<string | null>(null);
   
   const [upsellData, setUpsellData] = useState(initialData || {
     id: 'new-' + Date.now(),
     title: '🎁 Oferta exclusiva para completar seu pedido!',
     description: '<p>Parabéns pela sua compra! Como cliente especial, você tem acesso a esta oferta por tempo limitado.</p>',
     productImage: 'https://placehold.co/1000x1000',
+    productId: '',
     productName: 'Produto Upsell',
     originalPrice: 197.0,
     discountPrice: 97.0,
@@ -46,7 +114,16 @@ const UpsellBuilder: React.FC<UpsellBuilderProps> = ({ initialData, onSave, prod
     }
   });
   
+  const [showAutoFillAlert, setShowAutoFillAlert] = useState(false);
+  
   const handleChange = (field: string, value: any) => {
+    if (field === 'title' || field === 'description' || field === 'productImage') {
+      setFieldsEdited(prev => ({
+        ...prev,
+        [field]: true
+      }));
+    }
+    
     setUpsellData(prev => ({
       ...prev,
       [field]: value
@@ -63,14 +140,57 @@ const UpsellBuilder: React.FC<UpsellBuilderProps> = ({ initialData, onSave, prod
     }));
   };
   
+  const handleProductSelect = (productId: string) => {
+    if (fieldsEdited.title || fieldsEdited.description || fieldsEdited.productImage) {
+      setPendingProductId(productId);
+      setShowConfirmDialog(true);
+      return;
+    }
+    
+    applyProductData(productId);
+  };
+  
+  const applyProductData = (productId: string) => {
+    const selectedProduct = mockProducts.find(p => p.id === productId);
+    
+    if (selectedProduct) {
+      setUpsellData(prev => ({
+        ...prev,
+        productId: selectedProduct.id,
+        productName: selectedProduct.name,
+        title: `🎁 Oferta especial: ${selectedProduct.name}!`,
+        description: selectedProduct.description || '<p>Detalhes do produto não disponíveis. Você pode adicionar uma descrição manualmente.</p>',
+        productImage: selectedProduct.imageUrl || 'https://placehold.co/1000x1000',
+        originalPrice: selectedProduct.price,
+        discountPrice: Math.round(selectedProduct.price * 0.7)
+      }));
+      
+      setFieldsEdited({
+        title: false,
+        description: false,
+        productImage: false
+      });
+      
+      setShowAutoFillAlert(true);
+      
+      setTimeout(() => {
+        setShowAutoFillAlert(false);
+      }, 5000);
+    }
+  };
+  
+  const confirmProductChange = () => {
+    if (pendingProductId) {
+      applyProductData(pendingProductId);
+      setPendingProductId(null);
+    }
+    setShowConfirmDialog(false);
+  };
+  
   const handleSave = async () => {
     setSaving(true);
     
     try {
-      // In a real implementation, this would call your API to save the upsell
-      // Example: await saveUpsell(upsellData);
-      
-      // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       if (onSave) {
@@ -92,10 +212,7 @@ const UpsellBuilder: React.FC<UpsellBuilderProps> = ({ initialData, onSave, prod
   };
   
   const handlePreview = () => {
-    // Store the current state in localStorage for the preview
     localStorage.setItem('upsell-preview-data', JSON.stringify(upsellData));
-    
-    // Navigate to preview page
     navigate(`/marketing/upsell/${upsellData.id}/preview`);
   };
 
@@ -109,6 +226,39 @@ const UpsellBuilder: React.FC<UpsellBuilderProps> = ({ initialData, onSave, prod
           </CardDescription>
         </CardHeader>
         <CardContent>
+          <div className="space-y-6 mb-6">
+            <div className="space-y-2">
+              <Label htmlFor="productSelect">Selecione o Produto para Upsell</Label>
+              <Select 
+                value={upsellData.productId}
+                onValueChange={handleProductSelect}
+              >
+                <SelectTrigger id="productSelect">
+                  <SelectValue placeholder="Escolha um produto" />
+                </SelectTrigger>
+                <SelectContent>
+                  {mockProducts.map(product => (
+                    <SelectItem key={product.id} value={product.id}>
+                      {product.name} - R${product.price.toFixed(2)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                Ao selecionar um produto, os campos de imagem, título e descrição serão preenchidos automaticamente.
+              </p>
+            </div>
+            
+            {showAutoFillAlert && (
+              <Alert variant="default" className="bg-blue-50 border-blue-200">
+                <AlertCircle className="h-4 w-4 text-blue-600" />
+                <AlertDescription className="text-blue-700">
+                  Essas informações foram preenchidas automaticamente com base no produto selecionado, mas você pode editar se quiser.
+                </AlertDescription>
+              </Alert>
+            )}
+          </div>
+          
           <Tabs defaultValue="content" className="w-full">
             <TabsList className="grid w-full grid-cols-4 mb-6">
               <TabsTrigger value="content">
@@ -487,6 +637,21 @@ const UpsellBuilder: React.FC<UpsellBuilderProps> = ({ initialData, onSave, prod
           </Button>
         </CardFooter>
       </Card>
+      
+      <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Substituir conteúdo editado?</DialogTitle>
+            <DialogDescription>
+              Você já editou manualmente alguns campos. Selecionar um novo produto substituirá essas alterações.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowConfirmDialog(false)}>Cancelar</Button>
+            <Button onClick={confirmProductChange}>Substituir conteúdo</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
