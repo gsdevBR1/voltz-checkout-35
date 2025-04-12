@@ -11,31 +11,74 @@ import { AlertCircle } from 'lucide-react';
 import { Product } from '@/types/product';
 
 interface ProductSelectorProps {
-  products: Product[];
+  products?: Product[];
   selectedProductIds: string[];
-  onSelectProduct: (productId: string) => void;
-  onSelectAllFiltered: () => void;
-  onApplyToAllProducts: (checked: boolean) => void;
-  applyToAllProducts: boolean;
+  onSelectProduct?: (productId: string) => void;
+  onSelectAllFiltered?: () => void;
+  onApplyToAllProducts?: (checked: boolean) => void;
+  applyToAllProducts?: boolean;
   excludedProductId?: string;
   title?: string;
   description?: string;
+  // New props to support both implementations
+  onChange?: (selectedIds: string[]) => void;
+  allowMultiple?: boolean;
 }
 
 const ProductSelector: React.FC<ProductSelectorProps> = ({
-  products,
+  products = [], // Default to empty array to avoid undefined
   selectedProductIds,
   onSelectProduct,
   onSelectAllFiltered,
   onApplyToAllProducts,
-  applyToAllProducts,
+  applyToAllProducts = false, // Default value
   excludedProductId,
   title = "Aplicar este upsell em massa",
-  description
+  description,
+  onChange,
+  allowMultiple = true
 }) => {
   const [productNameFilter, setProductNameFilter] = useState('');
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   
+  // Safe handling for select product
+  const handleSelectProduct = (productId: string) => {
+    if (onSelectProduct) {
+      onSelectProduct(productId);
+    } else if (onChange) {
+      // If using the onChange prop
+      if (allowMultiple) {
+        // Toggle selection for multiple selection
+        const newSelection = selectedProductIds.includes(productId)
+          ? selectedProductIds.filter(id => id !== productId)
+          : [...selectedProductIds, productId];
+        onChange(newSelection);
+      } else {
+        // Single selection mode
+        onChange([productId]);
+      }
+    }
+  };
+
+  // Safe handling for select all
+  const handleSelectAllFiltered = () => {
+    if (onSelectAllFiltered) {
+      onSelectAllFiltered();
+    } else if (onChange) {
+      const productIds = filteredProducts
+        .filter(product => product.id !== excludedProductId)
+        .map(product => product.id);
+      onChange(productIds);
+    }
+  };
+
+  // Safe handling for apply to all
+  const handleApplyToAllProducts = (checked: boolean) => {
+    if (onApplyToAllProducts) {
+      onApplyToAllProducts(checked);
+    }
+  };
+
   useEffect(() => {
     if (productNameFilter) {
       const filtered = products.filter(product => 
@@ -57,7 +100,7 @@ const ProductSelector: React.FC<ProductSelectorProps> = ({
             <Checkbox 
               id="applyToAll" 
               checked={applyToAllProducts}
-              onCheckedChange={onApplyToAllProducts}
+              onCheckedChange={handleApplyToAllProducts}
               className="h-5 w-5 rounded-sm transition-colors data-[state=checked]:bg-primary data-[state=checked]:border-primary hover:border-primary/70"
             />
           </div>
@@ -98,7 +141,7 @@ const ProductSelector: React.FC<ProductSelectorProps> = ({
               </div>
               <Button 
                 variant="outline" 
-                onClick={onSelectAllFiltered}
+                onClick={handleSelectAllFiltered}
                 className="whitespace-nowrap font-medium transition-all h-auto py-2.5 px-4 hover:bg-accent border-input"
               >
                 <CheckSquare className="mr-2 h-4 w-4 text-primary" />
@@ -126,7 +169,7 @@ const ProductSelector: React.FC<ProductSelectorProps> = ({
                         <Checkbox 
                           id={`product-${product.id}`} 
                           checked={isSelected}
-                          onCheckedChange={() => onSelectProduct(product.id)}
+                          onCheckedChange={() => handleSelectProduct(product.id)}
                           disabled={isDisabled}
                           className="mr-3 h-5 w-5 rounded-sm transition-colors data-[state=checked]:bg-success data-[state=checked]:border-success"
                         />
