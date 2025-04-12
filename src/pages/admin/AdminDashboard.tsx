@@ -1,13 +1,24 @@
-
 import React, { useState } from 'react';
 import { ArrowUp, ArrowDown, Store, DollarSign, Calculator, AlertCircle, Calendar, Filter } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { AreaChart, LineChart, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, Area, Line, Legend, ResponsiveContainer } from 'recharts';
+import { 
+  AreaChart, 
+  LineChart, 
+  BarChart, 
+  CartesianGrid, 
+  XAxis, 
+  YAxis, 
+  Tooltip, 
+  Area, 
+  Line, 
+  Legend, 
+  ResponsiveContainer,
+  Bar
+} from 'recharts';
 
-// Helper function for className consolidation
 const cn = (...classes: string[]) => {
   return classes.filter(Boolean).join(' ');
 };
@@ -47,15 +58,12 @@ const StatsCard = ({
   );
 };
 
-// Chart data (mock data - would come from API in real app)
 const generateChartData = (days: number) => {
   return Array.from({ length: days }).map((_, i) => {
-    // Generate a date string for each day
     const date = new Date();
     date.setDate(date.getDate() - (days - 1) + i);
     const dateStr = date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
     
-    // Base values that increase over time
     const baseValue = 1000 + (i * 200);
     const randomVariation = () => Math.random() * 500 - 250;
     
@@ -68,7 +76,6 @@ const generateChartData = (days: number) => {
   });
 };
 
-// Alert component
 type AlertItemProps = {
   type: string;
   count: number;
@@ -101,7 +108,6 @@ const AdminDashboard: React.FC = () => {
   const [timeRange, setTimeRange] = useState('7d');
   const [chartData, setChartData] = useState(() => generateChartData(7));
   
-  // Update chart data when time range changes
   const handleTimeRangeChange = (value: string) => {
     setTimeRange(value);
     switch (value) {
@@ -136,7 +142,6 @@ const AdminDashboard: React.FC = () => {
         </div>
       </div>
       
-      {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatsCard
           title="Lojas Ativas"
@@ -171,7 +176,6 @@ const AdminDashboard: React.FC = () => {
         />
       </div>
       
-      {/* Activity Chart */}
       <Card className="bg-[#1E1E1E] border-white/5 shadow-md">
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
@@ -251,7 +255,6 @@ const AdminDashboard: React.FC = () => {
         </CardContent>
       </Card>
       
-      {/* Alerts Section */}
       <Card className="bg-[#1E1E1E] border-white/5 shadow-md">
         <CardHeader>
           <CardTitle className="text-white">Alertas Rápidos</CardTitle>
