@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
-import { Plus, ExternalLink, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { Plus, ExternalLink, AlertTriangle, CheckCircle2, History, Edit, Trash2 } from 'lucide-react';
 import { 
   Table, 
   TableBody, 
@@ -12,11 +12,15 @@ import {
   TableRow 
 } from '@/components/ui/table';
 import { AddDomainModal } from '@/components/configuracoes/AddDomainModal';
-import { Domain, DomainValidationResult } from '@/types/domain';
+import { Domain, DomainValidationResult, DomainHistoryEvent } from '@/types/domain';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { DomainConfigDetails } from '@/components/configuracoes/DomainConfigDetails';
+import { EditDomainModal } from '@/components/configuracoes/EditDomainModal';
+import { DeleteDomainDialog } from '@/components/configuracoes/DeleteDomainDialog';
+import { DomainHistoryDrawer } from '@/components/configuracoes/DomainHistoryDrawer';
 
+// Updated mock domains with history and inUse data
 const mockDomains: Domain[] = [
   {
     id: '1',
@@ -26,7 +30,25 @@ const mockDomains: Domain[] = [
     createdAt: '2023-10-15T10:30:00Z',
     dnsVerified: true,
     sslStatus: 'active',
-    lastChecked: '2023-10-15T14:30:00Z'
+    lastChecked: '2023-10-15T14:30:00Z',
+    inUse: 3,
+    history: [
+      {
+        id: '1a',
+        type: 'added',
+        timestamp: '2023-10-15T10:30:00Z'
+      },
+      {
+        id: '1b',
+        type: 'dns_verified',
+        timestamp: '2023-10-15T11:15:00Z'
+      },
+      {
+        id: '1c',
+        type: 'ssl_issued',
+        timestamp: '2023-10-15T14:30:00Z'
+      }
+    ]
   },
   {
     id: '2',
@@ -35,7 +57,15 @@ const mockDomains: Domain[] = [
     status: 'pending',
     createdAt: '2023-10-20T14:45:00Z',
     dnsVerified: false,
-    sslStatus: 'pending'
+    sslStatus: 'pending',
+    inUse: 0,
+    history: [
+      {
+        id: '2a',
+        type: 'added',
+        timestamp: '2023-10-20T14:45:00Z'
+      }
+    ]
   },
 ];
 
@@ -43,6 +73,9 @@ const DominiosPage: React.FC = () => {
   const [domains, setDomains] = useState<Domain[]>(mockDomains);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [selectedDomain, setSelectedDomain] = useState<Domain | null>(null);
+  const [editDomain, setEditDomain] = useState<Domain | null>(null);
+  const [deleteDomain, setDeleteDomain] = useState<Domain | null>(null);
+  const [historyDomain, setHistoryDomain] = useState<Domain | null>(null);
   const { toast } = useToast();
 
   const handleAddDomain = (data: { name: string }) => {
@@ -53,7 +86,15 @@ const DominiosPage: React.FC = () => {
       status: 'pending',
       createdAt: new Date().toISOString(),
       dnsVerified: false,
-      sslStatus: 'pending'
+      sslStatus: 'pending',
+      inUse: 0,
+      history: [
+        {
+          id: Math.random().toString(36).substring(2, 9),
+          type: 'added',
+          timestamp: new Date().toISOString()
+        }
+      ]
     };
 
     // Add the domain to the list
@@ -72,13 +113,45 @@ const DominiosPage: React.FC = () => {
   const handleVerifyDNS = (validationResult: DomainValidationResult) => {
     if (!selectedDomain) return;
     
-    // Update the selected domain with verification status
+    // Create new history events based on validation results
+    const newHistoryEvents: DomainHistoryEvent[] = [];
+    
+    if (validationResult.dnsVerified && !selectedDomain.dnsVerified) {
+      newHistoryEvents.push({
+        id: Math.random().toString(36).substring(2, 9),
+        type: 'dns_verified',
+        timestamp: validationResult.lastChecked
+      });
+    }
+    
+    if (validationResult.sslActive && selectedDomain.sslStatus !== 'active') {
+      newHistoryEvents.push({
+        id: Math.random().toString(36).substring(2, 9),
+        type: 'ssl_issued',
+        timestamp: validationResult.lastChecked
+      });
+    }
+    
+    if (!validationResult.dnsVerified && selectedDomain.dnsVerified) {
+      newHistoryEvents.push({
+        id: Math.random().toString(36).substring(2, 9),
+        type: 'validation_failed',
+        timestamp: validationResult.lastChecked,
+        details: 'Validação de DNS falhou'
+      });
+    }
+    
+    // Update the selected domain with verification status and new history events
     const updatedDomain: Domain = {
       ...selectedDomain,
       dnsVerified: validationResult.dnsVerified,
       sslStatus: validationResult.sslActive ? 'active' : 'pending',
       status: validationResult.dnsVerified && validationResult.sslActive ? 'active' : 'pending',
-      lastChecked: validationResult.lastChecked
+      lastChecked: validationResult.lastChecked,
+      history: [
+        ...(selectedDomain.history || []),
+        ...newHistoryEvents
+      ]
     };
     
     // Update the domain in the list
@@ -93,10 +166,22 @@ const DominiosPage: React.FC = () => {
   const handleSubdomainChange = (type: 'checkout' | 'secure' | 'pay' | 'seguro') => {
     if (!selectedDomain) return;
     
+    // Create a history event for the name change
+    const historyEvent: DomainHistoryEvent = {
+      id: Math.random().toString(36).substring(2, 9),
+      type: 'name_changed',
+      timestamp: new Date().toISOString(),
+      details: `Tipo alterado de ${selectedDomain.type} para ${type}`
+    };
+    
     // Update the selected domain with the new subdomain type
     const updatedDomain: Domain = {
       ...selectedDomain,
-      type
+      type,
+      history: [
+        ...(selectedDomain.history || []),
+        historyEvent
+      ]
     };
     
     // Update the domain in the list
@@ -111,6 +196,78 @@ const DominiosPage: React.FC = () => {
       title: "Tipo atualizado",
       description: `O tipo do subdomínio foi alterado para ${type}`,
     });
+  };
+
+  const handleEditDomain = (domain: Domain) => {
+    setEditDomain(domain);
+  };
+
+  const handleEditDomainSubmit = (type: 'checkout' | 'secure' | 'pay' | 'seguro') => {
+    if (!editDomain) return;
+    
+    // Only proceed if the type is actually changing
+    if (editDomain.type === type) {
+      setEditDomain(null);
+      return;
+    }
+    
+    // Create a history event for the name change
+    const historyEvent: DomainHistoryEvent = {
+      id: Math.random().toString(36).substring(2, 9),
+      type: 'name_changed',
+      timestamp: new Date().toISOString(),
+      details: `Tipo alterado de ${editDomain.type} para ${type}`
+    };
+    
+    // Update the domain
+    const updatedDomain: Domain = {
+      ...editDomain,
+      type,
+      history: [
+        ...(editDomain.history || []),
+        historyEvent
+      ]
+    };
+    
+    // Update domains list
+    setDomains(domains.map(domain => 
+      domain.id === editDomain.id ? updatedDomain : domain
+    ));
+    
+    // Update selected domain if it's the one being edited
+    if (selectedDomain && selectedDomain.id === editDomain.id) {
+      setSelectedDomain(updatedDomain);
+    }
+    
+    setEditDomain(null);
+    
+    toast({
+      title: "Domínio atualizado",
+      description: `O tipo do subdomínio foi alterado para ${type}`,
+    });
+  };
+
+  const handleDeleteConfirm = () => {
+    if (!deleteDomain) return;
+    
+    // Remove the domain
+    setDomains(domains.filter(domain => domain.id !== deleteDomain.id));
+    
+    // Clear selected domain if it was deleted
+    if (selectedDomain && selectedDomain.id === deleteDomain.id) {
+      setSelectedDomain(null);
+    }
+    
+    setDeleteDomain(null);
+    
+    toast({
+      title: "Domínio removido",
+      description: `O domínio foi removido com sucesso`,
+    });
+  };
+
+  const handleViewHistory = (domain: Domain) => {
+    setHistoryDomain(domain);
   };
 
   const getStatusBadge = (status: Domain['status']) => {
@@ -182,13 +339,14 @@ const DominiosPage: React.FC = () => {
                     <TableHead>Status</TableHead>
                     <TableHead>DNS Verificado</TableHead>
                     <TableHead>SSL</TableHead>
+                    <TableHead>Em uso</TableHead>
                     <TableHead className="text-right">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {domains.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                      <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                         Nenhum domínio configurado ainda
                       </TableCell>
                     </TableRow>
@@ -214,6 +372,15 @@ const DominiosPage: React.FC = () => {
                             <Badge variant="outline" className="text-yellow-800 border-yellow-300 bg-yellow-50">Pendente</Badge>
                           )}
                         </TableCell>
+                        <TableCell>
+                          {domain.inUse ? (
+                            <Badge variant="outline" className="bg-blue-50 border-blue-200 text-blue-700 dark:bg-blue-950/30 dark:border-blue-800 dark:text-blue-400">
+                              {domain.inUse} {domain.inUse === 1 ? 'checkout' : 'checkouts'}
+                            </Badge>
+                          ) : (
+                            <span className="text-muted-foreground text-sm">Não utilizado</span>
+                          )}
+                        </TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-2">
                             <Button 
@@ -223,8 +390,41 @@ const DominiosPage: React.FC = () => {
                             >
                               Configurar
                             </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="h-8 w-8 p-0"
+                              onClick={() => handleEditDomain(domain)}
+                              disabled={domain.status === 'pending' && !domain.dnsVerified}
+                            >
+                              <Edit className="h-4 w-4" />
+                              <span className="sr-only">Editar</span>
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="h-8 w-8 p-0"
+                              onClick={() => setDeleteDomain(domain)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                              <span className="sr-only">Remover</span>
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="h-8 w-8 p-0"
+                              onClick={() => handleViewHistory(domain)}
+                            >
+                              <History className="h-4 w-4" />
+                              <span className="sr-only">Histórico</span>
+                            </Button>
                             {domain.status === 'active' && (
-                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className="h-8 w-8 p-0"
+                                onClick={() => handleVisitDomain(domain)}
+                              >
                                 <ExternalLink className="h-4 w-4" />
                                 <span className="sr-only">Visitar</span>
                               </Button>
@@ -245,6 +445,33 @@ const DominiosPage: React.FC = () => {
           onClose={() => setIsAddModalOpen(false)} 
           onSubmit={handleAddDomain} 
         />
+
+        {editDomain && (
+          <EditDomainModal
+            domain={editDomain}
+            otherDomains={domains.filter(d => d.id !== editDomain.id)}
+            isOpen={!!editDomain}
+            onClose={() => setEditDomain(null)}
+            onSubmit={handleEditDomainSubmit}
+          />
+        )}
+
+        {deleteDomain && (
+          <DeleteDomainDialog
+            domain={deleteDomain}
+            isOpen={!!deleteDomain}
+            onConfirm={handleDeleteConfirm}
+            onCancel={() => setDeleteDomain(null)}
+          />
+        )}
+
+        {historyDomain && (
+          <DomainHistoryDrawer
+            domain={historyDomain}
+            open={!!historyDomain}
+            onClose={() => setHistoryDomain(null)}
+          />
+        )}
       </div>
     </DashboardLayout>
   );
