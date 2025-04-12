@@ -17,7 +17,8 @@ import {
   CheckCircle, 
   Clock, 
   XCircle,
-  Info
+  Info,
+  FileText
 } from 'lucide-react';
 import { formatCurrency, formatDateTime } from '@/lib/utils';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
