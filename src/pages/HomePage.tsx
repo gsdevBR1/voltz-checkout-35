@@ -1,7 +1,8 @@
+
 import React, { useEffect } from 'react';
 import { useStores } from '@/contexts/StoreContext';
 import { useActivationSteps, useCheckActivationStatus } from '@/contexts/ActivationStepsContextWithStores';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
