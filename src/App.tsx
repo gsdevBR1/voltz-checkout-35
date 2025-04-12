@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -55,6 +54,11 @@ import { ActivationStepsProvider } from "./contexts/ActivationStepsContextWithSt
 import { StoreProvider } from "./contexts/StoreContext";
 import { ThemeProvider } from "./providers/ThemeProvider";
 
+import IntegrationLayout from "./pages/integracoes/IntegrationLayout";
+import EcommerceIntegrations from "./pages/integracoes/EcommerceIntegrations";
+import PixelsIntegrations from "./pages/integracoes/PixelsIntegrations";
+import TrackingIntegrations from "./pages/integracoes/TrackingIntegrations";
+
 const App: React.FC = () => {
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -103,12 +107,10 @@ const App: React.FC = () => {
                   <Route path="/marketing/upsell/display/:id" element={<UpsellDisplay />} />
                   <Route path="/marketing/upsell/editar/:id" element={<CriarUpsellPage />} />
                   
-                  {/* Order Bumps Routes */}
                   <Route path="/marketing/order-bumps" element={<OrderBumpsPage />} />
                   <Route path="/marketing/order-bumps/novo" element={<CriarOrderBumpPage />} />
                   <Route path="/marketing/order-bumps/:id/editar" element={<EditarOrderBumpPage />} />
                   
-                  {/* Cross-Sell Routes */}
                   <Route path="/marketing/cross-sell" element={<CrossSellPage />} />
                   <Route path="/marketing/cross-sells/novo" element={<CriarCrossSellPage />} />
                   <Route path="/marketing/cross-sells/:id/editar" element={<EditarCrossSellPage />} />
@@ -127,6 +129,12 @@ const App: React.FC = () => {
                   <Route path="/steps/gateway" element={<GatewayStep />} />
                   <Route path="/steps/shipping" element={<ShippingStep />} />
                   <Route path="/steps/shopify" element={<ShopifyStep />} />
+                  
+                  <Route path="/integracoes" element={<Navigate to="/integracoes/ecommerce" replace />} />
+                  <Route path="/integracoes/ecommerce" element={<EcommerceIntegrations />} />
+                  <Route path="/integracoes/pixels" element={<PixelsIntegrations />} />
+                  <Route path="/integracoes/trackeamento" element={<TrackingIntegrations />} />
+                  
                   <Route path="*" element={<NotFound />} />
                 </Routes>
                 <Toaster />

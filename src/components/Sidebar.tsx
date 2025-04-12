@@ -28,7 +28,8 @@ import {
   RefreshCw,
   BarChart,
   Copy,
-  Flame
+  Flame,
+  Plug
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { StoreSelector } from '@/components/StoreSelector';
@@ -220,6 +221,28 @@ export const AppSidebar: React.FC<SidebarProps> = ({ className }) => {
           title: 'Redirecionamento',
           path: '/checkouts/redirecionamento',
           icon: ArrowRight,
+        }
+      ]
+    },
+    {
+      title: 'Integrações',
+      path: '/integracoes',
+      icon: Plug,
+      subItems: [
+        {
+          title: 'E-commerce',
+          path: '/integracoes/ecommerce',
+          icon: ShoppingBag,
+        },
+        {
+          title: 'Pixels',
+          path: '/integracoes/pixels',
+          icon: BarChart,
+        },
+        {
+          title: 'Trackeamento',
+          path: '/integracoes/trackeamento',
+          icon: RefreshCw,
         }
       ]
     },

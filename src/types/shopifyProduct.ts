@@ -43,6 +43,11 @@ export interface ShopifyAppCredentials {
   accessToken: string;
   shopDomain: string;
   isConnected: boolean;
+  // Add additional properties for the app permissions
+  permissions?: string[];
+  installationType?: 'official' | 'private';
+  appId?: string;
+  scopes?: string[];
 }
 
 export interface ShopifyCloneResult {
