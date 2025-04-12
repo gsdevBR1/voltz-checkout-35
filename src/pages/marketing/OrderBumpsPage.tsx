@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Plus, Copy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -6,11 +5,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
 import MarketingLayout from '@/components/marketing/MarketingLayout';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Product, ProductType, ProductStatus } from '@/types/product';
-import { OrderBump, OrderBumpFormData } from '@/types/orderBump';
-import OrderBumpForm from '@/components/marketing/OrderBumpForm';
+import { OrderBump } from '@/types/orderBump';
 import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 
 // Mock products for demo
 const mockProducts: Product[] = [
@@ -66,48 +64,7 @@ const mockOrderBumps: OrderBump[] = [
 
 const OrderBumpsPage = () => {
   const [orderBumps, setOrderBumps] = useState<OrderBump[]>(mockOrderBumps);
-  const [showCreateDialog, setShowCreateDialog] = useState(false);
-  const [editingOrderBump, setEditingOrderBump] = useState<OrderBump | null>(null);
-  const [duplicatingOrderBump, setDuplicatingOrderBump] = useState<OrderBump | null>(null);
-
-  const handleCreate = (data: OrderBumpFormData) => {
-    const newOrderBump: OrderBump = {
-      id: `ob_${Date.now()}`,
-      ...data,
-      conversionRate: 0,
-      createdAt: new Date(),
-      updatedAt: new Date()
-    };
-    
-    setOrderBumps(prev => [...prev, newOrderBump]);
-    setShowCreateDialog(false);
-    toast.success("Order Bump criado com sucesso!");
-  };
-
-  const handleUpdate = (data: OrderBumpFormData) => {
-    if (!editingOrderBump) return;
-    
-    setOrderBumps(prev => prev.map(ob => 
-      ob.id === editingOrderBump.id ? { 
-        ...ob, 
-        ...data,
-        updatedAt: new Date() 
-      } : ob
-    ));
-    
-    setEditingOrderBump(null);
-    toast.success("Order Bump atualizado com sucesso!");
-  };
-
-  const handleDuplicate = (orderBump: OrderBump) => {
-    setDuplicatingOrderBump({
-      ...orderBump,
-      id: `ob_${Date.now()}`,
-      name: `${orderBump.name} (Cópia)`,
-      createdAt: new Date(),
-      updatedAt: new Date()
-    });
-  };
+  const navigate = useNavigate();
 
   const handleDelete = (id: string) => {
     setOrderBumps(prev => prev.filter(ob => ob.id !== id));
@@ -120,6 +77,19 @@ const OrderBumpsPage = () => {
     ));
     
     toast.success(`Order Bump ${isActive ? 'ativado' : 'desativado'} com sucesso!`);
+  };
+
+  const handleDuplicate = (orderBump: OrderBump) => {
+    const newOrderBump: OrderBump = {
+      ...orderBump,
+      id: `ob_${Date.now()}`,
+      name: `${orderBump.name} (Cópia)`,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    
+    setOrderBumps(prev => [...prev, newOrderBump]);
+    toast.success("Order Bump duplicado com sucesso!");
   };
 
   // Helper to get product names for display
@@ -141,7 +111,7 @@ const OrderBumpsPage = () => {
             Aumente o valor médio do pedido com ofertas no checkout.
           </p>
         </div>
-        <Button onClick={() => setShowCreateDialog(true)}>
+        <Button onClick={() => navigate("/marketing/order-bumps/novo")}>
           <Plus className="mr-2 h-4 w-4" />
           Novo Order Bump
         </Button>
@@ -202,7 +172,7 @@ const OrderBumpsPage = () => {
                   <Button 
                     variant="outline" 
                     size="sm"
-                    onClick={() => setEditingOrderBump(orderBump)}
+                    onClick={() => navigate(`/marketing/order-bumps/${orderBump.id}/editar`)}
                   >
                     Editar
                   </Button>
@@ -222,7 +192,7 @@ const OrderBumpsPage = () => {
         {/* Placeholder for new card */}
         <Card 
           className="border-dashed flex items-center justify-center h-[270px] cursor-pointer hover:bg-accent/30 transition-all duration-200" 
-          onClick={() => setShowCreateDialog(true)}
+          onClick={() => navigate("/marketing/order-bumps/novo")}
         >
           <div className="text-center">
             <div className="mx-auto bg-primary/10 h-12 w-12 rounded-full flex items-center justify-center mb-3">
@@ -235,59 +205,6 @@ const OrderBumpsPage = () => {
           </div>
         </Card>
       </div>
-
-      {/* Create New OrderBump Dialog */}
-      <Dialog 
-        open={showCreateDialog} 
-        onOpenChange={(open) => {
-          setShowCreateDialog(open);
-          if (!open) setDuplicatingOrderBump(null);
-        }}
-      >
-        <DialogContent 
-          className="w-[90vw] max-w-[960px] p-0 gap-0 rounded-xl shadow-lg animate-in fade-in-0 zoom-in-95 duration-200"
-        >
-          <div className="p-8 md:p-10 overflow-y-auto max-h-[85vh]">
-            <OrderBumpForm
-              products={mockProducts}
-              initialData={duplicatingOrderBump || undefined}
-              onSubmit={handleCreate}
-              onCancel={() => {
-                setShowCreateDialog(false);
-                setDuplicatingOrderBump(null);
-              }}
-            />
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Edit OrderBump Dialog */}
-      <Dialog 
-        open={!!editingOrderBump} 
-        onOpenChange={(open) => {
-          if (!open) setEditingOrderBump(null);
-        }}
-      >
-        <DialogContent 
-          className="w-[90vw] max-w-[960px] p-0 gap-0 rounded-xl shadow-lg animate-in fade-in-0 zoom-in-95 duration-200"
-        >
-          <div className="p-8 md:p-10 overflow-y-auto max-h-[85vh]">
-            {editingOrderBump && (
-              <OrderBumpForm
-                products={mockProducts}
-                initialData={editingOrderBump}
-                onSubmit={handleUpdate}
-                onCancel={() => setEditingOrderBump(null)}
-                onDuplicate={() => {
-                  handleDuplicate(editingOrderBump);
-                  setEditingOrderBump(null);
-                  setShowCreateDialog(true);
-                }}
-              />
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
     </MarketingLayout>
   );
 };

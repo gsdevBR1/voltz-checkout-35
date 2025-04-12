@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -41,6 +42,7 @@ import CriarUpsellPage from "./pages/marketing/CriarUpsellPage";
 import UpsellDisplay from "./pages/marketing/UpsellDisplay";
 import OrderBumpsPage from "./pages/marketing/OrderBumpsPage";
 import EditarOrderBumpPage from "./pages/marketing/EditarOrderBumpPage";
+import CriarOrderBumpPage from "./pages/marketing/CriarOrderBumpPage";
 import CuponsPage from "./pages/marketing/CuponsPage";
 import CrossSellPage from "./pages/marketing/CrossSellPage";
 import PixelsPage from "./pages/marketing/PixelsPage";
@@ -97,8 +99,12 @@ const App: React.FC = () => {
                   <Route path="/marketing/upsell/:id/preview" element={<UpsellDisplay />} />
                   <Route path="/marketing/upsell/display/:id" element={<UpsellDisplay />} />
                   <Route path="/marketing/upsell/editar/:id" element={<CriarUpsellPage />} />
+                  
+                  {/* Updated Order Bumps Routes */}
                   <Route path="/marketing/order-bumps" element={<OrderBumpsPage />} />
-                  <Route path="/marketing/order-bumps/editar/:id" element={<EditarOrderBumpPage />} />
+                  <Route path="/marketing/order-bumps/novo" element={<CriarOrderBumpPage />} />
+                  <Route path="/marketing/order-bumps/:id/editar" element={<EditarOrderBumpPage />} />
+                  
                   <Route path="/marketing/cupons" element={<CuponsPage />} />
                   <Route path="/marketing/cross-sell" element={<CrossSellPage />} />
                   <Route path="/marketing/pixels" element={<PixelsPage />} />

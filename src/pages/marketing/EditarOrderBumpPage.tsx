@@ -1,12 +1,21 @@
+
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import MarketingLayout from '@/components/marketing/MarketingLayout';
-import OrderBumpForm from '@/components/marketing/OrderBumpForm';
-import { OrderBump, OrderBumpFormData } from '@/types/orderBump';
+import OrderBumpPageForm from '@/components/marketing/OrderBumpPageForm';
+import { OrderBump } from '@/types/orderBump';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import { Product, ProductType, ProductStatus } from '@/types/product';
+import { 
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 
 const mockProducts: Product[] = [
   {
@@ -86,7 +95,7 @@ const EditarOrderBumpPage = () => {
     fetchOrderBump();
   }, [id, navigate]);
 
-  const handleSubmit = (data: OrderBumpFormData) => {
+  const handleSubmit = (data: any) => {
     try {
       console.log("Updated order bump data:", data);
       toast.success("Order Bump atualizado com sucesso");
@@ -160,14 +169,30 @@ const EditarOrderBumpPage = () => {
         </Button>
       }
     >
-      <div className="bg-background rounded-xl shadow-sm p-8 md:p-10 max-w-[960px] mx-auto">
-        <OrderBumpForm
+      <Breadcrumb className="mb-6">
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink href="/marketing/order-bumps">Marketing</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbLink href="/marketing/order-bumps">Order Bumps</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>Editar Order Bump</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+
+      <div className="bg-background rounded-xl p-4 sm:p-6 md:p-8 max-w-[1080px] mx-auto">
+        <OrderBumpPageForm
           initialData={orderBump}
           products={mockProducts}
           onSubmit={handleSubmit}
           onCancel={() => navigate('/marketing/order-bumps')}
           onDuplicate={() => {
-            navigate('/marketing/order-bumps/criar', { 
+            navigate('/marketing/order-bumps/novo', { 
               state: { duplicateFrom: orderBump }
             });
           }}
