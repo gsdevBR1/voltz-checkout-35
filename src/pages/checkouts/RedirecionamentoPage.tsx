@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import CheckoutLayout from '@/components/checkout/CheckoutLayout';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -53,11 +52,10 @@ const RedirecionamentoPage = () => {
   };
 
   return (
-    <CheckoutLayout>
-      <div>
-        <h1>Redirecionamento</h1>
-        <p>Configure as URLs de redirecionamento após o pagamento e a exibição de upsells para cada método de pagamento.</p>
-      </div>
+    <CheckoutLayout 
+      title="Redirecionamento"
+      description="Configure as URLs de redirecionamento após o pagamento e a exibição de upsells para cada método de pagamento."
+    >
       <Card>
         <CardHeader>
           <CardTitle>Configurar Redirecionamentos e Upsells</CardTitle>
