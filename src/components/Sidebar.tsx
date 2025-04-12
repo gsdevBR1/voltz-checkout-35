@@ -21,7 +21,12 @@ import {
   MessageSquare,
   Link as LinkIcon,
   ArrowRight,
-  Percent
+  Percent,
+  Megaphone,
+  MousePointer,
+  Tag,
+  RefreshCw,
+  BarChart
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { StoreSelector } from '@/components/StoreSelector';
@@ -138,6 +143,38 @@ export const AppSidebar: React.FC<SidebarProps> = ({ className }) => {
       title: 'Produtos',
       path: '/produtos',
       icon: Package,
+    },
+    {
+      title: 'Marketing',
+      path: '/marketing',
+      icon: Megaphone,
+      subItems: [
+        {
+          title: 'Upsell One Click',
+          path: '/marketing/upsell',
+          icon: MousePointer,
+        },
+        {
+          title: 'Order Bumps',
+          path: '/marketing/order-bumps',
+          icon: ShoppingBag,
+        },
+        {
+          title: 'Cupons de Desconto',
+          path: '/marketing/cupons',
+          icon: Tag,
+        },
+        {
+          title: 'Cross-Sell',
+          path: '/marketing/cross-sell',
+          icon: RefreshCw,
+        },
+        {
+          title: 'Pixels',
+          path: '/marketing/pixels',
+          icon: BarChart,
+        }
+      ]
     },
     {
       title: 'Checkouts',

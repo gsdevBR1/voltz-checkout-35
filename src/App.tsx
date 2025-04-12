@@ -36,6 +36,14 @@ import PersonalizarCheckoutPage from "./pages/checkouts/PersonalizarCheckoutPage
 import ProvasSociaisPage from "./pages/checkouts/ProvasSociaisPage";
 import GatewaysPage from "./pages/checkouts/GatewaysPage";
 import RedirecionamentoPage from "./pages/checkouts/RedirecionamentoPage";
+
+// Marketing Section Pages
+import UpsellOnePage from "./pages/marketing/UpsellOnePage";
+import OrderBumpsPage from "./pages/marketing/OrderBumpsPage";
+import CuponsPage from "./pages/marketing/CuponsPage";
+import CrossSellPage from "./pages/marketing/CrossSellPage";
+import PixelsPage from "./pages/marketing/PixelsPage";
+
 import { ActivationStepsProvider } from "./contexts/ActivationStepsContextWithStores";
 import { StoreProvider } from "./contexts/StoreContext";
 import { ThemeProvider } from "./providers/ThemeProvider";
@@ -82,6 +90,14 @@ const App: React.FC = () => {
                   <Route path="/produtos/editar/:id" element={<EditarProduto />} />
                   <Route path="/produtos/:id/editar" element={<EditarProdutoFisico />} />
                   <Route path="/produtos/:id/ver" element={<VerProduto />} />
+                  
+                  {/* Marketing Section Routes */}
+                  <Route path="/marketing/upsell" element={<UpsellOnePage />} />
+                  <Route path="/marketing/order-bumps" element={<OrderBumpsPage />} />
+                  <Route path="/marketing/cupons" element={<CuponsPage />} />
+                  <Route path="/marketing/cross-sell" element={<CrossSellPage />} />
+                  <Route path="/marketing/pixels" element={<PixelsPage />} />
+                  
                   <Route path="/checkouts/descontos" element={<DescontosPage />} />
                   <Route path="/checkouts/personalizar" element={<PersonalizarCheckoutPage />} />
                   <Route path="/checkouts/provas-sociais" element={<ProvasSociaisPage />} />
