@@ -44,6 +44,7 @@ import OrderBumpsPage from "./pages/marketing/OrderBumpsPage";
 import EditarOrderBumpPage from "./pages/marketing/EditarOrderBumpPage";
 import CriarOrderBumpPage from "./pages/marketing/CriarOrderBumpPage";
 import CuponsPage from "./pages/marketing/CuponsPage";
+import CriarCupomPage from "./pages/marketing/CriarCupomPage";
 import CrossSellPage from "./pages/marketing/CrossSellPage";
 import PixelsPage from "./pages/marketing/PixelsPage";
 
@@ -106,6 +107,7 @@ const App: React.FC = () => {
                   <Route path="/marketing/order-bumps/:id/editar" element={<EditarOrderBumpPage />} />
                   
                   <Route path="/marketing/cupons" element={<CuponsPage />} />
+                  <Route path="/marketing/cupons/novo" element={<CriarCupomPage />} />
                   <Route path="/marketing/cross-sell" element={<CrossSellPage />} />
                   <Route path="/marketing/pixels" element={<PixelsPage />} />
                   

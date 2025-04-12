@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Plus, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -23,7 +24,7 @@ const CuponsPage = () => {
             Incentive suas vendas com promoções e descontos.
           </p>
         </div>
-        <Button>
+        <Button as={Link} to="/marketing/cupons/novo">
           <Plus className="mr-2 h-4 w-4" />
           Novo Cupom
         </Button>
