@@ -88,7 +88,7 @@ export const DomainConfigDetails: React.FC<DomainConfigDetailsProps> = ({
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        <Alert variant="outline" className="bg-muted">
+        <Alert className="bg-muted">
           <InfoIcon className="h-4 w-4 mr-2" />
           <AlertDescription>
             Configure estes registros no painel de DNS do seu provedor de domínio. A propagação pode levar até 48 horas.

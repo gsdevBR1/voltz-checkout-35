@@ -72,7 +72,7 @@ const DominiosPage: React.FC = () => {
     if (!selectedDomain) return;
     
     // Update the selected domain with verification status
-    const updatedDomain = {
+    const updatedDomain: Domain = {
       ...selectedDomain,
       dnsVerified: true,
       sslStatus: 'active',
@@ -92,7 +92,7 @@ const DominiosPage: React.FC = () => {
     if (!selectedDomain) return;
     
     // Update the selected domain with the new subdomain type
-    const updatedDomain = {
+    const updatedDomain: Domain = {
       ...selectedDomain,
       type
     };
