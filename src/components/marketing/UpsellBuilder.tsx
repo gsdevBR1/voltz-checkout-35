@@ -18,7 +18,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   DropdownMenu,
@@ -85,9 +84,10 @@ interface UpsellBuilderProps {
   initialData?: any;
   onSave?: (data: any) => void;
   productId?: string;
+  mockUpsells?: Array<{id: string, name: string, isActive: boolean}>;
 }
 
-const UpsellBuilder: React.FC<UpsellBuilderProps> = ({ initialData, onSave, productId }) => {
+const UpsellBuilder: React.FC<UpsellBuilderProps> = ({ initialData, onSave, productId, mockUpsells = [] }) => {
   const navigate = useNavigate();
   const [saving, setSaving] = useState(false);
   const [fieldsEdited, setFieldsEdited] = useState({
@@ -97,12 +97,6 @@ const UpsellBuilder: React.FC<UpsellBuilderProps> = ({ initialData, onSave, prod
   });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [pendingProductId, setPendingProductId] = useState<string | null>(null);
-  
-  const mockUpsells = [
-    { id: 'ups_1', name: 'Upsell Premium: Curso Avançado' },
-    { id: 'ups_2', name: 'Upsell Básico: E-book Complementar' },
-    { id: 'ups_3', name: 'Oferta Especial: Mentoria' },
-  ];
   
   const [upsellData, setUpsellData] = useState(initialData || {
     id: 'new-' + Date.now(),
@@ -1007,9 +1001,9 @@ const UpsellBuilder: React.FC<UpsellBuilderProps> = ({ initialData, onSave, prod
                             <SelectItem 
                               key={upsell.id} 
                               value={upsell.id}
-                              disabled={upsell.id === upsellData.id}
+                              disabled={upsell.id === upsellData.id || !upsell.isActive}
                             >
-                              {upsell.name}
+                              {upsell.name} {!upsell.isActive && "(Inativo)"}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -1027,6 +1021,15 @@ const UpsellBuilder: React.FC<UpsellBuilderProps> = ({ initialData, onSave, prod
                             </p>
                           </div>
                         </div>
+                      )}
+                      
+                      {mockUpsells.some(u => !u.isActive) && (
+                        <Alert variant="default" className="mt-2 bg-amber-50 border-amber-200">
+                          <AlertCircle className="h-4 w-4 text-amber-600" />
+                          <AlertDescription className="text-amber-700">
+                            Upsells inativos aparecem na lista mas não podem ser selecionados.
+                          </AlertDescription>
+                        </Alert>
                       )}
                     </div>
                   )}
