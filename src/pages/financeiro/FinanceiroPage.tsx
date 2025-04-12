@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -32,17 +32,9 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
+import CreditCardModal from "@/components/financeiro/CreditCardModal";
 
 // Mock data - in a real application, this would come from an API
 const financialData = {
@@ -74,18 +66,9 @@ const financialData = {
 };
 
 const FinanceiroPage: React.FC = () => {
-  const [isCardDialogOpen, setIsCardDialogOpen] = React.useState(false);
-  const [showLimitWarning, setShowLimitWarning] = React.useState(financialData.cycle.usagePercentage > 80);
+  const [isCardModalOpen, setIsCardModalOpen] = useState(false);
+  const [showLimitWarning, setShowLimitWarning] = useState(financialData.cycle.usagePercentage > 80);
   
-  const handleUpdateCard = () => {
-    // In a real app, this would handle the card update process
-    toast({
-      title: "Cartão atualizado",
-      description: "Seu método de pagamento foi atualizado com sucesso.",
-    });
-    setIsCardDialogOpen(false);
-  };
-
   const handleManualCharge = () => {
     // In a real app, this would trigger a manual charge
     toast({
@@ -193,14 +176,13 @@ const FinanceiroPage: React.FC = () => {
                 </div>
                 <Progress 
                   value={financialData.cycle.usagePercentage} 
-                  indicatorClassName={
+                  className={
                     financialData.cycle.usagePercentage > 80 
-                      ? "bg-amber-500" 
+                      ? "bg-amber-100" 
                       : financialData.cycle.usagePercentage > 95 
-                        ? "bg-red-500" 
-                        : "bg-green-500"
+                        ? "bg-red-100" 
+                        : "bg-slate-100"
                   }
-                  className="h-2"
                 />
               </div>
               
@@ -246,33 +228,9 @@ const FinanceiroPage: React.FC = () => {
                     )}
                   </div>
                 </div>
-                <Dialog open={isCardDialogOpen} onOpenChange={setIsCardDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button variant="outline" size="sm">
-                      {financialData.paymentMethod ? "Alterar cartão" : "Adicionar cartão"}
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Atualizar método de pagamento</DialogTitle>
-                      <DialogDescription>
-                        Adicione ou atualize os dados do seu cartão de crédito.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="py-4">
-                      {/* In a real app, this would be a form for card details */}
-                      <p className="text-center text-muted-foreground py-6">
-                        Formulário para informações de cartão estaria aqui em uma aplicação real.
-                      </p>
-                    </div>
-                    <DialogFooter>
-                      <Button variant="outline" onClick={() => setIsCardDialogOpen(false)}>
-                        Cancelar
-                      </Button>
-                      <Button onClick={handleUpdateCard}>Salvar</Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
+                <Button variant="outline" size="sm" onClick={() => setIsCardModalOpen(true)}>
+                  {financialData.paymentMethod ? "Alterar cartão" : "Adicionar cartão"}
+                </Button>
               </div>
 
               <div className="space-y-2 pt-4">
@@ -330,6 +288,16 @@ const FinanceiroPage: React.FC = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Credit Card Modal */}
+      <CreditCardModal 
+        isOpen={isCardModalOpen}
+        onClose={() => setIsCardModalOpen(false)}
+        existingCard={financialData.paymentMethod ? {
+          last4: financialData.paymentMethod.last4,
+          brand: financialData.paymentMethod.brand
+        } : null}
+      />
     </DashboardLayout>
   );
 };
