@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import CheckoutLayout from '@/components/checkout/CheckoutLayout';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -45,8 +46,7 @@ const RedirecionamentoPage = () => {
   
   const handleSave = () => {
     // Here you would save the URLs to your backend
-    toast({
-      title: "Configurações de redirecionamento salvas",
+    toast.success("Configurações de redirecionamento salvas", {
       description: "As configurações de redirecionamento e upsell foram atualizadas com sucesso.",
     });
   };
