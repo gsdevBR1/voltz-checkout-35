@@ -23,28 +23,28 @@ const PixelsPage = () => {
       name: "Google Ads",
       description: "Integração nativa com pixel do Google Ads para rastreamento de vendas.",
       isConfigured: true,
-      icon: "/lovable-uploads/3aa07f77-7311-4155-8e6c-39abb8dca3df.png"
+      icon: "https://tse2.mm.bing.net/th?id=OIP.Tqx7gOOsvJhvnfknSNwbPQHaFj&w=355&h=355&c=7"
     },
     {
       id: "ga4",
       name: "Google Analytics 4",
       description: "Monitoramento completo do desempenho da loja.",
       isConfigured: false,
-      icon: "/lovable-uploads/3aa07f77-7311-4155-8e6c-39abb8dca3df.png"
+      icon: "https://tse3.mm.bing.net/th?id=OIP.jJQ5ZPfoFvRTyvQHVikEmQHaD3&w=247&h=247&c=7"
     },
     {
       id: "gtm",
       name: "Google Tag Manager",
       description: "Gerenciamento de tags para atualização dinâmica.",
       isConfigured: true,
-      icon: "/lovable-uploads/3aa07f77-7311-4155-8e6c-39abb8dca3df.png"
+      icon: "https://tse4.mm.bing.net/th/id/OIP.zNsN36KtL902OLZcR4eg2wHaHk?w=474&h=474&c=7"
     },
     {
       id: "kwai",
       name: "Kwai",
       description: "Rastreamento de vendas através do pixel do Kwai.",
       isConfigured: false,
-      icon: "/lovable-uploads/3aa07f77-7311-4155-8e6c-39abb8dca3df.png"
+      icon: "https://tse2.mm.bing.net/th?id=OIP.XPJeIyUqGd0pL-u5GFL-qAHaHa&w=474&h=474&c=7"
     },
     {
       id: "meta",
