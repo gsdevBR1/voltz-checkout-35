@@ -97,315 +97,321 @@ const RecuperacaoVendas: React.FC = () => {
   };
 
   return (
-    <DashboardLayout
-      title="Recuperação de Vendas"
-      description="Configure estratégias automáticas para recuperar vendas perdidas. Envie mensagens personalizadas para clientes que abandonaram o checkout, via SMS, Email e, em breve, WhatsApp."
-    >
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="email" className="flex items-center gap-2">
-                <Mail className="h-4 w-4" /> Email
-              </TabsTrigger>
-              <TabsTrigger value="sms" className="flex items-center gap-2">
-                <MessageSquare className="h-4 w-4" /> SMS
-              </TabsTrigger>
-              <TabsTrigger value="whatsapp" className="flex items-center gap-2" disabled>
-                <MessageCircle className="h-4 w-4" /> WhatsApp
-                <Badge variant="outline" className="ml-1 py-0 h-5">Em breve</Badge>
-              </TabsTrigger>
-            </TabsList>
+    <DashboardLayout>
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Recuperação de Vendas</h1>
+          <p className="text-muted-foreground mt-2">
+            Configure estratégias automáticas para recuperar vendas perdidas. Envie mensagens personalizadas para clientes que abandonaram o checkout, via SMS, Email e, em breve, WhatsApp.
+          </p>
+        </div>
+        
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="email" className="flex items-center gap-2">
+                  <Mail className="h-4 w-4" /> Email
+                </TabsTrigger>
+                <TabsTrigger value="sms" className="flex items-center gap-2">
+                  <MessageSquare className="h-4 w-4" /> SMS
+                </TabsTrigger>
+                <TabsTrigger value="whatsapp" className="flex items-center gap-2" disabled>
+                  <MessageCircle className="h-4 w-4" /> WhatsApp
+                  <Badge variant="outline" className="ml-1 py-0 h-5">Em breve</Badge>
+                </TabsTrigger>
+              </TabsList>
 
-            {/* Email Tab */}
-            <TabsContent value="email">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-between">
-                    <span>Configuração de Email</span>
+              {/* Email Tab */}
+              <TabsContent value="email">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center justify-between">
+                      <span>Configuração de Email</span>
+                      <FormField
+                        control={form.control}
+                        name="email.enabled"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center justify-between rounded-lg space-y-0">
+                            <FormControl>
+                              <div className="flex items-center space-x-2">
+                                <Switch
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                />
+                                <FormLabel className="text-sm">
+                                  {field.value ? "Ativado" : "Desativado"}
+                                </FormLabel>
+                              </div>
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                    </CardTitle>
+                    <CardDescription>
+                      Configure o envio automático de emails para recuperar carrinhos abandonados.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
                     <FormField
                       control={form.control}
-                      name="email.enabled"
+                      name="email.delayMinutes"
                       render={({ field }) => (
-                        <FormItem className="flex flex-row items-center justify-between rounded-lg space-y-0">
-                          <FormControl>
-                            <div className="flex items-center space-x-2">
-                              <Switch
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
+                        <FormItem>
+                          <FormLabel>Tempo para envio (minutos)</FormLabel>
+                          <div className="flex items-center">
+                            <Clock className="h-4 w-4 mr-2 text-muted-foreground" />
+                            <FormControl>
+                              <Input
+                                type="number"
+                                {...field}
+                                onChange={(e) => field.onChange(Number(e.target.value))}
+                                disabled={!form.watch("email.enabled")}
                               />
-                              <FormLabel className="text-sm">
-                                {field.value ? "Ativado" : "Desativado"}
-                              </FormLabel>
-                            </div>
-                          </FormControl>
+                            </FormControl>
+                          </div>
+                          <FormDescription>
+                            Tempo de espera após o abandono do carrinho para enviar o email.
+                          </FormDescription>
+                          <FormMessage />
                         </FormItem>
                       )}
                     />
-                  </CardTitle>
-                  <CardDescription>
-                    Configure o envio automático de emails para recuperar carrinhos abandonados.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <FormField
-                    control={form.control}
-                    name="email.delayMinutes"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Tempo para envio (minutos)</FormLabel>
-                        <div className="flex items-center">
-                          <Clock className="h-4 w-4 mr-2 text-muted-foreground" />
+
+                    <FormField
+                      control={form.control}
+                      name="email.fromEmail"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Email do remetente</FormLabel>
                           <FormControl>
                             <Input
-                              type="number"
+                              placeholder="suporte@sualoja.com"
                               {...field}
-                              onChange={(e) => field.onChange(Number(e.target.value))}
                               disabled={!form.watch("email.enabled")}
                             />
                           </FormControl>
-                        </div>
-                        <FormDescription>
-                          Tempo de espera após o abandono do carrinho para enviar o email.
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="email.fromEmail"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email do remetente</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="suporte@sualoja.com"
-                            {...field}
-                            disabled={!form.watch("email.enabled")}
-                          />
-                        </FormControl>
-                        <FormDescription>
-                          Email que aparecerá como remetente da mensagem.
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="email.subject"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Assunto</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="Esqueceu algo no carrinho?"
-                            {...field}
-                            disabled={!form.watch("email.enabled")}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="email.body"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Corpo do Email</FormLabel>
-                        <FormControl>
-                          <Textarea
-                            placeholder="Conteúdo do email..."
-                            className="min-h-[150px]"
-                            {...field}
-                            disabled={!form.watch("email.enabled")}
-                          />
-                        </FormControl>
-                        <FormDescription>
-                          Use {"{nome}"}, {"{produto}"}, {"{link}"} como variáveis que serão substituídas automaticamente.
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </CardContent>
-                <CardFooter className="flex justify-between border-t pt-5">
-                  <div className="flex items-center text-xs text-muted-foreground">
-                    <AlertCircle className="h-4 w-4 mr-1" />
-                    Emails são enviados através da plataforma Voltz
-                  </div>
-                  <Button 
-                    variant="outline" 
-                    type="button"
-                    onClick={handleSimulateEmail}
-                    disabled={!form.watch("email.enabled")}
-                  >
-                    <Send className="h-4 w-4 mr-2" />
-                    Enviar teste
-                  </Button>
-                </CardFooter>
-              </Card>
-            </TabsContent>
-
-            {/* SMS Tab */}
-            <TabsContent value="sms">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-between">
-                    <span>Configuração de SMS</span>
-                    <FormField
-                      control={form.control}
-                      name="sms.enabled"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-center justify-between rounded-lg space-y-0">
-                          <FormControl>
-                            <div className="flex items-center space-x-2">
-                              <Switch
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
-                              <FormLabel className="text-sm">
-                                {field.value ? "Ativado" : "Desativado"}
-                              </FormLabel>
-                            </div>
-                          </FormControl>
+                          <FormDescription>
+                            Email que aparecerá como remetente da mensagem.
+                          </FormDescription>
+                          <FormMessage />
                         </FormItem>
                       )}
                     />
-                  </CardTitle>
-                  <CardDescription>
-                    Configure o envio automático de SMS para recuperar carrinhos abandonados.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <FormField
-                    control={form.control}
-                    name="sms.delayMinutes"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Tempo para envio (minutos)</FormLabel>
-                        <div className="flex items-center">
-                          <Clock className="h-4 w-4 mr-2 text-muted-foreground" />
+
+                    <FormField
+                      control={form.control}
+                      name="email.subject"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Assunto</FormLabel>
                           <FormControl>
                             <Input
-                              type="number"
+                              placeholder="Esqueceu algo no carrinho?"
                               {...field}
-                              onChange={(e) => field.onChange(Number(e.target.value))}
-                              disabled={!form.watch("sms.enabled")}
+                              disabled={!form.watch("email.enabled")}
                             />
                           </FormControl>
-                        </div>
-                        <FormDescription>
-                          Tempo de espera após o abandono do carrinho para enviar o SMS.
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                  <FormField
-                    control={form.control}
-                    name="sms.message"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Mensagem</FormLabel>
-                        <FormControl>
-                          <Textarea
-                            placeholder="Olá {nome}, você deixou itens no carrinho. Finalize sua compra: {link}"
-                            {...field}
-                            disabled={!form.watch("sms.enabled")}
-                            className="resize-none"
-                          />
-                        </FormControl>
-                        <FormDescription>
-                          Use {"{nome}"} e {"{link}"} como variáveis. Máximo de 160 caracteres.
-                          <div className="text-right mt-1">
-                            <span className={`text-xs ${field.value.length > 160 ? "text-destructive" : "text-muted-foreground"}`}>
-                              {field.value.length}/160
-                            </span>
+                    <FormField
+                      control={form.control}
+                      name="email.body"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Corpo do Email</FormLabel>
+                          <FormControl>
+                            <Textarea
+                              placeholder="Conteúdo do email..."
+                              className="min-h-[150px]"
+                              {...field}
+                              disabled={!form.watch("email.enabled")}
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            Use {"{nome}"}, {"{produto}"}, {"{link}"} como variáveis que serão substituídas automaticamente.
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </CardContent>
+                  <CardFooter className="flex justify-between border-t pt-5">
+                    <div className="flex items-center text-xs text-muted-foreground">
+                      <AlertCircle className="h-4 w-4 mr-1" />
+                      Emails são enviados através da plataforma Voltz
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      type="button"
+                      onClick={handleSimulateEmail}
+                      disabled={!form.watch("email.enabled")}
+                    >
+                      <Send className="h-4 w-4 mr-2" />
+                      Enviar teste
+                    </Button>
+                  </CardFooter>
+                </Card>
+              </TabsContent>
+
+              {/* SMS Tab */}
+              <TabsContent value="sms">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center justify-between">
+                      <span>Configuração de SMS</span>
+                      <FormField
+                        control={form.control}
+                        name="sms.enabled"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center justify-between rounded-lg space-y-0">
+                            <FormControl>
+                              <div className="flex items-center space-x-2">
+                                <Switch
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                />
+                                <FormLabel className="text-sm">
+                                  {field.value ? "Ativado" : "Desativado"}
+                                </FormLabel>
+                              </div>
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                    </CardTitle>
+                    <CardDescription>
+                      Configure o envio automático de SMS para recuperar carrinhos abandonados.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <FormField
+                      control={form.control}
+                      name="sms.delayMinutes"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Tempo para envio (minutos)</FormLabel>
+                          <div className="flex items-center">
+                            <Clock className="h-4 w-4 mr-2 text-muted-foreground" />
+                            <FormControl>
+                              <Input
+                                type="number"
+                                {...field}
+                                onChange={(e) => field.onChange(Number(e.target.value))}
+                                disabled={!form.watch("sms.enabled")}
+                              />
+                            </FormControl>
                           </div>
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                          <FormDescription>
+                            Tempo de espera após o abandono do carrinho para enviar o SMS.
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                  <FormField
-                    control={form.control}
-                    name="sms.provider"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Provedor SMS</FormLabel>
-                        <FormControl>
-                          <Input
-                            value={field.value}
-                            disabled={true}
-                          />
-                        </FormControl>
-                        <FormDescription>
-                          O Gateway nativo VOLTZ é utilizado para envio de SMS.
-                        </FormDescription>
-                      </FormItem>
-                    )}
-                  />
-                </CardContent>
-                <CardFooter className="flex justify-between border-t pt-5">
-                  <div className="flex items-center text-xs text-muted-foreground">
-                    <AlertCircle className="h-4 w-4 mr-1" />
-                    Cobrança por SMS enviado
-                  </div>
-                  <Button 
-                    variant="outline" 
-                    type="button" 
-                    onClick={handleSimulateSMS}
-                    disabled={!form.watch("sms.enabled")}
-                  >
-                    <Send className="h-4 w-4 mr-2" />
-                    Enviar teste
-                  </Button>
-                </CardFooter>
-              </Card>
-            </TabsContent>
+                    <FormField
+                      control={form.control}
+                      name="sms.message"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Mensagem</FormLabel>
+                          <FormControl>
+                            <Textarea
+                              placeholder="Olá {nome}, você deixou itens no carrinho. Finalize sua compra: {link}"
+                              {...field}
+                              disabled={!form.watch("sms.enabled")}
+                              className="resize-none"
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            Use {"{nome}"} e {"{link}"} como variáveis. Máximo de 160 caracteres.
+                            <div className="text-right mt-1">
+                              <span className={`text-xs ${field.value.length > 160 ? "text-destructive" : "text-muted-foreground"}`}>
+                                {field.value.length}/160
+                              </span>
+                            </div>
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-            {/* WhatsApp Tab */}
-            <TabsContent value="whatsapp">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-between">
-                    <span>Configuração de WhatsApp</span>
-                    <Badge className="bg-pending text-pending-foreground">Em breve</Badge>
-                  </CardTitle>
-                  <CardDescription>
-                    Você poderá ativar automações por WhatsApp nos próximos dias.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="min-h-[300px] flex flex-col items-center justify-center text-center p-10">
-                  <MessageCircle className="h-16 w-16 text-muted-foreground mb-4" />
-                  <h3 className="text-lg font-medium mb-2">Recurso em desenvolvimento</h3>
-                  <p className="text-muted-foreground max-w-md">
-                    Estamos trabalhando para disponibilizar a recuperação de carrinhos abandonados via WhatsApp. 
-                    Em breve você poderá configurar mensagens automáticas para este canal.
-                  </p>
-                </CardContent>
-                <CardFooter className="justify-center border-t pt-5">
-                  <Button variant="outline" disabled>
-                    Entrar na lista de espera
-                  </Button>
-                </CardFooter>
-              </Card>
-            </TabsContent>
-          </Tabs>
+                    <FormField
+                      control={form.control}
+                      name="sms.provider"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Provedor SMS</FormLabel>
+                          <FormControl>
+                            <Input
+                              value={field.value}
+                              disabled={true}
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            O Gateway nativo VOLTZ é utilizado para envio de SMS.
+                          </FormDescription>
+                        </FormItem>
+                      )}
+                    />
+                  </CardContent>
+                  <CardFooter className="flex justify-between border-t pt-5">
+                    <div className="flex items-center text-xs text-muted-foreground">
+                      <AlertCircle className="h-4 w-4 mr-1" />
+                      Cobrança por SMS enviado
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      type="button" 
+                      onClick={handleSimulateSMS}
+                      disabled={!form.watch("sms.enabled")}
+                    >
+                      <Send className="h-4 w-4 mr-2" />
+                      Enviar teste
+                    </Button>
+                  </CardFooter>
+                </Card>
+              </TabsContent>
 
-          <div className="flex justify-end">
-            <Button type="submit">Salvar configurações</Button>
-          </div>
-        </form>
-      </Form>
+              {/* WhatsApp Tab */}
+              <TabsContent value="whatsapp">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center justify-between">
+                      <span>Configuração de WhatsApp</span>
+                      <Badge className="bg-pending text-pending-foreground">Em breve</Badge>
+                    </CardTitle>
+                    <CardDescription>
+                      Você poderá ativar automações por WhatsApp nos próximos dias.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="min-h-[300px] flex flex-col items-center justify-center text-center p-10">
+                    <MessageCircle className="h-16 w-16 text-muted-foreground mb-4" />
+                    <h3 className="text-lg font-medium mb-2">Recurso em desenvolvimento</h3>
+                    <p className="text-muted-foreground max-w-md">
+                      Estamos trabalhando para disponibilizar a recuperação de carrinhos abandonados via WhatsApp. 
+                      Em breve você poderá configurar mensagens automáticas para este canal.
+                    </p>
+                  </CardContent>
+                  <CardFooter className="justify-center border-t pt-5">
+                    <Button variant="outline" disabled>
+                      Entrar na lista de espera
+                    </Button>
+                  </CardFooter>
+                </Card>
+              </TabsContent>
+            </Tabs>
+
+            <div className="flex justify-end">
+              <Button type="submit">Salvar configurações</Button>
+            </div>
+          </form>
+        </Form>
+      </div>
     </DashboardLayout>
   );
 };
