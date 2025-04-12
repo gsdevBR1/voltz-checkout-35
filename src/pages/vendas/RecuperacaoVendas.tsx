@@ -11,19 +11,17 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { AlertCircle, Mail, MessageSquare, Send, Clock, MessageCircle } from "lucide-react";
+import { AlertCircle, Mail, MessageSquare, Send, MessageCircle } from "lucide-react";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { toast } from "@/hooks/use-toast";
-import { RecoverySettings } from "@/types/recovery";
+import { RecoverySettings, RecoveryTrigger } from "@/types/recovery";
 import RecoveryStats from "@/components/vendas/RecoveryStats";
+import RecoveryTriggersList from "@/components/vendas/RecoveryTriggersList";
 
 const initialSettings: RecoverySettings = {
   email: {
@@ -32,12 +30,14 @@ const initialSettings: RecoverySettings = {
     subject: "Esqueceu algo no carrinho?",
     body: "Olá {nome},\n\nNotamos que você deixou alguns itens no seu carrinho. Que tal finalizar sua compra agora?\n\nAcesse o link: {link}\n\nAtenciosamente,\nEquipe de Suporte",
     fromEmail: "",
+    triggers: [],
   },
   sms: {
     enabled: false,
     delayMinutes: 15,
     message: "Olá {nome}, você deixou itens no carrinho. Finalize sua compra: {link}",
     provider: "Gateway nativo VOLTZ",
+    triggers: [],
   },
   whatsapp: {
     enabled: false,
@@ -51,12 +51,14 @@ const formSchema = z.object({
     subject: z.string().min(1, "O assunto é obrigatório"),
     body: z.string().min(1, "O corpo do email é obrigatório"),
     fromEmail: z.string().email("Email inválido").or(z.string().length(0)),
+    triggers: z.array(z.any()),
   }),
   sms: z.object({
     enabled: z.boolean(),
     delayMinutes: z.number().min(1, "O tempo deve ser maior que 1 minuto").max(1440, "O tempo não pode exceder 24 horas"),
     message: z.string().max(160, "A mensagem não pode exceder 160 caracteres"),
     provider: z.string(),
+    triggers: z.array(z.any()),
   }),
   whatsapp: z.object({
     enabled: z.boolean(),
@@ -66,6 +68,7 @@ const formSchema = z.object({
 const RecuperacaoVendas: React.FC = () => {
   const [settings, setSettings] = useState<RecoverySettings>(initialSettings);
   const [activeTab, setActiveTab] = useState("configuracao");
+  const [channelTab, setChannelTab] = useState("email");
 
   const form = useForm<RecoverySettings>({
     resolver: zodResolver(formSchema),
@@ -97,6 +100,64 @@ const RecuperacaoVendas: React.FC = () => {
     });
   };
 
+  const handleSaveTrigger = (trigger: RecoveryTrigger) => {
+    // Create a copy of the current settings
+    const newSettings = { ...settings };
+    
+    // Check if this trigger already exists (editing scenario)
+    const triggerIndex = channelTab === 'email' 
+      ? newSettings.email.triggers.findIndex(t => t.id === trigger.id)
+      : newSettings.sms.triggers.findIndex(t => t.id === trigger.id);
+    
+    if (triggerIndex !== -1) {
+      // Update existing trigger
+      if (channelTab === 'email') {
+        newSettings.email.triggers[triggerIndex] = trigger;
+      } else {
+        newSettings.sms.triggers[triggerIndex] = trigger;
+      }
+    } else {
+      // Add new trigger
+      if (channelTab === 'email') {
+        newSettings.email.triggers.push(trigger);
+      } else {
+        newSettings.sms.triggers.push(trigger);
+      }
+    }
+    
+    // Update settings
+    setSettings(newSettings);
+    form.setValue(channelTab === 'email' ? 'email.triggers' : 'sms.triggers', 
+                 channelTab === 'email' ? newSettings.email.triggers : newSettings.sms.triggers);
+    
+    toast({
+      title: "Automação salva",
+      description: "A automação foi configurada com sucesso.",
+    });
+  };
+
+  const handleDeleteTrigger = (id: string) => {
+    // Create a copy of the current settings
+    const newSettings = { ...settings };
+    
+    // Filter out the trigger with the specified id
+    if (channelTab === 'email') {
+      newSettings.email.triggers = newSettings.email.triggers.filter(t => t.id !== id);
+      form.setValue('email.triggers', newSettings.email.triggers);
+    } else {
+      newSettings.sms.triggers = newSettings.sms.triggers.filter(t => t.id !== id);
+      form.setValue('sms.triggers', newSettings.sms.triggers);
+    }
+    
+    // Update settings
+    setSettings(newSettings);
+    
+    toast({
+      title: "Automação removida",
+      description: "A automação foi removida com sucesso.",
+    });
+  };
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -116,7 +177,7 @@ const RecuperacaoVendas: React.FC = () => {
           <TabsContent value="configuracao">
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                <Tabs value={activeTab === "configuracao" ? form.getValues().email.enabled ? "email" : "sms" : "estatisticas"} onValueChange={setActiveTab} className="w-full">
+                <Tabs value={channelTab} onValueChange={setChannelTab} className="w-full">
                   <TabsList className="grid w-full grid-cols-3">
                     <TabsTrigger value="email" className="flex items-center gap-2">
                       <Mail className="h-4 w-4" /> Email
@@ -160,32 +221,7 @@ const RecuperacaoVendas: React.FC = () => {
                           Configure o envio automático de emails para recuperar carrinhos abandonados.
                         </CardDescription>
                       </CardHeader>
-                      <CardContent className="space-y-4">
-                        <FormField
-                          control={form.control}
-                          name="email.delayMinutes"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Tempo para envio (minutos)</FormLabel>
-                              <div className="flex items-center">
-                                <Clock className="h-4 w-4 mr-2 text-muted-foreground" />
-                                <FormControl>
-                                  <Input
-                                    type="number"
-                                    {...field}
-                                    onChange={(e) => field.onChange(Number(e.target.value))}
-                                    disabled={!form.watch("email.enabled")}
-                                  />
-                                </FormControl>
-                              </div>
-                              <FormDescription>
-                                Tempo de espera após o abandono do carrinho para enviar o email.
-                              </FormDescription>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
+                      <CardContent className="space-y-6">
                         <FormField
                           control={form.control}
                           name="email.fromEmail"
@@ -193,8 +229,10 @@ const RecuperacaoVendas: React.FC = () => {
                             <FormItem>
                               <FormLabel>Email do remetente</FormLabel>
                               <FormControl>
-                                <Input
+                                <input
+                                  type="email"
                                   placeholder="suporte@sualoja.com"
+                                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                                   {...field}
                                   disabled={!form.watch("email.enabled")}
                                 />
@@ -207,44 +245,11 @@ const RecuperacaoVendas: React.FC = () => {
                           )}
                         />
 
-                        <FormField
-                          control={form.control}
-                          name="email.subject"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Assunto</FormLabel>
-                              <FormControl>
-                                <Input
-                                  placeholder="Esqueceu algo no carrinho?"
-                                  {...field}
-                                  disabled={!form.watch("email.enabled")}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        <FormField
-                          control={form.control}
-                          name="email.body"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Corpo do Email</FormLabel>
-                              <FormControl>
-                                <Textarea
-                                  placeholder="Conteúdo do email..."
-                                  className="min-h-[150px]"
-                                  {...field}
-                                  disabled={!form.watch("email.enabled")}
-                                />
-                              </FormControl>
-                              <FormDescription>
-                                Use {"{nome}"}, {"{produto}"}, {"{link}"} como variáveis que serão substituídas automaticamente.
-                              </FormDescription>
-                              <FormMessage />
-                            </FormItem>
-                          )}
+                        <RecoveryTriggersList 
+                          type="email"
+                          triggers={settings.email.triggers}
+                          onSave={handleSaveTrigger}
+                          onDelete={handleDeleteTrigger}
                         />
                       </CardContent>
                       <CardFooter className="flex justify-between border-t pt-5">
@@ -295,59 +300,7 @@ const RecuperacaoVendas: React.FC = () => {
                           Configure o envio automático de SMS para recuperar carrinhos abandonados.
                         </CardDescription>
                       </CardHeader>
-                      <CardContent className="space-y-4">
-                        <FormField
-                          control={form.control}
-                          name="sms.delayMinutes"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Tempo para envio (minutos)</FormLabel>
-                              <div className="flex items-center">
-                                <Clock className="h-4 w-4 mr-2 text-muted-foreground" />
-                                <FormControl>
-                                  <Input
-                                    type="number"
-                                    {...field}
-                                    onChange={(e) => field.onChange(Number(e.target.value))}
-                                    disabled={!form.watch("sms.enabled")}
-                                  />
-                                </FormControl>
-                              </div>
-                              <FormDescription>
-                                Tempo de espera após o abandono do carrinho para enviar o SMS.
-                              </FormDescription>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        <FormField
-                          control={form.control}
-                          name="sms.message"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Mensagem</FormLabel>
-                              <FormControl>
-                                <Textarea
-                                  placeholder="Olá {nome}, você deixou itens no carrinho. Finalize sua compra: {link}"
-                                  {...field}
-                                  disabled={!form.watch("sms.enabled")}
-                                  className="resize-none"
-                                />
-                              </FormControl>
-                              <FormDescription>
-                                Use {"{nome}"} e {"{link}"} como variáveis. Máximo de 160 caracteres.
-                                <div className="text-right mt-1">
-                                  <span className={`text-xs ${field.value.length > 160 ? "text-destructive" : "text-muted-foreground"}`}>
-                                    {field.value.length}/160
-                                  </span>
-                                </div>
-                              </FormDescription>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
+                      <CardContent className="space-y-6">
                         <FormField
                           control={form.control}
                           name="sms.provider"
@@ -355,9 +308,11 @@ const RecuperacaoVendas: React.FC = () => {
                             <FormItem>
                               <FormLabel>Provedor SMS</FormLabel>
                               <FormControl>
-                                <Input
+                                <input
+                                  type="text"
                                   value={field.value}
                                   disabled={true}
+                                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                                 />
                               </FormControl>
                               <FormDescription>
@@ -365,6 +320,13 @@ const RecuperacaoVendas: React.FC = () => {
                               </FormDescription>
                             </FormItem>
                           )}
+                        />
+
+                        <RecoveryTriggersList 
+                          type="sms"
+                          triggers={settings.sms.triggers}
+                          onSave={handleSaveTrigger}
+                          onDelete={handleDeleteTrigger}
                         />
                       </CardContent>
                       <CardFooter className="flex justify-between border-t pt-5">
