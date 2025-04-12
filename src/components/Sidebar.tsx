@@ -159,6 +159,10 @@ export const AppSidebar: React.FC<SidebarProps> = ({ className }) => {
           badge: {
             text: 'EXCLUSIVO',
             variant: 'success' as const,
+            extraBadge: {
+              text: '🔥 Novo',
+              variant: 'warning' as const
+            }
           }
         }
       ]
@@ -326,9 +330,19 @@ export const AppSidebar: React.FC<SidebarProps> = ({ className }) => {
                               <span className="flex items-center gap-2">
                                 {subItem.title}
                                 {subItem.badge && (
-                                  <Badge variant={subItem.badge.variant} className="text-[10px] px-1 py-0">
-                                    {subItem.badge.text}
-                                  </Badge>
+                                  <div className="flex items-center gap-1">
+                                    <Badge variant={subItem.badge.variant} className="text-[10px] px-1 py-0">
+                                      {subItem.badge.text}
+                                    </Badge>
+                                    {subItem.badge.extraBadge && (
+                                      <Badge 
+                                        variant={subItem.badge.extraBadge.variant} 
+                                        className="text-[10px] px-1 py-0"
+                                      >
+                                        {subItem.badge.extraBadge.text}
+                                      </Badge>
+                                    )}
+                                  </div>
                                 )}
                               </span>
                             </Link>
