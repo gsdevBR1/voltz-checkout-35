@@ -11,114 +11,99 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { AlertCircle, Mail, MessageSquare, Send, MessageCircle } from "lucide-react";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
+import { Separator } from "@/components/ui/separator";
+import { 
+  Mail, 
+  MessageSquare, 
+  MessageCircle, 
+  Plus, 
+  Clock, 
+  Edit, 
+  Trash2, 
+  CheckCircle, 
+  XCircle, 
+  Link as LinkIcon, 
+  Tag
+} from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import { RecoverySettings, RecoveryTrigger } from "@/types/recovery";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { RecoverySettings, RecoveryTrigger, TRIGGER_EVENTS, DELAY_OPTIONS } from "@/types/recovery";
 import RecoveryStats from "@/components/vendas/RecoveryStats";
-import RecoveryTriggersList from "@/components/vendas/RecoveryTriggersList";
+import RecoveryTriggerForm from "@/components/vendas/RecoveryTriggerForm";
 
 const initialSettings: RecoverySettings = {
   email: {
-    enabled: false,
+    enabled: true,
     delayMinutes: 30,
     subject: "Esqueceu algo no carrinho?",
     body: "Olá {nome},\n\nNotamos que você deixou alguns itens no seu carrinho. Que tal finalizar sua compra agora?\n\nAcesse o link: {link}\n\nAtenciosamente,\nEquipe de Suporte",
     fromEmail: "",
-    triggers: [],
+    triggers: [
+      {
+        id: "1",
+        event: "cart_abandoned",
+        delay: "15min",
+        active: true,
+        message: "Olá {nome}, notamos que você deixou alguns produtos no carrinho.\n\nClique aqui para finalizar sua compra com segurança: {link_checkout}\n\nSe tiver dúvidas, fale com a gente! 💬",
+        subject: "Esqueceu algo no carrinho?"
+      },
+      {
+        id: "2",
+        event: "boleto_pending",
+        delay: "30min",
+        active: true,
+        message: "{nome}, seu boleto está pronto para pagamento.\n\nValor: {valor}\nVencimento: {data_vencimento}\n\nReabra o link aqui: {link_checkout}",
+        subject: "Seu boleto está pronto para pagamento"
+      }
+    ],
   },
   sms: {
-    enabled: false,
+    enabled: true,
     delayMinutes: 15,
     message: "Olá {nome}, você deixou itens no carrinho. Finalize sua compra: {link}",
     provider: "Gateway nativo VOLTZ",
-    triggers: [],
+    triggers: [
+      {
+        id: "1",
+        event: "cart_abandoned",
+        delay: "10min",
+        active: true,
+        message: "Olá {nome}, você deixou itens no carrinho. Finalize sua compra: {link_checkout}"
+      }
+    ],
   },
   whatsapp: {
     enabled: false,
   },
 };
 
-const formSchema = z.object({
-  email: z.object({
-    enabled: z.boolean(),
-    delayMinutes: z.number().min(1, "O tempo deve ser maior que 1 minuto").max(1440, "O tempo não pode exceder 24 horas"),
-    subject: z.string().min(1, "O assunto é obrigatório"),
-    body: z.string().min(1, "O corpo do email é obrigatório"),
-    fromEmail: z.string().email("Email inválido").or(z.string().length(0)),
-    triggers: z.array(z.any()),
-  }),
-  sms: z.object({
-    enabled: z.boolean(),
-    delayMinutes: z.number().min(1, "O tempo deve ser maior que 1 minuto").max(1440, "O tempo não pode exceder 24 horas"),
-    message: z.string().max(160, "A mensagem não pode exceder 160 caracteres"),
-    provider: z.string(),
-    triggers: z.array(z.any()),
-  }),
-  whatsapp: z.object({
-    enabled: z.boolean(),
-  }),
-});
-
 const RecuperacaoVendas: React.FC = () => {
   const [settings, setSettings] = useState<RecoverySettings>(initialSettings);
-  const [activeTab, setActiveTab] = useState("configuracao");
-  const [channelTab, setChannelTab] = useState("email");
+  const [activeTab, setActiveTab] = useState("automacoes");
+  const [isAddingTrigger, setIsAddingTrigger] = useState(false);
+  const [editingTrigger, setEditingTrigger] = useState<{trigger: RecoveryTrigger, channel: 'email' | 'sms'} | null>(null);
+  const [triggerToDelete, setTriggerToDelete] = useState<{id: string, channel: 'email' | 'sms'} | null>(null);
 
-  const form = useForm<RecoverySettings>({
-    resolver: zodResolver(formSchema),
-    defaultValues: initialSettings,
-  });
-
-  const onSubmit = (values: RecoverySettings) => {
-    setSettings(values);
-    toast({
-      title: "Configurações salvas",
-      description: "As configurações de recuperação de vendas foram atualizadas com sucesso.",
-      variant: "default",
-    });
-  };
-
-  const handleSimulateEmail = () => {
-    toast({
-      title: "Email de teste enviado",
-      description: "Um email de teste foi enviado para sua caixa de entrada.",
-      variant: "default",
-    });
-  };
-
-  const handleSimulateSMS = () => {
-    toast({
-      title: "SMS de teste enviado",
-      description: "Um SMS de teste foi enviado para seu número de telefone.",
-      variant: "default",
-    });
-  };
-
-  const handleSaveTrigger = (trigger: RecoveryTrigger) => {
+  const handleSaveTrigger = (trigger: RecoveryTrigger, channel: 'email' | 'sms') => {
     // Create a copy of the current settings
     const newSettings = { ...settings };
     
     // Check if this trigger already exists (editing scenario)
-    const triggerIndex = channelTab === 'email' 
+    const triggerIndex = channel === 'email' 
       ? newSettings.email.triggers.findIndex(t => t.id === trigger.id)
       : newSettings.sms.triggers.findIndex(t => t.id === trigger.id);
     
     if (triggerIndex !== -1) {
       // Update existing trigger
-      if (channelTab === 'email') {
+      if (channel === 'email') {
         newSettings.email.triggers[triggerIndex] = trigger;
       } else {
         newSettings.sms.triggers[triggerIndex] = trigger;
       }
     } else {
       // Add new trigger
-      if (channelTab === 'email') {
+      if (channel === 'email') {
         newSettings.email.triggers.push(trigger);
       } else {
         newSettings.sms.triggers.push(trigger);
@@ -127,8 +112,10 @@ const RecuperacaoVendas: React.FC = () => {
     
     // Update settings
     setSettings(newSettings);
-    form.setValue(channelTab === 'email' ? 'email.triggers' : 'sms.triggers', 
-                 channelTab === 'email' ? newSettings.email.triggers : newSettings.sms.triggers);
+    
+    // Reset form state
+    setIsAddingTrigger(false);
+    setEditingTrigger(null);
     
     toast({
       title: "Automação salva",
@@ -136,21 +123,24 @@ const RecuperacaoVendas: React.FC = () => {
     });
   };
 
-  const handleDeleteTrigger = (id: string) => {
+  const handleDeleteTrigger = () => {
+    if (!triggerToDelete) return;
+    
     // Create a copy of the current settings
     const newSettings = { ...settings };
     
     // Filter out the trigger with the specified id
-    if (channelTab === 'email') {
-      newSettings.email.triggers = newSettings.email.triggers.filter(t => t.id !== id);
-      form.setValue('email.triggers', newSettings.email.triggers);
+    if (triggerToDelete.channel === 'email') {
+      newSettings.email.triggers = newSettings.email.triggers.filter(t => t.id !== triggerToDelete.id);
     } else {
-      newSettings.sms.triggers = newSettings.sms.triggers.filter(t => t.id !== id);
-      form.setValue('sms.triggers', newSettings.sms.triggers);
+      newSettings.sms.triggers = newSettings.sms.triggers.filter(t => t.id !== triggerToDelete.id);
     }
     
     // Update settings
     setSettings(newSettings);
+    
+    // Reset state
+    setTriggerToDelete(null);
     
     toast({
       title: "Automação removida",
@@ -158,229 +148,348 @@ const RecuperacaoVendas: React.FC = () => {
     });
   };
 
+  const handleEditTrigger = (trigger: RecoveryTrigger, channel: 'email' | 'sms') => {
+    setEditingTrigger({ trigger, channel });
+  };
+
+  const countVariablesInMessage = (message: string) => {
+    const variablePattern = /{[^}]+}/g;
+    const matches = message.match(variablePattern);
+    return matches ? matches.length : 0;
+  };
+
+  const countLinksInMessage = (message: string) => {
+    // Look for {link_checkout} or {link_rastreamento} variables
+    const linkPattern = /{link[^}]*}/g;
+    const matches = message.match(linkPattern);
+    return matches ? matches.length : 0;
+  };
+
+  // If we're editing or adding, show the form
+  if (isAddingTrigger || editingTrigger) {
+    return (
+      <DashboardLayout>
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight">
+                {isAddingTrigger ? "Nova Automação" : "Editar Automação"}
+              </h1>
+              <p className="text-muted-foreground mt-2">
+                Configure quando e como suas mensagens serão enviadas automaticamente.
+              </p>
+            </div>
+            <Button variant="outline" onClick={() => {
+              setIsAddingTrigger(false);
+              setEditingTrigger(null);
+            }}>
+              Voltar
+            </Button>
+          </div>
+          
+          <RecoveryTriggerForm
+            type={editingTrigger ? editingTrigger.channel : 'email'}
+            existingTrigger={editingTrigger ? editingTrigger.trigger : undefined}
+            onSave={(trigger) => handleSaveTrigger(
+              trigger, 
+              editingTrigger ? editingTrigger.channel : 'email'
+            )}
+            onCancel={() => {
+              setIsAddingTrigger(false);
+              setEditingTrigger(null);
+            }}
+          />
+        </div>
+      </DashboardLayout>
+    );
+  }
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Recuperação de Vendas</h1>
-          <p className="text-muted-foreground mt-2">
-            Configure estratégias automáticas para recuperar vendas perdidas. Envie mensagens personalizadas para clientes que abandonaram o checkout, via SMS, Email e, em breve, WhatsApp.
-          </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Recuperação de Vendas</h1>
+            <p className="text-muted-foreground mt-2">
+              Automatize a comunicação com seus clientes para recuperar vendas abandonadas ou notificar eventos importantes.
+            </p>
+          </div>
+          <Button onClick={() => setIsAddingTrigger(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Criar nova automação
+          </Button>
         </div>
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="configuracao">Configuração</TabsTrigger>
+            <TabsTrigger value="automacoes">Automações</TabsTrigger>
             <TabsTrigger value="estatisticas">Estatísticas</TabsTrigger>
           </TabsList>
           
-          <TabsContent value="configuracao">
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                <Tabs value={channelTab} onValueChange={setChannelTab} className="w-full">
-                  <TabsList className="grid w-full grid-cols-3">
-                    <TabsTrigger value="email" className="flex items-center gap-2">
-                      <Mail className="h-4 w-4" /> Email
-                    </TabsTrigger>
-                    <TabsTrigger value="sms" className="flex items-center gap-2">
-                      <MessageSquare className="h-4 w-4" /> SMS
-                    </TabsTrigger>
-                    <TabsTrigger value="whatsapp" className="flex items-center gap-2" disabled>
-                      <MessageCircle className="h-4 w-4" /> WhatsApp
-                      <Badge variant="outline" className="ml-1 py-0 h-5">Em breve</Badge>
-                    </TabsTrigger>
-                  </TabsList>
+          <TabsContent value="automacoes" className="space-y-6">
+            {/* Email Automations */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-semibold flex items-center">
+                  <Mail className="h-5 w-5 mr-2" />
+                  Email
+                  <Badge variant="outline" className="ml-2">
+                    {settings.email.triggers.length} automações
+                  </Badge>
+                </h2>
+                <Button variant="outline" size="sm" onClick={() => {
+                  setIsAddingTrigger(true);
+                }}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Adicionar email
+                </Button>
+              </div>
 
-                  {/* Email Tab */}
-                  <TabsContent value="email">
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="flex items-center justify-between">
-                          <span>Configuração de Email</span>
-                          <FormField
-                            control={form.control}
-                            name="email.enabled"
-                            render={({ field }) => (
-                              <FormItem className="flex flex-row items-center justify-between rounded-lg space-y-0">
-                                <FormControl>
-                                  <div className="flex items-center space-x-2">
-                                    <Switch
-                                      checked={field.value}
-                                      onCheckedChange={field.onChange}
-                                    />
-                                    <FormLabel className="text-sm">
-                                      {field.value ? "Ativado" : "Desativado"}
-                                    </FormLabel>
-                                  </div>
-                                </FormControl>
-                              </FormItem>
-                            )}
-                          />
-                        </CardTitle>
-                        <CardDescription>
-                          Configure o envio automático de emails para recuperar carrinhos abandonados.
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent className="space-y-6">
-                        <FormField
-                          control={form.control}
-                          name="email.fromEmail"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Email do remetente</FormLabel>
-                              <FormControl>
-                                <input
-                                  type="email"
-                                  placeholder="suporte@sualoja.com"
-                                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                  {...field}
-                                  disabled={!form.watch("email.enabled")}
-                                />
-                              </FormControl>
-                              <FormDescription>
-                                Email que aparecerá como remetente da mensagem.
-                              </FormDescription>
-                              <FormMessage />
-                            </FormItem>
+              {settings.email.triggers.length > 0 ? (
+                <div className="grid gap-4 sm:grid-cols-1 lg:grid-cols-2">
+                  {settings.email.triggers.map((trigger) => (
+                    <Card key={trigger.id} className="overflow-hidden transition-all hover:shadow-md">
+                      <CardHeader className="pb-2 bg-muted/30">
+                        <div className="flex justify-between items-start">
+                          <div className="flex items-center">
+                            <div className="mr-2">
+                              <Mail className="h-5 w-5 text-blue-500" />
+                            </div>
+                            <div>
+                              <CardTitle className="text-base">
+                                {TRIGGER_EVENTS[trigger.event]}
+                              </CardTitle>
+                              <CardDescription className="flex items-center mt-1">
+                                <Clock className="h-3.5 w-3.5 mr-1" />
+                                Enviar após: {DELAY_OPTIONS[trigger.delay as keyof typeof DELAY_OPTIONS] || trigger.delay}
+                              </CardDescription>
+                            </div>
+                          </div>
+                          {trigger.active ? (
+                            <Badge className="bg-green-500 text-white">
+                              <CheckCircle className="h-3.5 w-3.5 mr-1" /> Ativa
+                            </Badge>
+                          ) : (
+                            <Badge variant="outline" className="text-muted-foreground">
+                              <XCircle className="h-3.5 w-3.5 mr-1" /> Inativa
+                            </Badge>
                           )}
-                        />
-
-                        <RecoveryTriggersList 
-                          type="email"
-                          triggers={settings.email.triggers}
-                          onSave={handleSaveTrigger}
-                          onDelete={handleDeleteTrigger}
-                        />
-                      </CardContent>
-                      <CardFooter className="flex justify-between border-t pt-5">
-                        <div className="flex items-center text-xs text-muted-foreground">
-                          <AlertCircle className="h-4 w-4 mr-1" />
-                          Emails são enviados através da plataforma Voltz
                         </div>
-                        <Button 
-                          variant="outline" 
-                          type="button"
-                          onClick={handleSimulateEmail}
-                          disabled={!form.watch("email.enabled")}
-                        >
-                          <Send className="h-4 w-4 mr-2" />
-                          Enviar teste
-                        </Button>
-                      </CardFooter>
-                    </Card>
-                  </TabsContent>
-
-                  {/* SMS Tab */}
-                  <TabsContent value="sms">
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="flex items-center justify-between">
-                          <span>Configuração de SMS</span>
-                          <FormField
-                            control={form.control}
-                            name="sms.enabled"
-                            render={({ field }) => (
-                              <FormItem className="flex flex-row items-center justify-between rounded-lg space-y-0">
-                                <FormControl>
-                                  <div className="flex items-center space-x-2">
-                                    <Switch
-                                      checked={field.value}
-                                      onCheckedChange={field.onChange}
-                                    />
-                                    <FormLabel className="text-sm">
-                                      {field.value ? "Ativado" : "Desativado"}
-                                    </FormLabel>
-                                  </div>
-                                </FormControl>
-                              </FormItem>
+                      </CardHeader>
+                      <CardContent className="p-4">
+                        <div className="space-y-2">
+                          <div className="font-medium text-sm">{trigger.subject}</div>
+                          <p className="text-sm text-muted-foreground line-clamp-2">
+                            {trigger.message}
+                          </p>
+                          <div className="flex flex-wrap gap-2 mt-2">
+                            {countLinksInMessage(trigger.message) > 0 && (
+                              <Badge variant="outline" className="text-xs">
+                                <LinkIcon className="h-3 w-3 mr-1" />
+                                {countLinksInMessage(trigger.message)} {countLinksInMessage(trigger.message) === 1 ? 'link' : 'links'}
+                              </Badge>
                             )}
-                          />
-                        </CardTitle>
-                        <CardDescription>
-                          Configure o envio automático de SMS para recuperar carrinhos abandonados.
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent className="space-y-6">
-                        <FormField
-                          control={form.control}
-                          name="sms.provider"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Provedor SMS</FormLabel>
-                              <FormControl>
-                                <input
-                                  type="text"
-                                  value={field.value}
-                                  disabled={true}
-                                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                />
-                              </FormControl>
-                              <FormDescription>
-                                O Gateway nativo VOLTZ é utilizado para envio de SMS.
-                              </FormDescription>
-                            </FormItem>
-                          )}
-                        />
-
-                        <RecoveryTriggersList 
-                          type="sms"
-                          triggers={settings.sms.triggers}
-                          onSave={handleSaveTrigger}
-                          onDelete={handleDeleteTrigger}
-                        />
-                      </CardContent>
-                      <CardFooter className="flex justify-between border-t pt-5">
-                        <div className="flex items-center text-xs text-muted-foreground">
-                          <AlertCircle className="h-4 w-4 mr-1" />
-                          Cobrança por SMS enviado
+                            {countVariablesInMessage(trigger.message) > 0 && (
+                              <Badge variant="outline" className="text-xs">
+                                <Tag className="h-3 w-3 mr-1" />
+                                {countVariablesInMessage(trigger.message)} {countVariablesInMessage(trigger.message) === 1 ? 'variável' : 'variáveis'}
+                              </Badge>
+                            )}
+                          </div>
                         </div>
-                        <Button 
-                          variant="outline" 
-                          type="button" 
-                          onClick={handleSimulateSMS}
-                          disabled={!form.watch("sms.enabled")}
-                        >
-                          <Send className="h-4 w-4 mr-2" />
-                          Enviar teste
-                        </Button>
-                      </CardFooter>
-                    </Card>
-                  </TabsContent>
-
-                  {/* WhatsApp Tab */}
-                  <TabsContent value="whatsapp">
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="flex items-center justify-between">
-                          <span>Configuração de WhatsApp</span>
-                          <Badge className="bg-pending text-pending-foreground">Em breve</Badge>
-                        </CardTitle>
-                        <CardDescription>
-                          Você poderá ativar automações por WhatsApp nos próximos dias.
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent className="min-h-[300px] flex flex-col items-center justify-center text-center p-10">
-                        <MessageCircle className="h-16 w-16 text-muted-foreground mb-4" />
-                        <h3 className="text-lg font-medium mb-2">Recurso em desenvolvimento</h3>
-                        <p className="text-muted-foreground max-w-md">
-                          Estamos trabalhando para disponibilizar a recuperação de carrinhos abandonados via WhatsApp. 
-                          Em breve você poderá configurar mensagens automáticas para este canal.
-                        </p>
                       </CardContent>
-                      <CardFooter className="justify-center border-t pt-5">
-                        <Button variant="outline" disabled>
-                          Entrar na lista de espera
+                      <CardFooter className="flex justify-end gap-2 pt-0 pb-4 px-4">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-8"
+                          onClick={() => handleEditTrigger(trigger, 'email')}
+                        >
+                          <Edit className="h-3.5 w-3.5 mr-2" />
+                          Editar
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                          onClick={() => setTriggerToDelete({ id: trigger.id, channel: 'email' })}
+                        >
+                          <Trash2 className="h-3.5 w-3.5 mr-2" />
+                          Remover
                         </Button>
                       </CardFooter>
                     </Card>
-                  </TabsContent>
-                </Tabs>
-
-                <div className="flex justify-end">
-                  <Button type="submit">Salvar configurações</Button>
+                  ))}
                 </div>
-              </form>
-            </Form>
+              ) : (
+                <Card className="border-dashed">
+                  <CardContent className="flex flex-col items-center justify-center py-8">
+                    <div className="rounded-full bg-muted p-3 mb-3">
+                      <Mail className="h-8 w-8 text-muted-foreground" />
+                    </div>
+                    <h3 className="text-lg font-medium mb-1">Nenhuma automação de email</h3>
+                    <p className="text-muted-foreground text-center mb-4 max-w-md">
+                      Você ainda não criou nenhuma automação de email. 
+                      Clique no botão acima para começar.
+                    </p>
+                    <Button onClick={() => setIsAddingTrigger(true)}>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Adicionar primeira automação
+                    </Button>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+
+            <Separator />
+
+            {/* SMS Automations */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-semibold flex items-center">
+                  <MessageSquare className="h-5 w-5 mr-2" />
+                  SMS
+                  <Badge variant="outline" className="ml-2">
+                    {settings.sms.triggers.length} automações
+                  </Badge>
+                </h2>
+                <Button variant="outline" size="sm" onClick={() => {
+                  setIsAddingTrigger(true);
+                }}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Adicionar SMS
+                </Button>
+              </div>
+
+              {settings.sms.triggers.length > 0 ? (
+                <div className="grid gap-4 sm:grid-cols-1 lg:grid-cols-2">
+                  {settings.sms.triggers.map((trigger) => (
+                    <Card key={trigger.id} className="overflow-hidden transition-all hover:shadow-md">
+                      <CardHeader className="pb-2 bg-muted/30">
+                        <div className="flex justify-between items-start">
+                          <div className="flex items-center">
+                            <div className="mr-2">
+                              <MessageSquare className="h-5 w-5 text-green-500" />
+                            </div>
+                            <div>
+                              <CardTitle className="text-base">
+                                {TRIGGER_EVENTS[trigger.event]}
+                              </CardTitle>
+                              <CardDescription className="flex items-center mt-1">
+                                <Clock className="h-3.5 w-3.5 mr-1" />
+                                Enviar após: {DELAY_OPTIONS[trigger.delay as keyof typeof DELAY_OPTIONS] || trigger.delay}
+                              </CardDescription>
+                            </div>
+                          </div>
+                          {trigger.active ? (
+                            <Badge className="bg-green-500 text-white">
+                              <CheckCircle className="h-3.5 w-3.5 mr-1" /> Ativa
+                            </Badge>
+                          ) : (
+                            <Badge variant="outline" className="text-muted-foreground">
+                              <XCircle className="h-3.5 w-3.5 mr-1" /> Inativa
+                            </Badge>
+                          )}
+                        </div>
+                      </CardHeader>
+                      <CardContent className="p-4">
+                        <div className="space-y-2">
+                          <p className="text-sm text-muted-foreground line-clamp-2">
+                            {trigger.message}
+                          </p>
+                          <div className="flex flex-wrap gap-2 mt-2">
+                            {countLinksInMessage(trigger.message) > 0 && (
+                              <Badge variant="outline" className="text-xs">
+                                <LinkIcon className="h-3 w-3 mr-1" />
+                                {countLinksInMessage(trigger.message)} {countLinksInMessage(trigger.message) === 1 ? 'link' : 'links'}
+                              </Badge>
+                            )}
+                            {countVariablesInMessage(trigger.message) > 0 && (
+                              <Badge variant="outline" className="text-xs">
+                                <Tag className="h-3 w-3 mr-1" />
+                                {countVariablesInMessage(trigger.message)} {countVariablesInMessage(trigger.message) === 1 ? 'variável' : 'variáveis'}
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                      </CardContent>
+                      <CardFooter className="flex justify-end gap-2 pt-0 pb-4 px-4">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-8"
+                          onClick={() => handleEditTrigger(trigger, 'sms')}
+                        >
+                          <Edit className="h-3.5 w-3.5 mr-2" />
+                          Editar
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                          onClick={() => setTriggerToDelete({ id: trigger.id, channel: 'sms' })}
+                        >
+                          <Trash2 className="h-3.5 w-3.5 mr-2" />
+                          Remover
+                        </Button>
+                      </CardFooter>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <Card className="border-dashed">
+                  <CardContent className="flex flex-col items-center justify-center py-8">
+                    <div className="rounded-full bg-muted p-3 mb-3">
+                      <MessageSquare className="h-8 w-8 text-muted-foreground" />
+                    </div>
+                    <h3 className="text-lg font-medium mb-1">Nenhuma automação de SMS</h3>
+                    <p className="text-muted-foreground text-center mb-4 max-w-md">
+                      Você ainda não criou nenhuma automação de SMS. 
+                      Clique no botão acima para começar.
+                    </p>
+                    <Button onClick={() => setIsAddingTrigger(true)}>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Adicionar primeira automação
+                    </Button>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+
+            <Separator />
+
+            {/* WhatsApp Section (Coming Soon) */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-semibold flex items-center">
+                  <MessageCircle className="h-5 w-5 mr-2" />
+                  WhatsApp
+                  <Badge variant="outline" className="ml-2 bg-amber-100 text-amber-800 border-amber-200">
+                    Em breve
+                  </Badge>
+                </h2>
+                <Button variant="outline" size="sm" disabled>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Adicionar WhatsApp
+                </Button>
+              </div>
+
+              <Card className="border-dashed opacity-70">
+                <CardContent className="flex flex-col items-center justify-center py-8">
+                  <div className="rounded-full bg-muted p-3 mb-3">
+                    <MessageCircle className="h-8 w-8 text-muted-foreground" />
+                  </div>
+                  <h3 className="text-lg font-medium mb-1">WhatsApp em breve</h3>
+                  <p className="text-muted-foreground text-center mb-4 max-w-md">
+                    Estamos trabalhando para disponibilizar a recuperação de carrinhos abandonados via WhatsApp. 
+                    Em breve você poderá configurar mensagens automáticas para este canal.
+                  </p>
+                  <Button variant="outline" disabled>
+                    Entrar na lista de espera
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
           
           <TabsContent value="estatisticas">
@@ -388,6 +497,24 @@ const RecuperacaoVendas: React.FC = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={triggerToDelete !== null} onOpenChange={(open) => !open && setTriggerToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir automação</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir esta automação? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteTrigger} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </DashboardLayout>
   );
 };
