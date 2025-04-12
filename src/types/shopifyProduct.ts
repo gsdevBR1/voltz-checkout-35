@@ -29,3 +29,12 @@ export interface ShopifyProduct {
   tags: string[];
   url: string;
 }
+
+export interface ShopifyAppCredentials {
+  apiKey: string;
+  apiSecret: string;
+  accessToken: string;
+  shopDomain: string;
+  isConnected: boolean;
+}
+
