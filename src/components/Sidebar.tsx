@@ -37,7 +37,9 @@ import {
   Store,
   Languages,
   LifeBuoy,
-  DollarSign
+  DollarSign,
+  FileMinus,
+  FileX
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { StoreSelector } from '@/components/StoreSelector';
@@ -131,6 +133,21 @@ export const AppSidebar: React.FC<SidebarProps> = ({ className }) => {
           title: 'Carrinhos Abandonados',
           path: '/vendas/abandonados',
           icon: ShoppingBag,
+        },
+        {
+          title: 'Extrato de Transações',
+          path: '/vendas/extrato',
+          icon: FileText,
+        },
+        {
+          title: 'Reembolsos',
+          path: '/vendas/reembolsos',
+          icon: FileMinus,
+        },
+        {
+          title: 'Estornos',
+          path: '/vendas/estornos',
+          icon: FileX,
         },
         {
           title: 'Recuperação de Vendas',

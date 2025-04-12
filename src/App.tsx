@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -16,6 +17,9 @@ import GatewayStep from "./pages/steps/GatewayStep";
 import ShippingStep from "./pages/steps/ShippingStep";
 import ShopifyStep from "./pages/steps/ShopifyStep";
 import TodasVendas from "./pages/vendas/TodasVendas";
+import ExtratoTransacoes from "./pages/vendas/ExtratoTransacoes";
+import Reembolsos from "./pages/vendas/Reembolsos";
+import Estornos from "./pages/vendas/Estornos";
 import DetalheVenda from "./pages/vendas/DetalheVenda";
 import CarrinhosAbandonados from "./pages/vendas/CarrinhosAbandonados";
 import DetalheCarrinhoAbandonado from "./pages/vendas/DetalheCarrinhoAbandonado";
@@ -92,6 +96,9 @@ const App: React.FC = () => {
                   <Route path="/lojas" element={<Stores />} />
                   <Route path="/dashboard" element={<Dashboard />} />
                   <Route path="/vendas/todas" element={<TodasVendas />} />
+                  <Route path="/vendas/extrato" element={<ExtratoTransacoes />} />
+                  <Route path="/vendas/reembolsos" element={<Reembolsos />} />
+                  <Route path="/vendas/estornos" element={<Estornos />} />
                   <Route path="/vendas/detalhe/:id" element={<DetalheVenda />} />
                   <Route path="/vendas/abandonados" element={<CarrinhosAbandonados />} />
                   <Route path="/vendas/abandonados/detalhe/:id" element={<DetalheCarrinhoAbandonado />} />
