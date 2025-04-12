@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -139,11 +138,6 @@ export const AppSidebar: React.FC<SidebarProps> = ({ className }) => {
           icon: LifeBuoy,
         }
       ]
-    },
-    {
-      title: 'Financeiro',
-      path: '/financeiro',
-      icon: DollarSign,
     },
     {
       title: 'Clientes',
@@ -296,6 +290,11 @@ export const AppSidebar: React.FC<SidebarProps> = ({ className }) => {
           icon: Webhook,
         }
       ]
+    },
+    {
+      title: 'Financeiro',
+      path: '/financeiro',
+      icon: DollarSign,
     },
     {
       title: 'Minhas Lojas',
