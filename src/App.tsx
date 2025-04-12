@@ -19,6 +19,7 @@ import TodasVendas from "./pages/vendas/TodasVendas";
 import DetalheVenda from "./pages/vendas/DetalheVenda";
 import CarrinhosAbandonados from "./pages/vendas/CarrinhosAbandonados";
 import DetalheCarrinhoAbandonado from "./pages/vendas/DetalheCarrinhoAbandonado";
+import RecuperacaoVendas from "./pages/vendas/RecuperacaoVendas";
 import TodosClientes from "./pages/clientes/TodosClientes";
 import Leads from "./pages/clientes/Leads";
 import ClienteDetalhes from "./pages/clientes/ClienteDetalhes";
@@ -94,6 +95,7 @@ const App: React.FC = () => {
                   <Route path="/vendas/detalhe/:id" element={<DetalheVenda />} />
                   <Route path="/vendas/abandonados" element={<CarrinhosAbandonados />} />
                   <Route path="/vendas/abandonados/detalhe/:id" element={<DetalheCarrinhoAbandonado />} />
+                  <Route path="/vendas/recuperacao" element={<RecuperacaoVendas />} />
                   <Route path="/clientes/todos" element={<TodosClientes />} />
                   <Route path="/clientes/leads" element={<Leads />} />
                   <Route path="/clientes/perfil/:id" element={<ClienteDetalhes />} />

@@ -36,7 +36,8 @@ import {
   Truck,
   Webhook,
   Store,
-  Languages
+  Languages,
+  LifeBuoy
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { StoreSelector } from '@/components/StoreSelector';
@@ -130,6 +131,11 @@ export const AppSidebar: React.FC<SidebarProps> = ({ className }) => {
           title: 'Carrinhos Abandonados',
           path: '/vendas/abandonados',
           icon: ShoppingBag,
+        },
+        {
+          title: 'Recuperação de Vendas',
+          path: '/vendas/recuperacao',
+          icon: LifeBuoy,
         }
       ]
     },
