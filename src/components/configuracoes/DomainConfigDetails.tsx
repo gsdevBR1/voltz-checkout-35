@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Card, 
   CardContent, 
@@ -18,8 +18,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { InfoIcon, RefreshCw, CheckCircle2, XCircle, Lock, AlertTriangle, Copy, HelpCircle } from 'lucide-react';
-import { Domain, DomainVerification } from '@/types/domain';
+import { InfoIcon, RefreshCw, CheckCircle2, XCircle, Lock, AlertTriangle, Copy, HelpCircle, Clock } from 'lucide-react';
+import { Domain, DomainVerification, DomainValidationResult } from '@/types/domain';
 import { 
   Tooltip,
   TooltipContent,
@@ -27,10 +27,11 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { useToast } from '@/hooks/use-toast';
+import { format } from 'date-fns';
 
 interface DomainConfigDetailsProps {
   domain: Domain;
-  onVerifyDNS: () => void;
+  onVerifyDNS: (validationResult: DomainValidationResult) => void;
   onSubdomainChange: (type: 'checkout' | 'secure' | 'pay' | 'seguro') => void;
   onBack: () => void;
 }
@@ -44,6 +45,7 @@ export const DomainConfigDetails: React.FC<DomainConfigDetailsProps> = ({
   const [verifying, setVerifying] = useState(false);
   const { toast } = useToast();
   const [selectedType, setSelectedType] = useState<'checkout' | 'secure' | 'pay' | 'seguro'>(domain.type);
+  const [lastChecked, setLastChecked] = useState<string>(domain.lastChecked || '');
 
   // Mock data for DNS verification details
   const dnsVerificationDetails: DomainVerification = {
@@ -61,22 +63,74 @@ export const DomainConfigDetails: React.FC<DomainConfigDetailsProps> = ({
     });
   };
 
+  // Simulate API call for DNS and SSL verification
+  const performDomainValidation = async (): Promise<DomainValidationResult> => {
+    // In a real implementation, this would call your backend API
+    // that would use dig, dns.resolveCname() or external DNS service
+    // and would also check HTTPS validity
+    
+    // For demo purposes, we'll simulate a successful validation with a 70% chance
+    const isSuccessful = Math.random() > 0.3;
+    
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    const now = new Date().toISOString();
+    
+    return {
+      dnsVerified: isSuccessful,
+      sslActive: isSuccessful,
+      lastChecked: now
+    };
+  };
+
+  // Function to perform manual verification
   const handleVerifyDNS = async () => {
     setVerifying(true);
-    // Simulate API call
-    setTimeout(() => {
-      onVerifyDNS();
-      setVerifying(false);
+    
+    try {
+      const validationResult = await performDomainValidation();
+      setLastChecked(validationResult.lastChecked);
+      onVerifyDNS(validationResult);
+      
       toast({
-        title: "Verificação concluída",
-        description: "A configuração de DNS foi verificada",
+        title: validationResult.dnsVerified ? "Verificação concluída" : "Verificação falhou",
+        description: validationResult.dnsVerified 
+          ? "A configuração de DNS foi verificada com sucesso" 
+          : "Não foi possível verificar o DNS. Verifique suas configurações.",
       });
-    }, 2000);
+    } catch (error) {
+      toast({
+        title: "Erro na verificação",
+        description: "Ocorreu um erro ao verificar o domínio. Tente novamente.",
+        variant: "destructive"
+      });
+    } finally {
+      setVerifying(false);
+    }
   };
 
   const handleTypeChange = (value: 'checkout' | 'secure' | 'pay' | 'seguro') => {
     setSelectedType(value);
     onSubdomainChange(value);
+  };
+
+  // Automatic validation when the component mounts
+  useEffect(() => {
+    // Only auto-validate if not already verified
+    if (!domain.dnsVerified) {
+      handleVerifyDNS();
+    }
+  }, []);
+
+  const formatLastChecked = () => {
+    if (!lastChecked) return 'Nunca verificado';
+    
+    try {
+      return format(new Date(lastChecked), "dd/MM/yyyy 'às' HH:mm");
+    } catch {
+      return 'Data inválida';
+    }
   };
 
   return (
@@ -181,12 +235,12 @@ export const DomainConfigDetails: React.FC<DomainConfigDetailsProps> = ({
                   {dnsVerificationDetails.isVerified ? (
                     <div className="flex items-center text-green-600">
                       <CheckCircle2 className="w-4 h-4 mr-1" />
-                      <span>Ativo</span>
+                      <span>Apontado corretamente</span>
                     </div>
                   ) : (
                     <div className="flex items-center text-yellow-600">
                       <XCircle className="w-4 h-4 mr-1" />
-                      <span>Pendente</span>
+                      <span>Não configurado</span>
                     </div>
                   )}
                 </TableCell>
@@ -199,13 +253,23 @@ export const DomainConfigDetails: React.FC<DomainConfigDetailsProps> = ({
                   ) : (
                     <div className="flex items-center text-yellow-600">
                       <AlertTriangle className="w-4 h-4 mr-1" />
-                      <span>Não configurado</span>
+                      <span>SSL pendente</span>
                     </div>
                   )}
                 </TableCell>
               </TableRow>
             </TableBody>
           </Table>
+        </div>
+
+        <div className="bg-muted p-4 rounded-md flex items-center justify-between text-sm">
+          <div className="flex items-center">
+            <Clock className="w-4 h-4 mr-2" />
+            <span>Última verificação: {formatLastChecked()}</span>
+          </div>
+          <div>
+            <span className="text-muted-foreground">A propagação pode levar até 24h em alguns provedores.</span>
+          </div>
         </div>
 
         <div className="flex items-center justify-between mt-6">
@@ -221,7 +285,7 @@ export const DomainConfigDetails: React.FC<DomainConfigDetailsProps> = ({
             ) : (
               <>
                 <RefreshCw className="mr-2 h-4 w-4" />
-                Verificar configuração
+                Verificar configuração agora
               </>
             )}
           </Button>

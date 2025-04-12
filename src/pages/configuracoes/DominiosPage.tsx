@@ -12,7 +12,7 @@ import {
   TableRow 
 } from '@/components/ui/table';
 import { AddDomainModal } from '@/components/configuracoes/AddDomainModal';
-import { Domain } from '@/types/domain';
+import { Domain, DomainValidationResult } from '@/types/domain';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { DomainConfigDetails } from '@/components/configuracoes/DomainConfigDetails';
@@ -25,7 +25,8 @@ const mockDomains: Domain[] = [
     status: 'active',
     createdAt: '2023-10-15T10:30:00Z',
     dnsVerified: true,
-    sslStatus: 'active'
+    sslStatus: 'active',
+    lastChecked: '2023-10-15T14:30:00Z'
   },
   {
     id: '2',
@@ -68,15 +69,16 @@ const DominiosPage: React.FC = () => {
     });
   };
 
-  const handleVerifyDNS = () => {
+  const handleVerifyDNS = (validationResult: DomainValidationResult) => {
     if (!selectedDomain) return;
     
     // Update the selected domain with verification status
     const updatedDomain: Domain = {
       ...selectedDomain,
-      dnsVerified: true,
-      sslStatus: 'active',
-      status: 'active'
+      dnsVerified: validationResult.dnsVerified,
+      sslStatus: validationResult.sslActive ? 'active' : 'pending',
+      status: validationResult.dnsVerified && validationResult.sslActive ? 'active' : 'pending',
+      lastChecked: validationResult.lastChecked
     };
     
     // Update the domain in the list
@@ -141,6 +143,11 @@ const DominiosPage: React.FC = () => {
 
   const handleConfigureDomain = (domain: Domain) => {
     setSelectedDomain(domain);
+  };
+
+  const handleVisitDomain = (domain: Domain) => {
+    const url = `https://${domain.type}.${domain.name}`;
+    window.open(url, '_blank');
   };
 
   return (

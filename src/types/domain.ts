@@ -7,6 +7,7 @@ export interface Domain {
   createdAt: string;
   dnsVerified?: boolean;
   sslStatus?: 'active' | 'pending' | 'failed';
+  lastChecked?: string;
 }
 
 export interface DomainVerification {
@@ -14,4 +15,10 @@ export interface DomainVerification {
   name: string;
   value: string;
   isVerified: boolean;
+}
+
+export interface DomainValidationResult {
+  dnsVerified: boolean;
+  sslActive: boolean;
+  lastChecked: string;
 }
