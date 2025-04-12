@@ -29,6 +29,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Product } from '@/types/product';
+import { Badge } from "@/components/ui/badge";
 
 const mockProducts: Product[] = [
   {
@@ -546,83 +547,111 @@ const UpsellBuilder: React.FC<UpsellBuilderProps> = ({ initialData, onSave, prod
               )}
             </div>
             
-            <div className="space-y-4 mt-6 pt-4 border-t">
+            <div className="space-y-5 mt-8 pt-6 border-t">
               <h3 className="text-lg font-medium">Aplicar este upsell em massa</h3>
               
-              <div className="flex items-start space-x-2">
-                <Checkbox 
-                  id="applyToAll" 
-                  checked={upsellData.applyToAllProducts}
-                  onCheckedChange={handleApplyToAllProducts}
-                />
-                <div className="space-y-1">
-                  <Label 
-                    htmlFor="applyToAll" 
-                    className="font-medium"
-                  >
-                    Aplicar este upsell a todos os produtos da loja
-                  </Label>
-                  {upsellData.applyToAllProducts && (
-                    <p className="text-sm text-amber-600">
-                      Este upsell será aplicado automaticamente após qualquer compra feita na loja.
-                    </p>
-                  )}
+              <div className="bg-slate-50 dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700 transition-all hover:border-slate-300 dark:hover:border-slate-600">
+                <div className="flex items-start space-x-3">
+                  <div className="flex h-5 items-center">
+                    <Checkbox 
+                      id="applyToAll" 
+                      checked={upsellData.applyToAllProducts}
+                      onCheckedChange={handleApplyToAllProducts}
+                      className="h-5 w-5 rounded-sm transition-colors data-[state=checked]:bg-emerald-600 data-[state=checked]:border-emerald-600"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label 
+                      htmlFor="applyToAll" 
+                      className="font-medium text-base cursor-pointer"
+                    >
+                      Aplicar este upsell a todos os produtos da loja
+                    </Label>
+                    {upsellData.applyToAllProducts && (
+                      <p className="text-sm text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 py-1.5 px-3 rounded-md">
+                        Este upsell será aplicado automaticamente após qualquer compra feita na loja.
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
               
               {!upsellData.applyToAllProducts && (
-                <div className="space-y-4 bg-slate-50 p-4 rounded-lg">
-                  <div className="space-y-2">
-                    <Label htmlFor="productFilter">Filtrar produtos pelo nome</Label>
-                    <div className="flex items-center space-x-2">
-                      <div className="relative flex-1">
-                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <div className="space-y-4 bg-gradient-to-b from-white to-slate-50 dark:from-slate-900 dark:to-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                  <div className="space-y-3">
+                    <Label htmlFor="productFilter" className="font-medium">Filtrar produtos pelo nome</Label>
+                    <div className="flex items-center space-x-3 flex-col sm:flex-row gap-3 sm:gap-0">
+                      <div className="relative flex-1 w-full">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                         <Input
                           id="productFilter"
                           type="text" 
-                          placeholder="Digite para buscar produtos..." 
+                          placeholder="Buscar produtos por nome..."
                           value={productNameFilter}
                           onChange={(e) => setProductNameFilter(e.target.value)}
-                          className="pl-8"
+                          className="pl-10 py-6 h-auto border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-offset-1 focus:ring-primary"
                         />
                       </div>
                       <Button 
                         variant="outline" 
                         onClick={handleSelectAllFiltered}
-                        className="whitespace-nowrap"
+                        className="whitespace-nowrap font-medium transition-all h-auto py-2.5 px-4 hover:bg-slate-100 dark:hover:bg-slate-700 border-slate-300 dark:border-slate-600"
                       >
-                        <CheckSquare className="mr-2 h-4 w-4" />
+                        <CheckSquare className="mr-2 h-4 w-4 text-primary" />
                         Selecionar todos
                       </Button>
                     </div>
                   </div>
                   
-                  <div className="max-h-[300px] overflow-y-auto border rounded-md bg-white">
+                  <div className="max-h-[350px] overflow-y-auto border rounded-lg bg-white dark:bg-slate-900 shadow-sm">
                     {filteredProducts.length > 0 ? (
-                      <ul className="p-0 m-0 list-none divide-y">
-                        {filteredProducts.map(product => (
-                          <li key={product.id} className={`flex items-center p-3 ${product.id === upsellData.productId ? 'bg-slate-100 opacity-60' : ''}`}>
-                            <Checkbox 
-                              id={`product-${product.id}`} 
-                              checked={upsellData.triggerProductIds.includes(product.id)}
-                              onCheckedChange={() => handleTriggerProductSelect(product.id)}
-                              disabled={product.id === upsellData.productId}
-                              className="mr-3"
-                            />
-                            <Label 
-                              htmlFor={`product-${product.id}`}
-                              className={`flex-1 cursor-pointer ${product.id === upsellData.productId ? 'text-muted-foreground' : ''}`}
+                      <ul className="p-0 m-0 list-none divide-y divide-slate-100 dark:divide-slate-800">
+                        {filteredProducts.map(product => {
+                          const isSelected = upsellData.triggerProductIds.includes(product.id);
+                          const isDisabled = product.id === upsellData.productId;
+                          
+                          return (
+                            <li 
+                              key={product.id} 
+                              className={`${
+                                isDisabled ? 'bg-slate-100/50 dark:bg-slate-800/50 opacity-60' : 
+                                isSelected ? 'bg-emerald-50 dark:bg-emerald-950/20' : ''
+                              } transition-colors hover:bg-slate-50 dark:hover:bg-slate-800`}
                             >
-                              <div className="font-medium">{product.name}</div>
-                              <div className="text-xs text-muted-foreground">
-                                R${product.price.toFixed(2)} • {product.type === 'digital' ? 'Digital' : 'Físico'}
+                              <div className="flex items-center p-4">
+                                <Checkbox 
+                                  id={`product-${product.id}`} 
+                                  checked={isSelected}
+                                  onCheckedChange={() => handleTriggerProductSelect(product.id)}
+                                  disabled={isDisabled}
+                                  className="mr-3 h-5 w-5 rounded-sm transition-colors data-[state=checked]:bg-emerald-600 data-[state=checked]:border-emerald-600"
+                                />
+                                <Label 
+                                  htmlFor={`product-${product.id}`}
+                                  className={`flex flex-col sm:flex-row sm:items-center justify-between flex-1 cursor-pointer ${isDisabled ? 'text-muted-foreground' : ''}`}
+                                >
+                                  <div className="font-medium text-base">{product.name}</div>
+                                  <div className="flex items-center gap-2 mt-1 sm:mt-0">
+                                    <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                                      R${product.price.toFixed(2)}
+                                    </span>
+                                    <Badge variant="outline" className={`
+                                      text-xs px-2 py-0.5 
+                                      ${product.type === 'digital' 
+                                        ? 'bg-blue-50 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400 border-blue-200 dark:border-blue-800' 
+                                        : 'bg-purple-50 text-purple-700 dark:bg-purple-950/30 dark:text-purple-400 border-purple-200 dark:border-purple-800'}
+                                    `}>
+                                      {product.type === 'digital' ? 'Digital' : 'Físico'}
+                                    </Badge>
+                                  </div>
+                                </Label>
+                                {isDisabled && (
+                                  <span className="text-xs px-2 py-1 bg-slate-200 dark:bg-slate-700 rounded-md ml-2">Produto da oferta</span>
+                                )}
                               </div>
-                            </Label>
-                            {product.id === upsellData.productId && (
-                              <span className="text-xs px-2 py-1 bg-slate-200 rounded ml-2">Produto da oferta</span>
-                            )}
-                          </li>
-                        ))}
+                            </li>
+                          );
+                        })}
                       </ul>
                     ) : (
                       <div className="p-8 text-center text-muted-foreground">
@@ -631,15 +660,16 @@ const UpsellBuilder: React.FC<UpsellBuilderProps> = ({ initialData, onSave, prod
                     )}
                   </div>
                   
-                  <div className="flex items-center space-x-2 text-sm">
-                    <ListFilter className="h-4 w-4 text-muted-foreground" />
-                    <span>
-                      {productNameFilter 
-                        ? `${filteredProducts.length} produtos encontrados com "${productNameFilter}"`
-                        : `${mockProducts.length} produtos no total`}
-                    </span>
-                    <div className="flex-1"></div>
-                    <span className="font-medium">
+                  <div className="flex items-center justify-between text-sm p-2 mt-2 bg-slate-100 dark:bg-slate-800 rounded-md">
+                    <div className="flex items-center space-x-2">
+                      <ListFilter className="h-4 w-4 text-muted-foreground" />
+                      <span>
+                        {productNameFilter 
+                          ? `${filteredProducts.length} produtos encontrados com "${productNameFilter}"`
+                          : `${mockProducts.length} produtos no total`}
+                      </span>
+                    </div>
+                    <span className="font-semibold bg-slate-200 dark:bg-slate-700 px-2 py-1 rounded-md">
                       {upsellData.triggerProductIds.length} produtos selecionados
                     </span>
                   </div>
@@ -647,27 +677,27 @@ const UpsellBuilder: React.FC<UpsellBuilderProps> = ({ initialData, onSave, prod
               )}
               
               {(upsellData.triggerProductIds.length === 0 && !upsellData.applyToAllProducts) && (
-                <Alert variant="default" className="bg-slate-50 border-slate-200">
-                  <AlertCircle className="h-4 w-4 text-muted-foreground" />
-                  <AlertDescription className="text-muted-foreground">
+                <Alert variant="default" className="bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700">
+                  <AlertCircle className="h-4 w-4 text-slate-500" />
+                  <AlertDescription className="text-slate-600 dark:text-slate-400">
                     Selecione ao menos um produto para ativar o upsell.
                   </AlertDescription>
                 </Alert>
               )}
               
               {upsellData.applyToAllProducts && upsellData.productId && (
-                <Alert variant="default" className="bg-blue-50 border-blue-200">
-                  <AlertCircle className="h-4 w-4 text-blue-600" />
-                  <AlertDescription className="text-blue-700">
+                <Alert variant="default" className="bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-900">
+                  <AlertCircle className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                  <AlertDescription className="text-emerald-700 dark:text-emerald-300">
                     Upsell será aplicado em {mockProducts.length - 1} produtos (todos os produtos exceto o produto da oferta).
                   </AlertDescription>
                 </Alert>
               )}
               
               {upsellData.triggerProductIds.length > 0 && (
-                <Alert variant="default" className="bg-blue-50 border-blue-200">
-                  <AlertCircle className="h-4 w-4 text-blue-600" />
-                  <AlertDescription className="text-blue-700">
+                <Alert variant="default" className="bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-900">
+                  <AlertCircle className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                  <AlertDescription className="text-emerald-700 dark:text-emerald-300">
                     Upsell será aplicado em {upsellData.triggerProductIds.length} produtos.
                   </AlertDescription>
                 </Alert>
