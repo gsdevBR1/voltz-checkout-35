@@ -102,8 +102,7 @@ export const DomainConfigDetails: React.FC<DomainConfigDetailsProps> = ({
     } catch (error) {
       toast({
         title: "Erro na verificação",
-        description: "Ocorreu um erro ao verificar o domínio. Tente novamente.",
-        variant: "destructive"
+        description: "Ocorreu um erro ao verificar o domínio. Tente novamente."
       });
     } finally {
       setVerifying(false);
@@ -165,6 +164,14 @@ export const DomainConfigDetails: React.FC<DomainConfigDetailsProps> = ({
                 <TableCell>
                   <div className="flex items-center">
                     <span>{dnsVerificationDetails.type}</span>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-6 w-6 ml-1"
+                      onClick={() => handleCopyValue(dnsVerificationDetails.type)}
+                    >
+                      <Copy className="h-4 w-4" />
+                    </Button>
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
@@ -192,6 +199,14 @@ export const DomainConfigDetails: React.FC<DomainConfigDetailsProps> = ({
                         <SelectItem value="seguro">seguro</SelectItem>
                       </SelectContent>
                     </Select>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-6 w-6"
+                      onClick={() => handleCopyValue(selectedType)}
+                    >
+                      <Copy className="h-4 w-4" />
+                    </Button>
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
@@ -236,11 +251,27 @@ export const DomainConfigDetails: React.FC<DomainConfigDetailsProps> = ({
                     <div className="flex items-center text-green-600">
                       <CheckCircle2 className="w-4 h-4 mr-1" />
                       <span>Apontado corretamente</span>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-6 w-6 ml-1"
+                        onClick={() => handleCopyValue("Apontado corretamente")}
+                      >
+                        <Copy className="h-4 w-4" />
+                      </Button>
                     </div>
                   ) : (
                     <div className="flex items-center text-yellow-600">
                       <XCircle className="w-4 h-4 mr-1" />
                       <span>Não configurado</span>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-6 w-6 ml-1"
+                        onClick={() => handleCopyValue("Não configurado")}
+                      >
+                        <Copy className="h-4 w-4" />
+                      </Button>
                     </div>
                   )}
                 </TableCell>
@@ -249,11 +280,27 @@ export const DomainConfigDetails: React.FC<DomainConfigDetailsProps> = ({
                     <div className="flex items-center text-green-600">
                       <Lock className="w-4 h-4 mr-1" />
                       <span>Ativado</span>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-6 w-6 ml-1"
+                        onClick={() => handleCopyValue("SSL Ativado")}
+                      >
+                        <Copy className="h-4 w-4" />
+                      </Button>
                     </div>
                   ) : (
                     <div className="flex items-center text-yellow-600">
                       <AlertTriangle className="w-4 h-4 mr-1" />
                       <span>SSL pendente</span>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-6 w-6 ml-1"
+                        onClick={() => handleCopyValue("SSL pendente")}
+                      >
+                        <Copy className="h-4 w-4" />
+                      </Button>
                     </div>
                   )}
                 </TableCell>
@@ -266,6 +313,14 @@ export const DomainConfigDetails: React.FC<DomainConfigDetailsProps> = ({
           <div className="flex items-center">
             <Clock className="w-4 h-4 mr-2" />
             <span>Última verificação: {formatLastChecked()}</span>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="h-6 w-6 ml-1"
+              onClick={() => handleCopyValue(`Última verificação: ${formatLastChecked()}`)}
+            >
+              <Copy className="h-4 w-4" />
+            </Button>
           </div>
           <div>
             <span className="text-muted-foreground">A propagação pode levar até 24h em alguns provedores.</span>
