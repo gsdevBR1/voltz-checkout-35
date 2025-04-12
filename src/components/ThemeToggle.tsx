@@ -1,6 +1,6 @@
 
 import React from "react";
-import { useTheme } from "@/providers/ThemeProvider";
+import { useTheme } from "../providers/ThemeProvider";
 import { cn } from "@/lib/utils";
 import { Moon, Sun } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
