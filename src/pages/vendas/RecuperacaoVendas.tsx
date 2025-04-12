@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { DashboardLayout } from "@/components/DashboardLayout";
+import DashboardLayout from "@/components/DashboardLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Card,
@@ -16,31 +16,13 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { AlertCircle, Mail, MessageSquare, Send, Clock, WhatsApp } from "lucide-react";
+import { AlertCircle, Mail, MessageSquare, Send, Clock, MessageCircle } from "lucide-react";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { toast } from "@/hooks/use-toast";
-
-interface RecoverySettings {
-  email: {
-    enabled: boolean;
-    delayMinutes: number;
-    subject: string;
-    body: string;
-    fromEmail: string;
-  };
-  sms: {
-    enabled: boolean;
-    delayMinutes: number;
-    message: string;
-    provider: string;
-  };
-  whatsapp: {
-    enabled: boolean;
-  };
-}
+import { RecoverySettings } from "@/types/recovery";
 
 const initialSettings: RecoverySettings = {
   email: {
@@ -84,12 +66,12 @@ const RecuperacaoVendas: React.FC = () => {
   const [settings, setSettings] = useState<RecoverySettings>(initialSettings);
   const [activeTab, setActiveTab] = useState("email");
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<RecoverySettings>({
     resolver: zodResolver(formSchema),
     defaultValues: initialSettings,
   });
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
+  const onSubmit = (values: RecoverySettings) => {
     setSettings(values);
     toast({
       title: "Configurações salvas",
@@ -130,7 +112,7 @@ const RecuperacaoVendas: React.FC = () => {
                 <MessageSquare className="h-4 w-4" /> SMS
               </TabsTrigger>
               <TabsTrigger value="whatsapp" className="flex items-center gap-2" disabled>
-                <WhatsApp className="h-4 w-4" /> WhatsApp
+                <MessageCircle className="h-4 w-4" /> WhatsApp
                 <Badge variant="outline" className="ml-1 py-0 h-5">Em breve</Badge>
               </TabsTrigger>
             </TabsList>
@@ -403,7 +385,7 @@ const RecuperacaoVendas: React.FC = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="min-h-[300px] flex flex-col items-center justify-center text-center p-10">
-                  <WhatsApp className="h-16 w-16 text-muted-foreground mb-4" />
+                  <MessageCircle className="h-16 w-16 text-muted-foreground mb-4" />
                   <h3 className="text-lg font-medium mb-2">Recurso em desenvolvimento</h3>
                   <p className="text-muted-foreground max-w-md">
                     Estamos trabalhando para disponibilizar a recuperação de carrinhos abandonados via WhatsApp. 
