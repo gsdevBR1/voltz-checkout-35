@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useNavigate } from 'react-router-dom';
-import { ChevronRight, Eye, Save, Clock, Paintbrush, Type, Layout, AlertCircle, ImageIcon, X, Upload, Search } from 'lucide-react';
+import { ChevronRight, Eye, Save, Clock, Paintbrush, Type, Layout, AlertCircle, ImageIcon, X, Upload, Search, CheckSquare, Filter, ListFilter } from 'lucide-react';
 import { toast } from 'sonner';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
@@ -27,6 +26,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Product } from '@/types/product';
 
@@ -103,8 +103,9 @@ const UpsellBuilder: React.FC<UpsellBuilderProps> = ({ initialData, onSave, prod
     description: '<p>Parabéns pela sua compra! Como cliente especial, você tem acesso a esta oferta por tempo limitado.</p>',
     productImage: 'https://placehold.co/1000x1000',
     productImageFile: null,
-    triggerProductIds: [], // Array of product IDs that trigger the upsell
-    productId: '', // The product offered in the upsell
+    triggerProductIds: [],
+    applyToAllProducts: false,
+    productId: '',
     productName: 'Produto Upsell',
     originalPrice: 197.0,
     discountPrice: 97.0,
@@ -130,23 +131,44 @@ const UpsellBuilder: React.FC<UpsellBuilderProps> = ({ initialData, onSave, prod
   const [imageError, setImageError] = useState<string | null>(null);
   const [productError, setProductError] = useState<string | null>(null);
   
+  const [productNameFilter, setProductNameFilter] = useState('');
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
+  const [showReplaceUpsellDialog, setShowReplaceUpsellDialog] = useState(false);
+  const [hasConflictingProducts, setHasConflictingProducts] = useState(false);
+  
   useEffect(() => {
     if (upsellData.productImage) {
       setImagePreview(upsellData.productImage);
     }
     
-    // Initialize with productId from props if available
     if (productId && !upsellData.productId) {
       applyProductData(productId);
     }
+    
+    setFilteredProducts(mockProducts);
   }, []);
   
   useEffect(() => {
-    // Check if trigger products include the offer product
+    if (productNameFilter) {
+      const filtered = mockProducts.filter(product => 
+        product.name.toLowerCase().includes(productNameFilter.toLowerCase())
+      );
+      setFilteredProducts(filtered);
+    } else {
+      setFilteredProducts(mockProducts);
+    }
+  }, [productNameFilter]);
+  
+  useEffect(() => {
     if (upsellData.productId && upsellData.triggerProductIds.includes(upsellData.productId)) {
       setProductError("O produto oferecido no upsell não pode ser o mesmo que o produto gatilho.");
     } else {
       setProductError(null);
+    }
+    
+    if (upsellData.triggerProductIds.length > 0) {
+      const hasConflict = Math.random() < 0.3;
+      setHasConflictingProducts(hasConflict);
     }
   }, [upsellData.productId, upsellData.triggerProductIds]);
   
@@ -259,17 +281,21 @@ const UpsellBuilder: React.FC<UpsellBuilderProps> = ({ initialData, onSave, prod
   };
   
   const handleTriggerProductSelect = (productId: string) => {
-    // Toggle selection of trigger products
+    if (upsellData.applyToAllProducts) {
+      setUpsellData(prev => ({
+        ...prev,
+        applyToAllProducts: false,
+      }));
+    }
+    
     const currentTriggerProducts = [...upsellData.triggerProductIds];
     
     if (currentTriggerProducts.includes(productId)) {
-      // Remove product if already selected
       setUpsellData(prev => ({
         ...prev,
         triggerProductIds: prev.triggerProductIds.filter(id => id !== productId)
       }));
     } else {
-      // Add product if not already selected
       setUpsellData(prev => ({
         ...prev,
         triggerProductIds: [...prev.triggerProductIds, productId]
@@ -285,6 +311,32 @@ const UpsellBuilder: React.FC<UpsellBuilderProps> = ({ initialData, onSave, prod
     }
     
     applyProductData(productId);
+  };
+  
+  const handleApplyToAllProducts = (checked: boolean) => {
+    setUpsellData(prev => ({
+      ...prev,
+      applyToAllProducts: checked,
+      triggerProductIds: checked ? [] : prev.triggerProductIds
+    }));
+  };
+  
+  const handleSelectAllFiltered = () => {
+    const filteredIds = filteredProducts.map(product => product.id);
+    
+    const validFilteredIds = upsellData.productId 
+      ? filteredIds.filter(id => id !== upsellData.productId)
+      : filteredIds;
+    
+    setUpsellData(prev => ({
+      ...prev,
+      applyToAllProducts: false,
+      triggerProductIds: validFilteredIds
+    }));
+    
+    if (validFilteredIds.length > 0 && Math.random() < 0.3) {
+      setHasConflictingProducts(true);
+    }
   };
   
   const applyProductData = (productId: string) => {
@@ -327,6 +379,15 @@ const UpsellBuilder: React.FC<UpsellBuilderProps> = ({ initialData, onSave, prod
     setShowConfirmDialog(false);
   };
   
+  const handleConfirmReplaceUpsells = () => {
+    setShowReplaceUpsellDialog(false);
+    setHasConflictingProducts(false);
+    
+    toast.success("Upsells existentes substituídos", {
+      description: "Os upsells anteriores foram substituídos com sucesso.",
+    });
+  };
+  
   const validateBeforeSave = () => {
     let isValid = true;
     
@@ -337,9 +398,9 @@ const UpsellBuilder: React.FC<UpsellBuilderProps> = ({ initialData, onSave, prod
       isValid = false;
     }
     
-    if (upsellData.triggerProductIds.length === 0) {
+    if (upsellData.triggerProductIds.length === 0 && !upsellData.applyToAllProducts) {
       toast.error("Produto gatilho necessário", {
-        description: "Você precisa selecionar pelo menos um produto gatilho."
+        description: "Você precisa selecionar pelo menos um produto gatilho ou aplicar a todos os produtos."
       });
       isValid = false;
     }
@@ -356,6 +417,11 @@ const UpsellBuilder: React.FC<UpsellBuilderProps> = ({ initialData, onSave, prod
         description: productError
       });
       isValid = false;
+    }
+    
+    if (hasConflictingProducts) {
+      setShowReplaceUpsellDialog(true);
+      return false;
     }
     
     return isValid;
@@ -382,8 +448,12 @@ const UpsellBuilder: React.FC<UpsellBuilderProps> = ({ initialData, onSave, prod
         onSave(dataToSave);
       }
       
+      const productCount = upsellData.applyToAllProducts 
+        ? mockProducts.length - 1
+        : upsellData.triggerProductIds.length;
+      
       toast.success("Upsell salvo com sucesso!", {
-        description: "Suas configurações de upsell foram salvas.",
+        description: `Suas configurações de upsell foram aplicadas a ${productCount} produtos.`,
       });
       
       setSaving(false);
@@ -425,129 +495,184 @@ const UpsellBuilder: React.FC<UpsellBuilderProps> = ({ initialData, onSave, prod
         <CardContent>
           <div className="space-y-6 mb-6">
             <div className="space-y-2">
-              <Label htmlFor="triggerProducts">Produto Gatilho (comprado anteriormente)</Label>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button 
-                    variant="outline" 
-                    className="w-full justify-between"
-                    id="triggerProducts"
-                  >
-                    {upsellData.triggerProductIds.length === 0 
-                      ? "Selecione um ou mais produtos" 
-                      : `${upsellData.triggerProductIds.length} produto(s) selecionado(s)`}
-                    <ChevronRight className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-[300px] p-0">
-                  <div className="p-2">
-                    <div className="mb-2 mt-2 flex items-center px-2">
-                      <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
-                      <Input 
-                        placeholder="Buscar produtos..." 
-                        className="h-9 flex-1"
-                      />
-                    </div>
-                  </div>
-                  <div className="max-h-[300px] overflow-auto">
+              <h3 className="text-lg font-medium">Configuração da Oferta de Upsell</h3>
+              
+              <div className="space-y-2">
+                <Label htmlFor="offerProduct">Produto a ser ofertado no upsell</Label>
+                <Select 
+                  value={upsellData.productId}
+                  onValueChange={handleOfferProductSelect}
+                >
+                  <SelectTrigger id="offerProduct">
+                    <SelectValue placeholder="Escolha um produto" />
+                  </SelectTrigger>
+                  <SelectContent>
                     {mockProducts.map(product => (
-                      <DropdownMenuItem
-                        key={product.id}
-                        className="flex items-center gap-2 p-2"
-                        onSelect={(e) => {
-                          e.preventDefault();
-                          handleTriggerProductSelect(product.id);
-                        }}
-                      >
-                        <div className="flex h-4 w-4 items-center justify-center rounded-sm border">
-                          {upsellData.triggerProductIds.includes(product.id) && (
-                            <div className="h-2 w-2 bg-primary rounded-sm"></div>
-                          )}
-                        </div>
-                        <div className="flex-1">
-                          <div className="font-medium">{product.name}</div>
-                          <div className="text-xs text-muted-foreground">
-                            R${product.price.toFixed(2)}
-                          </div>
-                        </div>
-                      </DropdownMenuItem>
+                      <SelectItem key={product.id} value={product.id}>
+                        {product.name} - R${product.price.toFixed(2)}
+                      </SelectItem>
                     ))}
-                  </div>
-                </DropdownMenuContent>
-              </DropdownMenu>
-              <p className="text-xs text-muted-foreground">
-                O upsell será exibido somente após a compra de um destes produtos.
-              </p>
-              
-              {upsellData.triggerProductIds.length > 0 && (
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {getSelectedTriggerProducts().map(product => (
-                    <div 
-                      key={product.id} 
-                      className="bg-secondary text-secondary-foreground px-2 py-1 rounded-md text-xs flex items-center gap-1"
-                    >
-                      {product.name}
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="h-4 w-4 p-0" 
-                        onClick={() => handleTriggerProductSelect(product.id)}
-                      >
-                        <X className="h-3 w-3" />
-                      </Button>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  Ao selecionar um produto, os campos de imagem, título e descrição serão preenchidos automaticamente.
+                </p>
+                
+                {getSelectedOfferProduct() && (
+                  <div className="flex items-center gap-2 mt-2">
+                    <div className="bg-primary text-primary-foreground px-2 py-1 rounded-md text-xs">
+                      {getSelectedOfferProduct()?.name}
                     </div>
-                  ))}
-                </div>
-              )}
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="offerProduct">Produto a ser ofertado no upsell</Label>
-              <Select 
-                value={upsellData.productId}
-                onValueChange={handleOfferProductSelect}
-              >
-                <SelectTrigger id="offerProduct">
-                  <SelectValue placeholder="Escolha um produto" />
-                </SelectTrigger>
-                <SelectContent>
-                  {mockProducts.map(product => (
-                    <SelectItem key={product.id} value={product.id}>
-                      {product.name} - R${product.price.toFixed(2)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <p className="text-xs text-muted-foreground">
-                Ao selecionar um produto, os campos de imagem, título e descrição serão preenchidos automaticamente.
-              </p>
-              
-              {getSelectedOfferProduct() && (
-                <div className="flex items-center gap-2 mt-2">
-                  <div className="bg-primary text-primary-foreground px-2 py-1 rounded-md text-xs">
-                    {getSelectedOfferProduct()?.name}
                   </div>
-                </div>
-              )}
+                )}
+                
+                {productError && (
+                  <Alert variant="destructive" className="mt-2">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>
+                      {productError}
+                    </AlertDescription>
+                  </Alert>
+                )}
+              </div>
               
-              {productError && (
-                <Alert variant="destructive" className="mt-2">
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>
-                    {productError}
+              {showAutoFillAlert && (
+                <Alert variant="default" className="bg-blue-50 border-blue-200">
+                  <AlertCircle className="h-4 w-4 text-blue-600" />
+                  <AlertDescription className="text-blue-700">
+                    Essas informações foram preenchidas automaticamente com base no produto selecionado, mas você pode editar se quiser.
                   </AlertDescription>
                 </Alert>
               )}
             </div>
             
-            {showAutoFillAlert && (
-              <Alert variant="default" className="bg-blue-50 border-blue-200">
-                <AlertCircle className="h-4 w-4 text-blue-600" />
-                <AlertDescription className="text-blue-700">
-                  Essas informações foram preenchidas automaticamente com base no produto selecionado, mas você pode editar se quiser.
-                </AlertDescription>
-              </Alert>
-            )}
+            <div className="space-y-4 mt-6 pt-4 border-t">
+              <h3 className="text-lg font-medium">Aplicar este upsell em massa</h3>
+              
+              <div className="flex items-start space-x-2">
+                <Checkbox 
+                  id="applyToAll" 
+                  checked={upsellData.applyToAllProducts}
+                  onCheckedChange={handleApplyToAllProducts}
+                />
+                <div className="space-y-1">
+                  <Label 
+                    htmlFor="applyToAll" 
+                    className="font-medium"
+                  >
+                    Aplicar este upsell a todos os produtos da loja
+                  </Label>
+                  {upsellData.applyToAllProducts && (
+                    <p className="text-sm text-amber-600">
+                      Este upsell será aplicado automaticamente após qualquer compra feita na loja.
+                    </p>
+                  )}
+                </div>
+              </div>
+              
+              {!upsellData.applyToAllProducts && (
+                <div className="space-y-4 bg-slate-50 p-4 rounded-lg">
+                  <div className="space-y-2">
+                    <Label htmlFor="productFilter">Filtrar produtos pelo nome</Label>
+                    <div className="flex items-center space-x-2">
+                      <div className="relative flex-1">
+                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          id="productFilter"
+                          type="text" 
+                          placeholder="Digite para buscar produtos..." 
+                          value={productNameFilter}
+                          onChange={(e) => setProductNameFilter(e.target.value)}
+                          className="pl-8"
+                        />
+                      </div>
+                      <Button 
+                        variant="outline" 
+                        onClick={handleSelectAllFiltered}
+                        className="whitespace-nowrap"
+                      >
+                        <CheckSquare className="mr-2 h-4 w-4" />
+                        Selecionar todos
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  <div className="max-h-[300px] overflow-y-auto border rounded-md bg-white">
+                    {filteredProducts.length > 0 ? (
+                      <ul className="p-0 m-0 list-none divide-y">
+                        {filteredProducts.map(product => (
+                          <li key={product.id} className={`flex items-center p-3 ${product.id === upsellData.productId ? 'bg-slate-100 opacity-60' : ''}`}>
+                            <Checkbox 
+                              id={`product-${product.id}`} 
+                              checked={upsellData.triggerProductIds.includes(product.id)}
+                              onCheckedChange={() => handleTriggerProductSelect(product.id)}
+                              disabled={product.id === upsellData.productId}
+                              className="mr-3"
+                            />
+                            <Label 
+                              htmlFor={`product-${product.id}`}
+                              className={`flex-1 cursor-pointer ${product.id === upsellData.productId ? 'text-muted-foreground' : ''}`}
+                            >
+                              <div className="font-medium">{product.name}</div>
+                              <div className="text-xs text-muted-foreground">
+                                R${product.price.toFixed(2)} • {product.type === 'digital' ? 'Digital' : 'Físico'}
+                              </div>
+                            </Label>
+                            {product.id === upsellData.productId && (
+                              <span className="text-xs px-2 py-1 bg-slate-200 rounded ml-2">Produto da oferta</span>
+                            )}
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <div className="p-8 text-center text-muted-foreground">
+                        <p>Nenhum produto encontrado para "{productNameFilter}"</p>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="flex items-center space-x-2 text-sm">
+                    <ListFilter className="h-4 w-4 text-muted-foreground" />
+                    <span>
+                      {productNameFilter 
+                        ? `${filteredProducts.length} produtos encontrados com "${productNameFilter}"`
+                        : `${mockProducts.length} produtos no total`}
+                    </span>
+                    <div className="flex-1"></div>
+                    <span className="font-medium">
+                      {upsellData.triggerProductIds.length} produtos selecionados
+                    </span>
+                  </div>
+                </div>
+              )}
+              
+              {(upsellData.triggerProductIds.length === 0 && !upsellData.applyToAllProducts) && (
+                <Alert variant="default" className="bg-slate-50 border-slate-200">
+                  <AlertCircle className="h-4 w-4 text-muted-foreground" />
+                  <AlertDescription className="text-muted-foreground">
+                    Selecione ao menos um produto para ativar o upsell.
+                  </AlertDescription>
+                </Alert>
+              )}
+              
+              {upsellData.applyToAllProducts && upsellData.productId && (
+                <Alert variant="default" className="bg-blue-50 border-blue-200">
+                  <AlertCircle className="h-4 w-4 text-blue-600" />
+                  <AlertDescription className="text-blue-700">
+                    Upsell será aplicado em {mockProducts.length - 1} produtos (todos os produtos exceto o produto da oferta).
+                  </AlertDescription>
+                </Alert>
+              )}
+              
+              {upsellData.triggerProductIds.length > 0 && (
+                <Alert variant="default" className="bg-blue-50 border-blue-200">
+                  <AlertCircle className="h-4 w-4 text-blue-600" />
+                  <AlertDescription className="text-blue-700">
+                    Upsell será aplicado em {upsellData.triggerProductIds.length} produtos.
+                  </AlertDescription>
+                </Alert>
+              )}
+            </div>
           </div>
           
           <Tabs defaultValue="content" className="w-full">
@@ -1000,6 +1125,21 @@ const UpsellBuilder: React.FC<UpsellBuilderProps> = ({ initialData, onSave, prod
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowConfirmDialog(false)}>Cancelar</Button>
             <Button onClick={confirmProductChange}>Substituir conteúdo</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      <Dialog open={showReplaceUpsellDialog} onOpenChange={setShowReplaceUpsellDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Substituir upsells existentes?</DialogTitle>
+            <DialogDescription>
+              Alguns produtos selecionados já possuem upsells ativos. Deseja substituir os upsells anteriores?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowReplaceUpsellDialog(false)}>Cancelar</Button>
+            <Button onClick={handleConfirmReplaceUpsells}>Sim, substituir</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

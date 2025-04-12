@@ -16,9 +16,13 @@ const CriarUpsellPage = () => {
     // and save the data to your backend
     console.log('Upsell data saved:', data);
     
+    const productCount = data.applyToAllProducts 
+      ? "todos os produtos da loja" 
+      : `${data.triggerProductIds.length} produtos`;
+    
     // Show success message
     toast.success("Upsell salvo com sucesso", {
-      description: "Seu upsell foi criado e está pronto para uso.",
+      description: `Seu upsell foi criado e será aplicado a ${productCount}.`,
     });
     
     // Navigate back to upsell list
