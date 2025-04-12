@@ -46,6 +46,7 @@ import CriarOrderBumpPage from "./pages/marketing/CriarOrderBumpPage";
 import CuponsPage from "./pages/marketing/CuponsPage";
 import CriarCupomPage from "./pages/marketing/CriarCupomPage";
 import CrossSellPage from "./pages/marketing/CrossSellPage";
+import CriarCrossSellPage from "./pages/marketing/CriarCrossSellPage";
 import PixelsPage from "./pages/marketing/PixelsPage";
 
 import { ActivationStepsProvider } from "./contexts/ActivationStepsContextWithStores";
@@ -107,6 +108,7 @@ const App: React.FC = () => {
                   <Route path="/marketing/cupons" element={<CuponsPage />} />
                   <Route path="/marketing/cupons/novo" element={<CriarCupomPage />} />
                   <Route path="/marketing/cross-sell" element={<CrossSellPage />} />
+                  <Route path="/marketing/cross-sells/novo" element={<CriarCrossSellPage />} />
                   <Route path="/marketing/pixels" element={<PixelsPage />} />
                   
                   <Route path="/checkouts/descontos" element={<DescontosPage />} />

@@ -1,221 +1,122 @@
 
 import React, { useState } from 'react';
-import { Plus } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Plus, ShoppingBag, SearchX } from 'lucide-react';
+import MarketingLayout from '@/components/marketing/MarketingLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Switch } from '@/components/ui/switch';
+import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import MarketingLayout from '@/components/marketing/MarketingLayout';
-import ProductSelector from '@/components/marketing/ProductSelector';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Product, ProductType, ProductStatus } from '@/types/product';
+import { CrossSell } from '@/types/crossSell';
 
-// Mock products for demo
-const mockProducts: Product[] = [
+// Mock data for cross-sells - in a real app, this would come from an API
+const mockCrossSells: CrossSell[] = [
   {
-    id: "prod_1",
-    name: "iPhone 15 Pro",
-    type: "physical" as ProductType,
-    price: 5999.0,
-    description: "O mais recente iPhone com tecnologia avançada.",
-    status: "active" as ProductStatus,
-    imageUrl: "https://placehold.co/1000x1000/2563eb/ffffff?text=iPhone",
+    id: '1',
+    crossSellProductId: '2',
+    crossSellProductName: 'E-book: Guia de SEO',
+    mainProductIds: ['1'],
+    active: true,
     createdAt: new Date(),
-    updatedAt: new Date()
+    updatedAt: new Date(),
   },
   {
-    id: "prod_2",
-    name: "Whey Protein",
-    type: "physical" as ProductType,
-    price: 147.0,
-    description: "Suplemento proteico para atletas e praticantes de atividade física.",
-    status: "active" as ProductStatus,
-    imageUrl: "https://placehold.co/1000x1000/10b981/ffffff?text=Whey",
+    id: '2',
+    crossSellProductId: '4',
+    crossSellProductName: 'Mousepad Ergonômico',
+    mainProductIds: ['1', '3'],
+    active: true,
     createdAt: new Date(),
-    updatedAt: new Date()
+    updatedAt: new Date(),
   },
-  {
-    id: "prod_3",
-    name: "Curso de Fotografia",
-    type: "digital" as ProductType,
-    price: 129.90,
-    description: "Aprenda técnicas avançadas de fotografia digital.",
-    status: "active" as ProductStatus,
-    imageUrl: "https://placehold.co/1000x1000/f59e0b/ffffff?text=Curso",
-    createdAt: new Date(),
-    updatedAt: new Date()
-  }
 ];
 
-const CrossSellPage = () => {
-  const [showCreateDialog, setShowCreateDialog] = useState(false);
-  const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
-  const [applyToAllProducts, setApplyToAllProducts] = useState(false);
-
-  const handleSelectProduct = (productId: string) => {
-    if (selectedProductIds.includes(productId)) {
-      setSelectedProductIds(prev => prev.filter(id => id !== productId));
-    } else {
-      setSelectedProductIds(prev => [...prev, productId]);
-    }
-  };
-
-  const handleSelectAllFiltered = () => {
-    setSelectedProductIds(mockProducts.map(p => p.id));
-  };
-
-  const handleApplyToAllProducts = (checked: boolean) => {
-    setApplyToAllProducts(checked);
-    if (checked) {
-      setSelectedProductIds([]);
-    }
-  };
+const CrossSellPage: React.FC = () => {
+  const [crossSells] = useState<CrossSell[]>(mockCrossSells);
 
   return (
-    <MarketingLayout 
-      title="Cross-Sell" 
-      description="Configure produtos complementares sugeridos durante o processo de compra."
-    >
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-lg font-medium">Cross-Sell</h2>
-          <p className="text-sm text-muted-foreground">
-            Aumente seu ticket médio com sugestões de produtos complementares.
-          </p>
-        </div>
-        <Button onClick={() => setShowCreateDialog(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          Novo Cross-Sell
+    <MarketingLayout
+      title="Cross-Sell"
+      description="Sugira produtos complementares durante o checkout para aumentar o valor do pedido."
+      actions={
+        <Button asChild>
+          <Link to="/marketing/cross-sells/novo">
+            <Plus className="mr-2 h-4 w-4" />
+            Novo Cross-Sell
+          </Link>
         </Button>
-      </div>
-
-      <div className="grid gap-6 md:grid-cols-2">
-        {/* Exemplo de card de Cross-Sell */}
-        <Card className="group transition-all duration-200 hover:shadow-md">
-          <CardHeader className="pb-3 space-y-1">
-            <div className="flex justify-between items-start">
-              <div>
-                <CardTitle className="text-base">Acessórios para Smartphones</CardTitle>
-                <CardDescription>Associado a 3 produtos</CardDescription>
-              </div>
-              <Switch checked={true} />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-muted-foreground">Produto principal:</span>
-                <span className="font-medium">iPhone 15 Pro</span>
-              </div>
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-muted-foreground">Produtos sugeridos:</span>
-                <span className="font-medium">Capinha, Película, Carregador</span>
-              </div>
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-muted-foreground">Posição:</span>
-                <span className="font-medium">Página do Produto</span>
-              </div>
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-muted-foreground">Taxa de conversão:</span>
-                <span className="font-medium text-success">18%</span>
-              </div>
-              <Separator className="my-1" />
-              <div className="flex justify-end pt-2">
-                <Button variant="outline" size="sm" className="mr-2">
-                  Editar
-                </Button>
-                <Button variant="destructive" size="sm">
-                  Excluir
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Exemplo de outro card de Cross-Sell */}
-        <Card className="group transition-all duration-200 hover:shadow-md">
-          <CardHeader className="pb-3 space-y-1">
-            <div className="flex justify-between items-start">
-              <div>
-                <CardTitle className="text-base">Complementos Fitness</CardTitle>
-                <CardDescription>Associado a 5 produtos</CardDescription>
-              </div>
-              <Switch checked={true} />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-muted-foreground">Produto principal:</span>
-                <span className="font-medium">Whey Protein</span>
-              </div>
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-muted-foreground">Produtos sugeridos:</span>
-                <span className="font-medium">BCAA, Creatina, Shaker</span>
-              </div>
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-muted-foreground">Posição:</span>
-                <span className="font-medium">Carrinho</span>
-              </div>
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-muted-foreground">Taxa de conversão:</span>
-                <span className="font-medium text-success">22%</span>
-              </div>
-              <Separator className="my-1" />
-              <div className="flex justify-end pt-2">
-                <Button variant="outline" size="sm" className="mr-2">
-                  Editar
-                </Button>
-                <Button variant="destructive" size="sm">
-                  Excluir
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Placeholder para novo card */}
-        <Card className="border-dashed flex items-center justify-center h-[270px] cursor-pointer hover:bg-accent/30 transition-all duration-200" onClick={() => setShowCreateDialog(true)}>
-          <div className="text-center">
-            <div className="mx-auto bg-primary/10 h-12 w-12 rounded-full flex items-center justify-center mb-3">
-              <Plus className="h-6 w-6 text-primary" />
-            </div>
-            <h3 className="font-medium mb-1">Adicionar novo Cross-Sell</h3>
-            <p className="text-sm text-muted-foreground max-w-[180px]">
-              Crie novas sugestões de produtos complementares
+      }
+    >
+      {crossSells.length > 0 ? (
+        <div className="grid gap-6">
+          {crossSells.map((crossSell) => (
+            <Card key={crossSell.id} className="overflow-hidden">
+              <CardHeader className="bg-muted/30">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <CardTitle className="text-xl">{crossSell.crossSellProductName}</CardTitle>
+                    <CardDescription>
+                      Aplicado em {crossSell.mainProductIds.length} produto(s)
+                    </CardDescription>
+                  </div>
+                  <Badge variant={crossSell.active ? "success" : "secondary"}>
+                    {crossSell.active ? "Ativo" : "Inativo"}
+                  </Badge>
+                </div>
+              </CardHeader>
+              <CardContent className="pt-6">
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="font-medium mb-2">Produto sugerido:</h4>
+                    <div className="flex items-center bg-muted/30 p-3 rounded-md">
+                      <ShoppingBag className="h-5 w-5 mr-2 text-muted-foreground" />
+                      <span>{crossSell.crossSellProductName}</span>
+                    </div>
+                  </div>
+                  
+                  <Separator />
+                  
+                  <div className="pt-2">
+                    <h4 className="font-medium mb-2">Aplicado aos checkouts com os produtos:</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                      {/* In a real app, you'd map over the actual products */}
+                      <div className="bg-accent/20 p-2 rounded">Curso de Marketing Digital</div>
+                      {crossSell.id === '2' && (
+                        <div className="bg-accent/20 p-2 rounded">Camiseta Premium</div>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div className="flex justify-end gap-2 mt-4">
+                    <Button variant="outline" size="sm">
+                      Editar
+                    </Button>
+                    <Button variant="destructive" size="sm">
+                      Remover
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <Card className="border-dashed">
+          <CardContent className="flex flex-col items-center justify-center p-10 text-center">
+            <SearchX className="h-10 w-10 text-muted-foreground mb-4" />
+            <h3 className="font-semibold text-lg mb-2">Nenhum Cross-Sell configurado</h3>
+            <p className="text-muted-foreground mb-6 max-w-md">
+              Você ainda não configurou nenhum cross-sell. Configure agora para aumentar o valor médio dos pedidos.
             </p>
-          </div>
-        </Card>
-      </div>
-
-      <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-        <DialogContent className="max-w-3xl">
-          <DialogHeader>
-            <DialogTitle>Criar novo Cross-Sell</DialogTitle>
-            <DialogDescription>
-              Selecione os produtos principais aos quais este Cross-Sell será aplicado
-            </DialogDescription>
-          </DialogHeader>
-          
-          <ProductSelector
-            products={mockProducts}
-            selectedProductIds={selectedProductIds}
-            onSelectProduct={handleSelectProduct}
-            onSelectAllFiltered={handleSelectAllFiltered}
-            onApplyToAllProducts={handleApplyToAllProducts}
-            applyToAllProducts={applyToAllProducts}
-            title="Aplicar este Cross-Sell em massa"
-            description="Selecione quais produtos principais terão sugestões de produtos complementares"
-          />
-          
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowCreateDialog(false)}>Cancelar</Button>
-            <Button disabled={selectedProductIds.length === 0 && !applyToAllProducts}>
-              Continuar
+            <Button asChild>
+              <Link to="/marketing/cross-sells/novo">
+                <Plus className="mr-2 h-4 w-4" />
+                Criar Primeiro Cross-Sell
+              </Link>
             </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          </CardContent>
+        </Card>
+      )}
     </MarketingLayout>
   );
 };
