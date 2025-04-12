@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -29,7 +30,11 @@ import {
   BarChart,
   Copy,
   Flame,
-  Plug
+  Plug,
+  Settings,
+  Globe,
+  Truck,
+  Webhook
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { StoreSelector } from '@/components/StoreSelector';
@@ -243,6 +248,28 @@ export const AppSidebar: React.FC<SidebarProps> = ({ className }) => {
           title: 'Trackeamento',
           path: '/integracoes/trackeamento',
           icon: RefreshCw,
+        }
+      ]
+    },
+    {
+      title: 'Configurações',
+      path: '/configuracoes',
+      icon: Settings,
+      subItems: [
+        {
+          title: 'Domínios',
+          path: '/configuracoes/dominios',
+          icon: Globe,
+        },
+        {
+          title: 'Logística',
+          path: '/configuracoes/logistica',
+          icon: Truck,
+        },
+        {
+          title: 'Webhooks',
+          path: '/configuracoes/webhooks',
+          icon: Webhook,
         }
       ]
     },

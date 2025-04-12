@@ -51,6 +51,11 @@ import CriarCrossSellPage from "./pages/marketing/CriarCrossSellPage";
 import EditarCrossSellPage from "./pages/marketing/EditarCrossSellPage";
 import PixelsPage from "./pages/marketing/PixelsPage";
 
+// New Settings Pages
+import DominiosPage from "./pages/configuracoes/DominiosPage";
+import LogisticaPage from "./pages/configuracoes/LogisticaPage";
+import WebhooksPage from "./pages/configuracoes/WebhooksPage";
+
 import { ActivationStepsProvider } from "./contexts/ActivationStepsContextWithStores";
 import { StoreProvider } from "./contexts/StoreContext";
 import { ThemeProvider } from "./providers/ThemeProvider";
@@ -137,6 +142,12 @@ const App: React.FC = () => {
                   <Route path="/integracoes/pixels" element={<PixelsIntegrations />} />
                   <Route path="/integracoes/trackeamento" element={<TrackingIntegrations />} />
                   <Route path="/integracoes/:platform" element={<PixelManagementPage />} />
+                  
+                  {/* New Settings Routes */}
+                  <Route path="/configuracoes" element={<Navigate to="/configuracoes/dominios" replace />} />
+                  <Route path="/configuracoes/dominios" element={<DominiosPage />} />
+                  <Route path="/configuracoes/logistica" element={<LogisticaPage />} />
+                  <Route path="/configuracoes/webhooks" element={<WebhooksPage />} />
                   
                   <Route path="*" element={<NotFound />} />
                 </Routes>
