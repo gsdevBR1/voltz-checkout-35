@@ -12,7 +12,7 @@ export const AdminLayout: React.FC = () => {
         <AdminSidebar />
         <div className="flex-1 flex flex-col">
           <AdminHeader />
-          <main className="flex-1 overflow-auto">
+          <main className="flex-1 overflow-auto p-0">
             <Outlet />
           </main>
         </div>
