@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
@@ -66,6 +67,16 @@ const defaultDownsellTemplate = {
   redirectType: 'url',
   redirectUpsellId: '',
   fallbackRedirectUrl: 'https://voltz.checkout/obrigado',
+  // These properties are required by the upsellData type
+  hasDownsell: false,
+  downsellProductId: '',
+  downsellProductName: '',
+  downsellPrice: 0,
+  downsellImage: '',
+  downsellDescription: '',
+  downsellRedirectType: 'url',
+  downsellRedirectUpsellId: '',
+  downsellRedirectUrl: 'https://voltz.checkout/obrigado',
   showOriginalPrice: true,
   showScarcityBadge: true,
   scarcityText: 'Restam apenas 9 unidades!',
@@ -182,7 +193,8 @@ const UpsellDisplay: React.FC<UpsellDisplayProps> = ({ previewMode = false }) =>
         if (downsell) {
           // For downsell pages, use the downsell template with specific product data
           setUpsellData({
-            ...defaultDownsellTemplate,
+            ...mockUpsellData, // Start with all the properties from mockUpsellData
+            ...defaultDownsellTemplate, // Override with downsell template properties
             productName: downsell.productName,
             productImage: downsell.imageUrl,
             discountPrice: downsell.price,
