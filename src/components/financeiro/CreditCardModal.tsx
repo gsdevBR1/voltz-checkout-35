@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
@@ -36,7 +35,6 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 
-// Card validation schema
 const creditCardSchema = z.object({
   cardNumber: z
     .string()
@@ -87,14 +85,12 @@ const CreditCardModal: React.FC<CreditCardModalProps> = ({
     },
   });
 
-  // Detect card type based on number
   const detectCardType = (number: string) => {
     const visaRegex = /^4/;
     const mastercardRegex = /^5[1-5]/;
     const amexRegex = /^3[47]/;
     const eloRegex = /^(401178|401179|438935|457631|457632|504175|506699|509048|509067|509049|509069|509050|509074|509068|509040|509045|509051|509046|509066|509047|509042|509052|509043|509064|509040|36297|5067)/;
     
-    // Cleanup the number (remove spaces)
     const cleanNumber = number.replace(/\s+/g, '');
     
     if (visaRegex.test(cleanNumber)) return 'Visa';
@@ -104,7 +100,6 @@ const CreditCardModal: React.FC<CreditCardModalProps> = ({
     return '';
   };
 
-  // Format card number with spaces
   const formatCardNumber = (value: string) => {
     const v = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
     const matches = v.match(/\d{4,16}/g);
@@ -122,7 +117,6 @@ const CreditCardModal: React.FC<CreditCardModalProps> = ({
     }
   };
 
-  // Format expiry date with slash
   const formatExpiryDate = (value: string) => {
     const v = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
     
@@ -133,7 +127,6 @@ const CreditCardModal: React.FC<CreditCardModalProps> = ({
     return v;
   };
 
-  // Format CPF with dots and dash
   const formatCPF = (value: string) => {
     const v = value.replace(/\D/g, '');
     
@@ -152,13 +145,10 @@ const CreditCardModal: React.FC<CreditCardModalProps> = ({
     setIsSubmitting(true);
     
     try {
-      // Here you would implement the actual tokenization with your payment gateway
-      // This is just a mock implementation for demonstration purposes
       await new Promise(resolve => setTimeout(resolve, 1500));
       
       console.log('Card data to be tokenized:', data);
       
-      // Success message
       toast({
         title: "Cartão atualizado",
         description: "Seu cartão foi salvo com sucesso!",
@@ -205,10 +195,10 @@ const CreditCardModal: React.FC<CreditCardModalProps> = ({
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 pt-2">
             {existingCard && (
-              <div className="bg-slate-50 p-3 rounded-md mb-4">
-                <p className="text-sm text-slate-600">Cartão atual:</p>
+              <div className="bg-[#1E1E1E] dark:bg-[#1E1E1E] dark:bg-opacity-50 p-3 rounded-md mb-4 border border-white/5 shadow-sm dark:shadow-black/10">
+                <p className="text-sm text-slate-600 dark:text-[#B3B3B3]">Cartão atual:</p>
                 <div className="flex items-center mt-1">
-                  <CreditCard className="h-4 w-4 mr-2 text-slate-600" />
+                  <CreditCard className="h-4 w-4 mr-2 text-slate-600 dark:text-slate-300" />
                   <span className="font-medium">
                     {existingCard.brand} •••• {existingCard.last4}
                   </span>
