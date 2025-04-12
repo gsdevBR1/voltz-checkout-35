@@ -1,3 +1,4 @@
+
 import { Link } from "react-router-dom"
 import {
   DropdownMenu,
@@ -34,7 +35,7 @@ export function DashboardHeader() {
         <div className="flex items-center gap-3">
           <ThemeToggle />
           
-          {/* Add Admin Panel Link - discreet, only visible to those who know */}
+          {/* Admin Panel Link - More visible now */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
@@ -59,9 +60,9 @@ export function DashboardHeader() {
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
-                <Link to="/admin/login" className="text-[#10B981]">
+                <Link to="/admin/login" className="flex items-center text-[#10B981] font-medium">
                   <Shield className="h-4 w-4 mr-2" />
-                  Admin
+                  Admin Panel
                 </Link>
               </DropdownMenuItem>
             </DropdownMenuContent>

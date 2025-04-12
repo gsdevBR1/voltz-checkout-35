@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { useStores } from '@/contexts/StoreContext';
 import { useActivationSteps, useCheckActivationStatus } from '@/contexts/ActivationStepsContextWithStores';
@@ -7,10 +6,21 @@ import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { AlertTriangle, Plus } from 'lucide-react';
+import { AlertTriangle, Plus, Shield } from 'lucide-react';
 import DashboardLayout from '@/components/DashboardLayout';
 import ActivationStepCard from '@/components/ActivationStepCard';
 import ShopifyCard from '@/components/ShopifyCard';
+
+function AdminAccessButton() {
+  return (
+    <Link 
+      to="/admin/login" 
+      className="fixed bottom-4 right-4 bg-[#1E1E1E] hover:bg-[#262626] text-[#10B981] p-2 rounded-full shadow-lg flex items-center justify-center"
+    >
+      <Shield className="h-6 w-6" />
+    </Link>
+  );
+}
 
 const HomePage = () => {
   const { currentStore, isStoresLoading } = useStores();
@@ -19,7 +29,6 @@ const HomePage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Show a welcome toast on first load
   useEffect(() => {
     if (currentStore && !isStoresLoading) {
       toast({
@@ -43,7 +52,6 @@ const HomePage = () => {
     );
   }
 
-  // Filter required and optional steps
   const requiredSteps = steps.filter(step => step.isRequired);
   const optionalSteps = steps.filter(step => !step.isRequired);
 
@@ -107,7 +115,6 @@ const HomePage = () => {
           ))}
         </div>
 
-        {/* Optional steps section */}
         {optionalSteps.length > 0 && (
           <div className="mt-10">
             <h2 className="text-xl font-semibold mb-4">
@@ -123,6 +130,8 @@ const HomePage = () => {
             </div>
           </div>
         )}
+
+        <AdminAccessButton />
       </div>
     </DashboardLayout>
   );

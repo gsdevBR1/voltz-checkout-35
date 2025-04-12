@@ -1,11 +1,12 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Shield, Eye, EyeOff } from 'lucide-react';
+import { Shield, Eye, EyeOff, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
+import { Link } from 'react-router-dom';
 
 const AdminLoginPage: React.FC = () => {
   const navigate = useNavigate();
@@ -13,6 +14,13 @@ const AdminLoginPage: React.FC = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    // Check if already logged in as admin
+    if (localStorage.getItem('is_admin') === 'true') {
+      navigate('/admin');
+    }
+  }, [navigate]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,6 +52,12 @@ const AdminLoginPage: React.FC = () => {
     <div className="flex h-screen items-center justify-center bg-[#0A0A0A]">
       <Card className="w-[400px] bg-[#1E1E1E] border-white/5 shadow-2xl">
         <CardHeader className="space-y-1">
+          <div className="flex justify-between items-center mb-2">
+            <Link to="/pagina-inicial" className="text-gray-400 hover:text-white">
+              <ArrowLeft className="h-5 w-5" />
+            </Link>
+            <div></div>
+          </div>
           <div className="flex justify-center mb-6">
             <Shield className="h-12 w-12 text-[#10B981]" />
           </div>
@@ -112,7 +126,7 @@ const AdminLoginPage: React.FC = () => {
           <p className="text-center text-xs text-gray-500 w-full mt-2">
             Esta área é exclusiva para administradores da plataforma.
             <br />
-            Acessos são monitorados e registrados.
+            Use email: admin@voltz.checkout e senha: admin para teste.
           </p>
         </CardFooter>
       </Card>
