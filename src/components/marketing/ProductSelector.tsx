@@ -51,14 +51,14 @@ const ProductSelector: React.FC<ProductSelectorProps> = ({
     <div className="space-y-5 mt-8 pt-6 border-t">
       <h3 className="text-lg font-medium">{title}</h3>
       
-      <div className="bg-gradient-to-b from-slate-50 to-white dark:from-slate-900 dark:to-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700 transition-all hover:border-slate-300 dark:hover:border-slate-600 shadow-sm">
+      <div className="bg-gradient-to-b from-muted/50 to-card rounded-xl p-6 border border-border transition-all hover:border-border/60 shadow-sm">
         <div className="flex items-start space-x-3">
           <div className="flex h-6 items-center mt-0.5">
             <Checkbox 
               id="applyToAll" 
               checked={applyToAllProducts}
               onCheckedChange={onApplyToAllProducts}
-              className="h-5 w-5 rounded-sm transition-colors data-[state=checked]:bg-emerald-600 data-[state=checked]:border-emerald-600 hover:border-emerald-400"
+              className="h-5 w-5 rounded-sm transition-colors data-[state=checked]:bg-primary data-[state=checked]:border-primary hover:border-primary/70"
             />
           </div>
           <div className="space-y-1.5">
@@ -81,25 +81,25 @@ const ProductSelector: React.FC<ProductSelectorProps> = ({
       </div>
       
       {!applyToAllProducts && (
-        <div className="space-y-4 bg-gradient-to-b from-white to-slate-50 dark:from-slate-900 dark:to-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+        <div className="space-y-4 bg-gradient-to-b from-card to-muted/50 p-6 rounded-xl border border-border shadow-sm">
           <div className="space-y-3">
             <Label htmlFor="productFilter" className="font-medium">Filtrar produtos pelo nome</Label>
             <div className="flex items-center space-x-3 flex-col sm:flex-row gap-3 sm:gap-0">
               <div className="relative flex-1 w-full">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="productFilter"
                   type="text" 
                   placeholder="Buscar produtos por nome..."
                   value={productNameFilter}
                   onChange={(e) => setProductNameFilter(e.target.value)}
-                  className="pl-10 py-6 h-auto border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-offset-1 focus:ring-primary"
+                  className="pl-10 py-6 h-auto border-input rounded-lg focus:ring-2 focus:ring-offset-1 focus:ring-primary"
                 />
               </div>
               <Button 
                 variant="outline" 
                 onClick={onSelectAllFiltered}
-                className="whitespace-nowrap font-medium transition-all h-auto py-2.5 px-4 hover:bg-slate-100 dark:hover:bg-slate-700 border-slate-300 dark:border-slate-600"
+                className="whitespace-nowrap font-medium transition-all h-auto py-2.5 px-4 hover:bg-accent border-input"
               >
                 <CheckSquare className="mr-2 h-4 w-4 text-primary" />
                 Selecionar todos
@@ -107,9 +107,9 @@ const ProductSelector: React.FC<ProductSelectorProps> = ({
             </div>
           </div>
           
-          <div className="max-h-[350px] overflow-y-auto border rounded-lg bg-white dark:bg-slate-900 shadow-sm">
+          <div className="max-h-[350px] overflow-y-auto border rounded-lg bg-card shadow-sm">
             {filteredProducts.length > 0 ? (
-              <ul className="p-0 m-0 list-none divide-y divide-slate-100 dark:divide-slate-800">
+              <ul className="p-0 m-0 list-none divide-y divide-border/40">
                 {filteredProducts.map(product => {
                   const isSelected = selectedProductIds.includes(product.id);
                   const isDisabled = product.id === excludedProductId;
@@ -118,9 +118,9 @@ const ProductSelector: React.FC<ProductSelectorProps> = ({
                     <li 
                       key={product.id} 
                       className={`${
-                        isDisabled ? 'bg-slate-100/50 dark:bg-slate-800/50 opacity-60' : 
-                        isSelected ? 'bg-emerald-50 dark:bg-emerald-950/20' : ''
-                      } transition-colors hover:bg-slate-50 dark:hover:bg-slate-800 rounded-md m-1`}
+                        isDisabled ? 'bg-muted/40 opacity-60' : 
+                        isSelected ? 'bg-success/10 dark:bg-success/5' : ''
+                      } transition-colors hover:bg-accent/30 rounded-md m-1`}
                     >
                       <div className="flex items-center p-4">
                         <Checkbox 
@@ -128,7 +128,7 @@ const ProductSelector: React.FC<ProductSelectorProps> = ({
                           checked={isSelected}
                           onCheckedChange={() => onSelectProduct(product.id)}
                           disabled={isDisabled}
-                          className="mr-3 h-5 w-5 rounded-sm transition-colors data-[state=checked]:bg-emerald-600 data-[state=checked]:border-emerald-600"
+                          className="mr-3 h-5 w-5 rounded-sm transition-colors data-[state=checked]:bg-success data-[state=checked]:border-success"
                         />
                         <Label 
                           htmlFor={`product-${product.id}`}
@@ -136,21 +136,21 @@ const ProductSelector: React.FC<ProductSelectorProps> = ({
                         >
                           <div className="font-medium text-base">{product.name}</div>
                           <div className="flex items-center gap-2 mt-1 sm:mt-0">
-                            <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                            <span className="text-sm font-semibold text-foreground/80">
                               R${product.price.toFixed(2)}
                             </span>
                             <Badge variant="outline" className={`
                               text-xs px-2 py-0.5 
                               ${product.type === 'digital' 
-                                ? 'bg-blue-50 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400 border-blue-200 dark:border-blue-800' 
-                                : 'bg-purple-50 text-purple-700 dark:bg-purple-950/30 dark:text-purple-400 border-purple-200 dark:border-purple-800'}
+                                ? 'bg-primary/10 text-primary dark:bg-primary/20 border-primary/30' 
+                                : 'bg-secondary/10 text-secondary dark:bg-secondary/20 border-secondary/30'}
                             `}>
                               {product.type === 'digital' ? 'Digital' : 'Físico'}
                             </Badge>
                           </div>
                         </Label>
                         {isDisabled && (
-                          <span className="text-xs px-2 py-1 bg-slate-200 dark:bg-slate-700 rounded-md ml-2">Produto da oferta</span>
+                          <span className="text-xs px-2 py-1 bg-muted dark:bg-muted/70 rounded-md ml-2">Produto da oferta</span>
                         )}
                       </div>
                     </li>
@@ -164,7 +164,7 @@ const ProductSelector: React.FC<ProductSelectorProps> = ({
             )}
           </div>
           
-          <div className="flex items-center justify-between text-sm p-2 mt-2 bg-slate-100 dark:bg-slate-800 rounded-md">
+          <div className="flex items-center justify-between text-sm p-2 mt-2 bg-muted/60 dark:bg-muted/40 rounded-md">
             <div className="flex items-center space-x-2">
               <Filter className="h-4 w-4 text-muted-foreground" />
               <span>
@@ -173,7 +173,7 @@ const ProductSelector: React.FC<ProductSelectorProps> = ({
                   : `${products.length} produtos no total`}
               </span>
             </div>
-            <span className="font-semibold bg-slate-200 dark:bg-slate-700 px-2 py-1 rounded-md">
+            <span className="font-semibold bg-muted dark:bg-muted/70 px-2 py-1 rounded-md">
               {selectedProductIds.length} produtos selecionados
             </span>
           </div>
@@ -181,9 +181,9 @@ const ProductSelector: React.FC<ProductSelectorProps> = ({
       )}
       
       {(selectedProductIds.length === 0 && !applyToAllProducts) && (
-        <Alert variant="default" className="bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700">
-          <AlertCircle className="h-4 w-4 text-slate-500" />
-          <AlertDescription className="text-slate-600 dark:text-slate-400">
+        <Alert variant="default" className="bg-muted/40 dark:bg-muted/20 border-border">
+          <AlertCircle className="h-4 w-4 text-muted-foreground" />
+          <AlertDescription className="text-muted-foreground">
             Selecione ao menos um produto para ativar o upsell.
           </AlertDescription>
         </Alert>

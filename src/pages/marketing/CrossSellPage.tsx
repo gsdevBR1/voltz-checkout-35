@@ -89,10 +89,10 @@ const CrossSellPage = () => {
         </Button>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-6 md:grid-cols-2">
         {/* Exemplo de card de Cross-Sell */}
-        <Card>
-          <CardHeader className="pb-3">
+        <Card className="group transition-all duration-200 hover:shadow-md">
+          <CardHeader className="pb-3 space-y-1">
             <div className="flex justify-between items-start">
               <div>
                 <CardTitle className="text-base">Acessórios para Smartphones</CardTitle>
@@ -117,9 +117,9 @@ const CrossSellPage = () => {
               </div>
               <div className="flex justify-between items-center text-sm">
                 <span className="text-muted-foreground">Taxa de conversão:</span>
-                <span className="font-medium text-green-600">18%</span>
+                <span className="font-medium text-success">18%</span>
               </div>
-              <Separator />
+              <Separator className="my-1" />
               <div className="flex justify-end pt-2">
                 <Button variant="outline" size="sm" className="mr-2">
                   Editar
@@ -133,8 +133,8 @@ const CrossSellPage = () => {
         </Card>
 
         {/* Exemplo de outro card de Cross-Sell */}
-        <Card>
-          <CardHeader className="pb-3">
+        <Card className="group transition-all duration-200 hover:shadow-md">
+          <CardHeader className="pb-3 space-y-1">
             <div className="flex justify-between items-start">
               <div>
                 <CardTitle className="text-base">Complementos Fitness</CardTitle>
@@ -159,9 +159,9 @@ const CrossSellPage = () => {
               </div>
               <div className="flex justify-between items-center text-sm">
                 <span className="text-muted-foreground">Taxa de conversão:</span>
-                <span className="font-medium text-green-600">22%</span>
+                <span className="font-medium text-success">22%</span>
               </div>
-              <Separator />
+              <Separator className="my-1" />
               <div className="flex justify-end pt-2">
                 <Button variant="outline" size="sm" className="mr-2">
                   Editar
@@ -175,7 +175,7 @@ const CrossSellPage = () => {
         </Card>
 
         {/* Placeholder para novo card */}
-        <Card className="border-dashed flex items-center justify-center h-[270px] cursor-pointer hover:bg-accent/30 transition-colors" onClick={() => setShowCreateDialog(true)}>
+        <Card className="border-dashed flex items-center justify-center h-[270px] cursor-pointer hover:bg-accent/30 transition-all duration-200" onClick={() => setShowCreateDialog(true)}>
           <div className="text-center">
             <div className="mx-auto bg-primary/10 h-12 w-12 rounded-full flex items-center justify-center mb-3">
               <Plus className="h-6 w-6 text-primary" />
