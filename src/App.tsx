@@ -37,6 +37,7 @@ import PersonalizarCheckoutPage from "./pages/checkouts/PersonalizarCheckoutPage
 import ProvasSociaisPage from "./pages/checkouts/ProvasSociaisPage";
 import GatewaysPage from "./pages/checkouts/GatewaysPage";
 import RedirecionamentoPage from "./pages/checkouts/RedirecionamentoPage";
+import MoedaIdiomaPage from "./pages/checkouts/MoedaIdiomaPage";
 
 import UpsellOnePage from "./pages/marketing/UpsellOnePage";
 import CriarUpsellPage from "./pages/marketing/CriarUpsellPage";
@@ -132,6 +133,7 @@ const App: React.FC = () => {
                   <Route path="/checkouts/provas-sociais" element={<ProvasSociaisPage />} />
                   <Route path="/checkouts/gateways" element={<GatewaysPage />} />
                   <Route path="/checkouts/redirecionamento" element={<RedirecionamentoPage />} />
+                  <Route path="/checkouts/moeda-idioma" element={<MoedaIdiomaPage />} />
                   <Route path="/steps/billing" element={<BillingStep />} />
                   <Route path="/steps/domain" element={<DomainStep />} />
                   <Route path="/steps/gateway" element={<GatewayStep />} />

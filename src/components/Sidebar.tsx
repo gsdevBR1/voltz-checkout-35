@@ -35,7 +35,8 @@ import {
   Globe,
   Truck,
   Webhook,
-  Store
+  Store,
+  Languages
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { StoreSelector } from '@/components/StoreSelector';
@@ -217,6 +218,11 @@ export const AppSidebar: React.FC<SidebarProps> = ({ className }) => {
           title: 'Provas Sociais',
           path: '/checkouts/provas-sociais',
           icon: MessageSquare,
+        },
+        {
+          title: 'Moeda e Idioma',
+          path: '/checkouts/moeda-idioma',
+          icon: Languages,
         },
         {
           title: 'Gateways',
