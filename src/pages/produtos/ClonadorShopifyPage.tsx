@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -162,7 +163,7 @@ const ClonadorShopifyPage: React.FC = () => {
       toast({
         title: "Produto encontrado!",
         description: "Os dados do produto foram carregados com sucesso.",
-        variant: "success",
+        variant: "default", // Change from "success" to "default"
       });
     } catch (error) {
       console.error("Error fetching product:", error);
@@ -191,7 +192,7 @@ const ClonadorShopifyPage: React.FC = () => {
       toast({
         title: "Produto clonado com sucesso!",
         description: "O produto foi adicionado à sua loja e vinculado ao checkout VOLTZ.",
-        variant: "success",
+        variant: "default", // Change from "success" to "default"
       });
       
       form.reset();
