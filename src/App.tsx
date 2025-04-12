@@ -96,6 +96,7 @@ const App: React.FC = () => {
               <BrowserRouter>
                 <Routes>
                   <Route path="/" element={<Navigate to="/pagina-inicial" replace />} />
+                  
                   <Route path="/pagina-inicial" element={<HomePage />} />
                   <Route path="/lojas" element={<Stores />} />
                   <Route path="/dashboard" element={<Dashboard />} />
@@ -165,13 +166,12 @@ const App: React.FC = () => {
                   <Route path="/configuracoes/logistica" element={<LogisticaPage />} />
                   <Route path="/configuracoes/webhooks" element={<WebhooksPage />} />
                   
-                  <Route path="usuarios" element={<AdminUsersList />} />
-                  
                   {/* Admin Routes */}
                   <Route path="/admin/login" element={<AdminLoginPage />} />
                   <Route path="/admin" element={<AdminLayout />}>
                     <Route index element={<AdminDashboard />} />
                     <Route path="lojas" element={<AdminStoresList />} />
+                    <Route path="usuarios" element={<AdminUsersList />} />
                     <Route path="*" element={<Navigate to="/admin" replace />} />
                   </Route>
                   
