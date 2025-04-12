@@ -1,13 +1,75 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
 import MarketingLayout from '@/components/marketing/MarketingLayout';
+import ProductSelector from '@/components/marketing/ProductSelector';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+
+// Mock products for demo
+const mockProducts = [
+  {
+    id: "prod_1",
+    name: "Curso Avançado de Marketing Digital",
+    type: "digital",
+    price: 197.0,
+    description: "Aprenda estratégias avançadas de marketing digital com este curso completo.",
+    status: "active",
+    imageUrl: "https://placehold.co/1000x1000/2563eb/ffffff?text=Curso+Marketing",
+    createdAt: new Date(),
+    updatedAt: new Date()
+  },
+  {
+    id: "prod_2",
+    name: "E-book: Transformação Digital para Empresas",
+    type: "digital",
+    price: 47.0,
+    description: "Guia completo para implementar a transformação digital no seu negócio.",
+    status: "active",
+    imageUrl: "https://placehold.co/1000x1000/10b981/ffffff?text=E-book",
+    createdAt: new Date(),
+    updatedAt: new Date()
+  },
+  {
+    id: "prod_3",
+    name: "Template de Planilha para Gestão Financeira",
+    type: "digital",
+    price: 29.90,
+    description: "Controle suas finanças com esta planilha profissional.",
+    status: "active",
+    imageUrl: "https://placehold.co/1000x1000/f59e0b/ffffff?text=Planilha",
+    createdAt: new Date(),
+    updatedAt: new Date()
+  }
+];
 
 const OrderBumpsPage = () => {
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
+  const [applyToAllProducts, setApplyToAllProducts] = useState(false);
+
+  const handleSelectProduct = (productId: string) => {
+    if (selectedProductIds.includes(productId)) {
+      setSelectedProductIds(prev => prev.filter(id => id !== productId));
+    } else {
+      setSelectedProductIds(prev => [...prev, productId]);
+    }
+  };
+
+  const handleSelectAllFiltered = () => {
+    setSelectedProductIds(mockProducts.map(p => p.id));
+  };
+
+  const handleApplyToAllProducts = (checked: boolean) => {
+    setApplyToAllProducts(checked);
+    if (checked) {
+      setSelectedProductIds([]);
+    }
+  };
+
   return (
     <MarketingLayout 
       title="Order Bumps" 
@@ -20,7 +82,7 @@ const OrderBumpsPage = () => {
             Aumente o valor médio do pedido com ofertas no checkout.
           </p>
         </div>
-        <Button>
+        <Button onClick={() => setShowCreateDialog(true)}>
           <Plus className="mr-2 h-4 w-4" />
           Novo Order Bump
         </Button>
@@ -70,7 +132,7 @@ const OrderBumpsPage = () => {
         </Card>
 
         {/* Placeholder para novo card */}
-        <Card className="border-dashed flex items-center justify-center h-[270px] cursor-pointer hover:bg-accent/30 transition-colors">
+        <Card className="border-dashed flex items-center justify-center h-[270px] cursor-pointer hover:bg-accent/30 transition-colors" onClick={() => setShowCreateDialog(true)}>
           <div className="text-center">
             <div className="mx-auto bg-primary/10 h-12 w-12 rounded-full flex items-center justify-center mb-3">
               <Plus className="h-6 w-6 text-primary" />
@@ -82,6 +144,35 @@ const OrderBumpsPage = () => {
           </div>
         </Card>
       </div>
+
+      <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Criar novo Order Bump</DialogTitle>
+            <DialogDescription>
+              Selecione os produtos aos quais este Order Bump será aplicado
+            </DialogDescription>
+          </DialogHeader>
+          
+          <ProductSelector
+            products={mockProducts}
+            selectedProductIds={selectedProductIds}
+            onSelectProduct={handleSelectProduct}
+            onSelectAllFiltered={handleSelectAllFiltered}
+            onApplyToAllProducts={handleApplyToAllProducts}
+            applyToAllProducts={applyToAllProducts}
+            title="Aplicar este Order Bump em massa"
+            description="Selecione quais produtos terão esta oferta no checkout"
+          />
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCreateDialog(false)}>Cancelar</Button>
+            <Button disabled={selectedProductIds.length === 0 && !applyToAllProducts}>
+              Continuar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </MarketingLayout>
   );
 };

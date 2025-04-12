@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import MarketingLayout from '@/components/marketing/MarketingLayout';
 import UpsellBuilder from '@/components/marketing/UpsellBuilder';
 import { toast } from 'sonner';
