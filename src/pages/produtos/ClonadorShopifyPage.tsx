@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -42,12 +41,16 @@ import { formatCurrency } from '@/lib/utils';
 
 const singleProductFormSchema = z.object({
   productLink: z.string()
-    .url({ message: "O URL do produto é inválido." })
+    .url({ message: "O URL do produto é inválido. Insira um link completo incluindo https://" })
+    .refine(url => {
+      const hasProductsPath = url.includes('/products/') || url.includes('/produto/') || url.includes('/collection/');
+      return hasProductsPath;
+    }, { message: "O URL deve ser um link direto para um produto (ex: loja.com/products/nome-do-produto)" })
 });
 
 const storeFormSchema = z.object({
   storeLink: z.string()
-    .url({ message: "O URL da loja é inválido." })
+    .url({ message: "O URL da loja é inválido. Insira um link completo incluindo https://" })
 });
 
 const productFormSchema = z.object({
@@ -92,19 +95,23 @@ const ClonadorShopifyPage: React.FC = () => {
     },
   });
 
-  // Helper function to detect if a URL is likely from a Shopify store
   const isShopifyStore = (url: string): boolean => {
-    // This would be a more comprehensive check in a real implementation
-    // For now, we'll simulate detection for both myshopify.com domains and custom domains
-    return url.includes('shopify.com') || url.includes('.myshopify.com') || 
-           // Simulating detection of custom Shopify domains
-           url.includes('lojachic.com.br') || url.includes('tenisbonito.com') || 
-           url.includes('superloja.com.br');
+    return url.includes('shopify.com') || 
+           url.includes('.myshopify.com') || 
+           url.includes('/products/') || 
+           url.includes('/collections/') || 
+           url.includes('/produto/') ||
+           url.includes('lojachic.com.br') || 
+           url.includes('tenisbonito.com') || 
+           url.includes('superloja.com.br') ||
+           url.includes('tenispremium.com') ||
+           url.includes('superdrop.com');
   };
 
-  // Helper function to check if URL is a product page
   const isProductUrl = (url: string): boolean => {
-    return url.includes('/products/') || url.includes('/collections/') || url.includes('/produto/');
+    return url.includes('/products/') || 
+           url.includes('/collections/') || 
+           url.includes('/produto/');
   };
 
   const fetchProductData = async (url: string) => {
@@ -114,27 +121,22 @@ const ClonadorShopifyPage: React.FC = () => {
       if (!isShopifyStore(url)) {
         toast({
           title: "Erro ao verificar loja",
-          description: "Não conseguimos reconhecer essa loja como Shopify. Verifique o URL fornecido.",
+          description: "Essa loja não parece ser uma loja Shopify. Verifique o URL fornecido.",
           variant: "destructive",
         });
         return;
       }
 
-      // Simulate API attempt first
       let useScrapingFallback = !url.includes('.myshopify.com') && !url.includes('shopify.com');
       
-      // If we need to use scraping (or we're simulating that scenario)
       if (useScrapingFallback) {
         setDetectionMethod('scraping');
-        // Simulate scraping delay
         await new Promise(resolve => setTimeout(resolve, 2500));
       } else {
         setDetectionMethod('api');
-        // Simulate API call delay
         await new Promise(resolve => setTimeout(resolve, 1500));
       }
       
-      // Mock product data - in a real implementation this would come from API or scraping
       const mockProduct: ShopifyProduct = {
         id: "shopify_1234567890",
         title: "Produto Demonstrativo Shopify" + (useScrapingFallback ? " (via Scraping)" : ""),
@@ -245,25 +247,22 @@ const ClonadorShopifyPage: React.FC = () => {
       if (!isShopifyStore(url)) {
         toast({
           title: "Erro ao verificar loja",
-          description: "Não conseguimos reconhecer essa loja como Shopify. Verifique o URL fornecido.",
+          description: "Essa loja não parece ser uma loja Shopify. Verifique o URL fornecido.",
           variant: "destructive",
         });
         return;
       }
       
-      // Determine if we need to use scraping based on domain
       const useScrapingFallback = !url.includes('.myshopify.com') && !url.includes('shopify.com');
       setDetectionMethod(useScrapingFallback ? 'scraping' : 'api');
       
-      // Simulate detection delay - longer for scraping
       if (useScrapingFallback) {
         await new Promise(resolve => setTimeout(resolve, 3000));
       } else {
         await new Promise(resolve => setTimeout(resolve, 2000));
       }
       
-      // Mock result - in a real app, this would be the actual result of scanning the store
-      const productCount = Math.floor(Math.random() * 30) + 5; // Random number between 5 and 34
+      const productCount = Math.floor(Math.random() * 30) + 5;
       
       setFoundProducts(productCount);
       
@@ -289,7 +288,6 @@ const ClonadorShopifyPage: React.FC = () => {
       setIsStoreCloningInProgress(true);
       setStoreCloningProgress(0);
       
-      // Simulate a progressive cloning process
       for (let i = 1; i <= 10; i++) {
         await new Promise(resolve => setTimeout(resolve, 1000));
         setStoreCloningProgress(i * 10);
@@ -304,7 +302,6 @@ const ClonadorShopifyPage: React.FC = () => {
       storeForm.reset();
       setFoundProducts(null);
       setDetectionMethod(null);
-      
     } catch (error) {
       console.error("Error cloning store:", error);
       toast({
