@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -51,14 +50,12 @@ const PixelManagementPage: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
 
   useEffect(() => {
-    // Find the integration based on the platform URL param
     const foundIntegration = pixelsIntegrations.find(i => 
       i.platform === platform || i.platform.replace('_', '-') === platform
     );
     
     if (foundIntegration) {
       setIntegration(foundIntegration);
-      // Initialize with mock data for now
       setPixels(foundIntegration.pixels || []);
     } else {
       navigate('/integracoes/pixels');
@@ -92,7 +89,6 @@ const PixelManagementPage: React.FC = () => {
 
   const handleSavePixel = (pixelData: PixelConfig) => {
     if (currentPixel) {
-      // Update existing pixel
       setPixels(prev => 
         prev.map(p => p.id === pixelData.id ? pixelData : p)
       );
@@ -101,7 +97,6 @@ const PixelManagementPage: React.FC = () => {
         description: `O pixel ${pixelData.name} foi atualizado com sucesso.`,
       });
     } else {
-      // Add new pixel
       const newPixel = {
         ...pixelData,
         id: `pixel-${Date.now()}`,
@@ -323,16 +318,15 @@ const PixelManagementPage: React.FC = () => {
         )}
       </div>
       
-      {/* Add/Edit Pixel Dialog */}
       <AddEditPixelDialog
         isOpen={isAddEditOpen}
         onClose={() => setIsAddEditOpen(false)}
-        onSave={handleSavePixel}
+        onSubmit={handleSavePixel}
         pixel={currentPixel}
-        platform={integration.platform}
+        platformId={integration.platform}
+        isEdit={!!currentPixel}
       />
       
-      {/* Delete Confirmation Dialog */}
       <DeleteConfirmDialog
         isOpen={isDeleteOpen}
         onClose={() => setIsDeleteOpen(false)}
