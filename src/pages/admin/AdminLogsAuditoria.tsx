@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   Table, 
@@ -58,7 +57,10 @@ const AdminLogsAuditoria = () => {
     to: new Date() 
   });
 
-  // Mock data for logs
+  const handleDateRangeChange = (range: DateRange | undefined) => {
+    setDateRange(range);
+  };
+
   const allLogs: LogEntry[] = [
     {
       id: "log1",
@@ -201,12 +203,10 @@ const AdminLogsAuditoria = () => {
   const filterLogs = () => {
     let filteredLogs = allLogs;
     
-    // Filter by tab (all logs or specific action type)
     if (activeTab !== "all") {
       filteredLogs = filteredLogs.filter(log => log.actionType === activeTab);
     }
     
-    // Filter by search term
     if (search) {
       const searchLower = search.toLowerCase();
       filteredLogs = filteredLogs.filter(log => 
@@ -216,17 +216,14 @@ const AdminLogsAuditoria = () => {
       );
     }
     
-    // Filter by action type
     if (actionTypeFilter) {
       filteredLogs = filteredLogs.filter(log => log.actionType === actionTypeFilter);
     }
     
-    // Filter by result
     if (resultFilter) {
       filteredLogs = filteredLogs.filter(log => log.result === resultFilter);
     }
     
-    // Filter by date range
     if (dateRange?.from) {
       filteredLogs = filteredLogs.filter(log => {
         const logDate = new Date(log.timestamp);
@@ -250,7 +247,6 @@ const AdminLogsAuditoria = () => {
       return;
     }
     
-    // Format logs data for CSV
     const csvData = logs.map(log => ({
       "Data/Hora": formatTimestamp(log.timestamp),
       "Ação": log.action,
@@ -262,23 +258,19 @@ const AdminLogsAuditoria = () => {
                      log.actionType === "security" ? "Segurança" : "Sistema"
     }));
     
-    // Convert to CSV string
     const headers = Object.keys(csvData[0]).join(",");
     const rows = csvData.map(row => Object.values(row).join(","));
     const csvContent = [headers, ...rows].join("\n");
     
-    // Create download link
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     
-    // Set up download
     const now = new Date();
     link.setAttribute("href", url);
     link.setAttribute("download", `logs_auditoria_${format(now, "yyyy-MM-dd")}.csv`);
     document.body.appendChild(link);
     
-    // Trigger download and cleanup
     link.click();
     document.body.removeChild(link);
     toast.success("CSV exportado com sucesso");
@@ -315,7 +307,7 @@ const AdminLogsAuditoria = () => {
             </div>
             <DatePickerWithRange 
               selected={dateRange}
-              onSelect={setDateRange}
+              onSelect={handleDateRangeChange}
               className="w-full md:w-auto"
             />
           </div>
