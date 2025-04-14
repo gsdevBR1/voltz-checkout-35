@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   Table, 
@@ -292,6 +291,8 @@ const AdminLogsAuditoria = () => {
         </Button>
       </div>
 
+      
+      
       <Card className="mb-6">
         <div className="p-6 space-y-4">
           <div className="flex flex-col md:flex-row gap-4">
@@ -313,6 +314,8 @@ const AdminLogsAuditoria = () => {
             />
           </div>
 
+          
+          
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1 md:flex-none md:w-1/4">
               <Select value={actionTypeFilter} onValueChange={setActionTypeFilter}>
@@ -352,6 +355,8 @@ const AdminLogsAuditoria = () => {
         </div>
       </Card>
 
+      
+      
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="mb-6 w-full md:w-auto">
           <TabsTrigger value="all">Todos</TabsTrigger>
