@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { 
   Table, 
@@ -50,8 +51,8 @@ interface LogEntry {
 const AdminLogsAuditoria = () => {
   const [activeTab, setActiveTab] = useState("all");
   const [search, setSearch] = useState("");
-  const [actionTypeFilter, setActionTypeFilter] = useState<string>("");
-  const [resultFilter, setResultFilter] = useState<string>("");
+  const [actionTypeFilter, setActionTypeFilter] = useState<string>("all");
+  const [resultFilter, setResultFilter] = useState<string>("all");
   const [dateRange, setDateRange] = useState<DateRange | undefined>({ 
     from: new Date(new Date().setDate(new Date().getDate() - 7)),
     to: new Date() 
@@ -216,11 +217,11 @@ const AdminLogsAuditoria = () => {
       );
     }
     
-    if (actionTypeFilter) {
+    if (actionTypeFilter && actionTypeFilter !== "all") {
       filteredLogs = filteredLogs.filter(log => log.actionType === actionTypeFilter);
     }
     
-    if (resultFilter) {
+    if (resultFilter && resultFilter !== "all") {
       filteredLogs = filteredLogs.filter(log => log.result === resultFilter);
     }
     
@@ -322,7 +323,7 @@ const AdminLogsAuditoria = () => {
                   </div>
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todos os tipos</SelectItem>
+                  <SelectItem value="all">Todos os tipos</SelectItem>
                   <SelectItem value="modification">Alteração</SelectItem>
                   <SelectItem value="access">Acesso</SelectItem>
                   <SelectItem value="security">Segurança</SelectItem>
@@ -340,7 +341,7 @@ const AdminLogsAuditoria = () => {
                   </div>
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todos os resultados</SelectItem>
+                  <SelectItem value="all">Todos os resultados</SelectItem>
                   <SelectItem value="success">Sucesso</SelectItem>
                   <SelectItem value="error">Negado</SelectItem>
                   <SelectItem value="warning">Alerta</SelectItem>
