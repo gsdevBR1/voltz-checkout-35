@@ -55,6 +55,7 @@ import EditarCrossSellPage from "./pages/marketing/EditarCrossSellPage";
 import PixelsPage from "./pages/marketing/PixelsPage";
 
 import FinanceiroPage from './pages/financeiro/FinanceiroPage';
+import PlanoCobrancaPage from './pages/financeiro/PlanoCobrancaPage';
 
 import DominiosPage from "./pages/configuracoes/DominiosPage";
 import LogisticaPage from "./pages/configuracoes/LogisticaPage";
@@ -158,6 +159,7 @@ function App() {
                   <Route path="/steps/shopify" element={<ShopifyStep />} />
                   
                   <Route path="/financeiro" element={<FinanceiroPage />} />
+                  <Route path="/plano-cobranca" element={<PlanoCobrancaPage />} />
                   
                   <Route path="/integracoes" element={<Navigate to="/integracoes/ecommerce" replace />} />
                   <Route path="/integracoes/ecommerce" element={<EcommerceIntegrations />} />

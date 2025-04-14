@@ -37,7 +37,8 @@ import {
   Store,
   Languages,
   LifeBuoy,
-  DollarSign
+  DollarSign,
+  Receipt
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { StoreSelector } from '@/components/StoreSelector';
@@ -300,6 +301,11 @@ export const AppSidebar: React.FC<SidebarProps> = ({ className }) => {
       title: 'Financeiro',
       path: '/financeiro',
       icon: DollarSign,
+    },
+    {
+      title: 'Plano e Cobrança',
+      path: '/plano-cobranca',
+      icon: Receipt,
     },
     {
       title: 'Minhas Lojas',
