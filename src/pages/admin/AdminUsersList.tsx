@@ -76,6 +76,7 @@ import { Switch } from '@/components/ui/switch';
 import { PermissionControl } from '@/components/admin/PermissionControl';
 import { PermissionBadge } from '@/components/admin/PermissionBadge';
 import { PermissionProfile } from '@/components/admin/UserPermissionForm';
+import { UserStoresModal } from '@/components/admin/UserStoresModal';
 
 const mockUsers = Array.from({ length: 30 }).map((_, i) => ({
   id: `user-${i+1}`,
@@ -143,6 +144,7 @@ const AdminUsersList: React.FC = () => {
   const [blockUserAlertOpen, setBlockUserAlertOpen] = useState(false);
   const [newPermission, setNewPermission] = useState('');
   const [permissionControlOpen, setPermissionControlOpen] = useState(false);
+  const [userStoresDialogOpen, setUserStoresDialogOpen] = useState(false);
 
   const filteredUsers = mockUsers.filter(user => {
     const matchesSearch = searchTerm === '' || 
@@ -226,6 +228,11 @@ const AdminUsersList: React.FC = () => {
     setProfileDialogOpen(true);
   };
 
+  const handleViewUserStores = (user: any) => {
+    setSelectedUser(user);
+    setUserStoresDialogOpen(true);
+  };
+
   const formatDate = (date: Date | null) => {
     if (!date) return 'Nunca acessou';
     return new Intl.DateTimeFormat('pt-BR', {
@@ -235,6 +242,17 @@ const AdminUsersList: React.FC = () => {
       hour: '2-digit',
       minute: '2-digit'
     }).format(date);
+  };
+
+  const getUserStores = (userId: string) => {
+    const storeCount = Math.floor(Math.random() * 4) + 1;
+    return Array.from({ length: storeCount }).map((_, i) => ({
+      id: `store-${userId}-${i+1}`,
+      name: `Loja ${i === 0 ? 'Principal' : i+1} de ${selectedUser?.name.split(' ')[0]}`,
+      status: ['active', 'active', 'suspended', 'trial'][Math.floor(Math.random() * (i === 0 ? 1 : 4))] as 'active' | 'suspended' | 'trial',
+      createdAt: new Date(Date.now() - Math.floor(Math.random() * 300 * 24 * 60 * 60 * 1000)),
+      domain: `loja${i+1}-${userId.split('-')[1]}.voltzcheckout.com`
+    }));
   };
 
   return (
@@ -437,6 +455,13 @@ const AdminUsersList: React.FC = () => {
                             >
                               <Shield className="h-4 w-4 mr-2" />
                               Controle de Permissões
+                            </DropdownMenuItem>
+                            <DropdownMenuItem 
+                              className="cursor-pointer hover:bg-[#2A2A2A] text-gray-300 hover:text-white"
+                              onClick={() => handleViewUserStores(user)}
+                            >
+                              <Store className="h-4 w-4 mr-2" />
+                              Ver Lojas do Usuário
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -661,13 +686,13 @@ const AdminUsersList: React.FC = () => {
       </Dialog>
       
       {selectedUser && (
-        <PermissionControl 
-          isOpen={permissionControlOpen}
-          onClose={handleClosePermissionControl}
-          userId={selectedUser.id}
+        <UserStoresModal
+          isOpen={userStoresDialogOpen}
+          onClose={() => setUserStoresDialogOpen(false)}
           userName={selectedUser.name}
+          userId={selectedUser.id}
           userEmail={selectedUser.email}
-          currentPermission={selectedUser.permission as PermissionProfile}
+          stores={getUserStores(selectedUser.id)}
         />
       )}
       
