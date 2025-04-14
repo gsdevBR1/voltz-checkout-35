@@ -27,111 +27,113 @@ const AdminStoreDetail = () => {
   };
 
   return (
-    <AdminLayout>
-      <div className="container mx-auto p-6">
-        <div className="flex justify-between items-center mb-6">
-          <div>
-            <h1 className="text-2xl font-bold">{storeData.name}</h1>
-            <p className="text-muted-foreground">ID: {storeData.id} | Proprietário: {storeData.owner}</p>
+    <div className="flex min-h-screen bg-[#0A0A0A]">
+      <div className="flex-1 flex flex-col">
+        <div className="container mx-auto p-6">
+          <div className="flex justify-between items-center mb-6">
+            <div>
+              <h1 className="text-2xl font-bold">{storeData.name}</h1>
+              <p className="text-muted-foreground">ID: {storeData.id} | Proprietário: {storeData.owner}</p>
+            </div>
+            <div className="flex gap-2">
+              <Badge variant={storeData.status === 'active' ? 'success' : 'destructive'}>
+                {storeData.status === 'active' ? 'Ativa' : 'Inativa'}
+              </Badge>
+              <Badge variant="outline">{storeData.plan}</Badge>
+            </div>
           </div>
-          <div className="flex gap-2">
-            <Badge variant={storeData.status === 'active' ? 'success' : 'destructive'}>
-              {storeData.status === 'active' ? 'Ativa' : 'Inativa'}
-            </Badge>
-            <Badge variant="outline">{storeData.plan}</Badge>
-          </div>
-        </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="mb-6">
-            <TabsTrigger value="details">Detalhes</TabsTrigger>
-            <TabsTrigger value="orders">Pedidos</TabsTrigger>
-            <TabsTrigger value="cycle-history">Histórico de Ciclos</TabsTrigger>
-            <TabsTrigger value="settings">Configurações</TabsTrigger>
-          </TabsList>
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="mb-6">
+              <TabsTrigger value="details">Detalhes</TabsTrigger>
+              <TabsTrigger value="orders">Pedidos</TabsTrigger>
+              <TabsTrigger value="cycle-history">Histórico de Ciclos</TabsTrigger>
+              <TabsTrigger value="settings">Configurações</TabsTrigger>
+            </TabsList>
 
-          <TabsContent value="details">
-            {/* Store details content */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-card rounded-lg p-6 border">
-                <h3 className="text-lg font-medium mb-4">Informações Gerais</h3>
-                <dl className="space-y-2">
-                  <div className="flex justify-between">
-                    <dt className="text-muted-foreground">Email:</dt>
-                    <dd>{storeData.email}</dd>
+            <TabsContent value="details">
+              {/* Store details content */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="bg-card rounded-lg p-6 border">
+                  <h3 className="text-lg font-medium mb-4">Informações Gerais</h3>
+                  <dl className="space-y-2">
+                    <div className="flex justify-between">
+                      <dt className="text-muted-foreground">Email:</dt>
+                      <dd>{storeData.email}</dd>
+                    </div>
+                    <div className="flex justify-between">
+                      <dt className="text-muted-foreground">Criada em:</dt>
+                      <dd>{storeData.createDate}</dd>
+                    </div>
+                    <div className="flex justify-between">
+                      <dt className="text-muted-foreground">Último acesso:</dt>
+                      <dd>{storeData.lastAccess}</dd>
+                    </div>
+                  </dl>
+                </div>
+                
+                <div className="bg-card rounded-lg p-6 border">
+                  <h3 className="text-lg font-medium mb-4">Financeiro</h3>
+                  <dl className="space-y-2">
+                    <div className="flex justify-between">
+                      <dt className="text-muted-foreground">Valor do Ciclo:</dt>
+                      <dd>R$ {storeData.cycleValue.toFixed(2)}</dd>
+                    </div>
+                    <div className="flex justify-between">
+                      <dt className="text-muted-foreground">Faturamento Mensal:</dt>
+                      <dd>R$ {storeData.monthlyRevenue.toFixed(2)}</dd>
+                    </div>
+                    <div className="flex justify-between">
+                      <dt className="text-muted-foreground">Taxa por Transação:</dt>
+                      <dd>{storeData.transactionFee}%</dd>
+                    </div>
+                  </dl>
+                  <div className="mt-4">
+                    <Button variant="outline" size="sm">Ajustar Ciclo</Button>
                   </div>
-                  <div className="flex justify-between">
-                    <dt className="text-muted-foreground">Criada em:</dt>
-                    <dd>{storeData.createDate}</dd>
-                  </div>
-                  <div className="flex justify-between">
-                    <dt className="text-muted-foreground">Último acesso:</dt>
-                    <dd>{storeData.lastAccess}</dd>
-                  </div>
-                </dl>
-              </div>
-              
-              <div className="bg-card rounded-lg p-6 border">
-                <h3 className="text-lg font-medium mb-4">Financeiro</h3>
-                <dl className="space-y-2">
-                  <div className="flex justify-between">
-                    <dt className="text-muted-foreground">Valor do Ciclo:</dt>
-                    <dd>R$ {storeData.cycleValue.toFixed(2)}</dd>
-                  </div>
-                  <div className="flex justify-between">
-                    <dt className="text-muted-foreground">Faturamento Mensal:</dt>
-                    <dd>R$ {storeData.monthlyRevenue.toFixed(2)}</dd>
-                  </div>
-                  <div className="flex justify-between">
-                    <dt className="text-muted-foreground">Taxa por Transação:</dt>
-                    <dd>{storeData.transactionFee}%</dd>
-                  </div>
-                </dl>
-                <div className="mt-4">
-                  <Button variant="outline" size="sm">Ajustar Ciclo</Button>
+                </div>
+
+                <div className="bg-card rounded-lg p-6 border">
+                  <h3 className="text-lg font-medium mb-4">Domínios</h3>
+                  <dl className="space-y-2">
+                    <div className="flex justify-between">
+                      <dt className="text-muted-foreground">Domínio Voltz:</dt>
+                      <dd>{storeData.domain}</dd>
+                    </div>
+                    <div className="flex justify-between">
+                      <dt className="text-muted-foreground">Domínio Personalizado:</dt>
+                      <dd>{storeData.customDomain || 'Não configurado'}</dd>
+                    </div>
+                  </dl>
                 </div>
               </div>
+            </TabsContent>
 
-              <div className="bg-card rounded-lg p-6 border">
-                <h3 className="text-lg font-medium mb-4">Domínios</h3>
-                <dl className="space-y-2">
-                  <div className="flex justify-between">
-                    <dt className="text-muted-foreground">Domínio Voltz:</dt>
-                    <dd>{storeData.domain}</dd>
-                  </div>
-                  <div className="flex justify-between">
-                    <dt className="text-muted-foreground">Domínio Personalizado:</dt>
-                    <dd>{storeData.customDomain || 'Não configurado'}</dd>
-                  </div>
-                </dl>
+            <TabsContent value="orders">
+              <div className="rounded-lg border">
+                <h3 className="p-6 text-lg font-medium">Lista de Pedidos</h3>
+                <p className="px-6 pb-6 text-muted-foreground">
+                  Funcionalidade em desenvolvimento
+                </p>
               </div>
-            </div>
-          </TabsContent>
+            </TabsContent>
 
-          <TabsContent value="orders">
-            <div className="rounded-lg border">
-              <h3 className="p-6 text-lg font-medium">Lista de Pedidos</h3>
-              <p className="px-6 pb-6 text-muted-foreground">
-                Funcionalidade em desenvolvimento
-              </p>
-            </div>
-          </TabsContent>
+            <TabsContent value="cycle-history">
+              <CycleHistoryTable storeId={storeData.id} />
+            </TabsContent>
 
-          <TabsContent value="cycle-history">
-            <CycleHistoryTable storeId={storeData.id} />
-          </TabsContent>
-
-          <TabsContent value="settings">
-            <div className="rounded-lg border">
-              <h3 className="p-6 text-lg font-medium">Configurações da Loja</h3>
-              <p className="px-6 pb-6 text-muted-foreground">
-                Funcionalidade em desenvolvimento
-              </p>
-            </div>
-          </TabsContent>
-        </Tabs>
+            <TabsContent value="settings">
+              <div className="rounded-lg border">
+                <h3 className="p-6 text-lg font-medium">Configurações da Loja</h3>
+                <p className="px-6 pb-6 text-muted-foreground">
+                  Funcionalidade em desenvolvimento
+                </p>
+              </div>
+            </TabsContent>
+          </Tabs>
+        </div>
       </div>
-    </AdminLayout>
+    </div>
   );
 };
 
