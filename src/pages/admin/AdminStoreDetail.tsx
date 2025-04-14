@@ -4,7 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { AdminLayout } from '@/components/admin/AdminLayout';
-import { CycleHistoryTable } from '@/components/admin/CycleHistoryTable';
+import CycleHistoryTable from '@/components/admin/CycleHistoryTable';
 
 const AdminStoreDetail = () => {
   const [activeTab, setActiveTab] = useState('details');
