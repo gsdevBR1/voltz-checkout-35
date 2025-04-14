@@ -13,66 +13,13 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 
-export function DatePickerWithRange({
-  className,
-  selected,
-  onSelect,
-}: React.HTMLAttributes<HTMLDivElement> & {
-  selected: DateRange | undefined
-  onSelect: (date: DateRange | undefined) => void
-}) {
-  return (
-    <div className={cn("grid gap-2", className)}>
-      <Popover>
-        <PopoverTrigger asChild>
-          <Button
-            id="date"
-            variant={"outline"}
-            className={cn(
-              "w-[300px] justify-start text-left font-normal",
-              !selected && "text-muted-foreground"
-            )}
-          >
-            <CalendarIcon className="mr-2 h-4 w-4" />
-            {selected?.from ? (
-              selected.to ? (
-                <>
-                  {format(selected.from, "LLL dd, y")} -{" "}
-                  {format(selected.to, "LLL dd, y")}
-                </>
-              ) : (
-                format(selected.from, "LLL dd, y")
-              )
-            ) : (
-              <span>Selecione um período</span>
-            )}
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
-          <Calendar
-            initialFocus
-            mode="range"
-            defaultMonth={selected?.from}
-            selected={selected}
-            onSelect={onSelect}
-            numberOfMonths={2}
-            className="pointer-events-auto"
-          />
-        </PopoverContent>
-      </Popover>
-    </div>
-  )
+interface DatePickerProps {
+  className?: string
 }
 
-// Add the DatePicker component that is missing
-export function DatePicker({
-  className,
-  date,
-  setDate,
-}: React.HTMLAttributes<HTMLDivElement> & {
-  date: Date | undefined
-  setDate: (date: Date | undefined) => void
-}) {
+export function DatePicker({ className }: DatePickerProps) {
+  const [date, setDate] = React.useState<Date>()
+
   return (
     <div className={cn("grid gap-2", className)}>
       <Popover>
@@ -86,16 +33,68 @@ export function DatePicker({
             )}
           >
             <CalendarIcon className="mr-2 h-4 w-4" />
-            {date ? format(date, "PPP") : <span>Selecione uma data</span>}
+            {date ? format(date, "PPP") : <span>Selecionar data</span>}
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-auto p-0" align="start">
+          <Calendar
+            mode="single"
+            selected={date}
+            onSelect={setDate}
+            initialFocus
+          />
+        </PopoverContent>
+      </Popover>
+    </div>
+  )
+}
+
+interface DatePickerWithRangeProps {
+  className?: string;
+  selected?: DateRange | undefined;
+  onSelect?: (date: DateRange | undefined) => void;
+}
+
+export function DatePickerWithRange({
+  className,
+  selected,
+  onSelect,
+}: DatePickerWithRangeProps) {
+  return (
+    <div className={cn("grid gap-2", className)}>
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button
+            id="date-range"
+            variant={"outline"}
+            className={cn(
+              "w-full justify-start text-left font-normal",
+              !selected?.from && "text-muted-foreground"
+            )}
+          >
+            <CalendarIcon className="mr-2 h-4 w-4" />
+            {selected?.from ? (
+              selected.to ? (
+                <>
+                  {format(selected.from, "dd/MM/yyyy")} -{" "}
+                  {format(selected.to, "dd/MM/yyyy")}
+                </>
+              ) : (
+                format(selected.from, "dd/MM/yyyy")
+              )
+            ) : (
+              <span>Escolha um período</span>
+            )}
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start">
           <Calendar
             initialFocus
-            mode="single"
-            selected={date}
-            onSelect={setDate}
-            className="pointer-events-auto"
+            mode="range"
+            defaultMonth={selected?.from}
+            selected={selected}
+            onSelect={onSelect}
+            numberOfMonths={2}
           />
         </PopoverContent>
       </Popover>

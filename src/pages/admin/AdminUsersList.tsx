@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   Eye, 
@@ -72,10 +71,12 @@ import {
 } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { Switch } from '@/components/ui/switch';
+import { PermissionControl } from '@/components/admin/PermissionControl';
+import { PermissionBadge } from '@/components/admin/PermissionBadge';
+import { PermissionProfile } from '@/components/admin/UserPermissionForm';
 
-// Mock user data
 const mockUsers = Array.from({ length: 30 }).map((_, i) => ({
   id: `user-${i+1}`,
   name: `Usuário ${i+1}`,
@@ -87,7 +88,7 @@ const mockUsers = Array.from({ length: 30 }).map((_, i) => ({
     : [{ id: `store-${i % 7 + 1}`, name: `Loja ${i % 7 + 1}` }],
   lastAccess: i % 4 === 0 ? null : new Date(Date.now() - Math.floor(Math.random() * 10 * 24 * 60 * 60 * 1000)),
   status: i % 10 === 0 ? 'blocked' : 'active',
-  permission: i % 15 === 0 ? 'admin_global' : i % 7 === 0 ? 'admin_store' : 'standard',
+  permission: i % 15 === 0 ? 'admin_global' : i % 7 === 0 ? 'financeiro' : i % 5 === 0 ? 'suporte' : i % 3 === 0 ? 'leitura' : 'personalizado',
   created: new Date(Date.now() - Math.floor(Math.random() * 300 * 24 * 60 * 60 * 1000)),
   emailVerified: i % 3 !== 0,
   loginHistory: Array.from({ length: 5 }).map((_, j) => ({
@@ -97,25 +98,36 @@ const mockUsers = Array.from({ length: 30 }).map((_, i) => ({
   }))
 }));
 
-// Define user permission types and descriptions
 const permissionTypes = [
-  {
-    value: 'standard',
-    label: 'Usuário Padrão',
-    description: 'Acesso apenas aos recursos básicos da plataforma e suas próprias lojas.',
-    icon: <Shield className="h-4 w-4" />
-  },
-  {
-    value: 'admin_store',
-    label: 'Admin da Loja',
-    description: 'Gerencia todos os aspectos da loja, incluindo outros usuários associados.',
-    icon: <ShieldCheck className="h-4 w-4" />
-  },
   {
     value: 'admin_global',
     label: 'Admin Global',
-    description: 'Acesso completo a todas as funcionalidades administrativas e todas as lojas da plataforma.',
+    description: 'Acesso total a todos os módulos do Admin',
     icon: <ShieldAlert className="h-4 w-4" />
+  },
+  {
+    value: 'financeiro',
+    label: 'Financeiro',
+    description: 'Acesso somente às seções: Financeiro Global, Ciclos, Cobranças, Reembolsos',
+    icon: <ShieldCheck className="h-4 w-4" />
+  },
+  {
+    value: 'suporte',
+    label: 'Suporte',
+    description: 'Acesso somente às seções: Usuários, Lojas, Logs e Visualização de Vendas',
+    icon: <ShieldCheck className="h-4 w-4" />
+  },
+  {
+    value: 'leitura',
+    label: 'Leitura',
+    description: 'Pode visualizar todos os dados, mas não pode editar ou executar ações',
+    icon: <Eye className="h-4 w-4" />
+  },
+  {
+    value: 'personalizado',
+    label: 'Personalizado',
+    description: 'Permissões configuradas manualmente por módulo',
+    icon: <Shield className="h-4 w-4" />
   }
 ];
 
@@ -123,31 +135,27 @@ const AdminUsersList: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [storeFilter, setStoreFilter] = useState('');
-  const [createdDateFilter, setCreatedDateFilter] = useState('');
+  const [createdDateFilter, setCreatedDateFilter] = useState<string>('');
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [profileDialogOpen, setProfileDialogOpen] = useState(false);
   const [permissionDialogOpen, setPermissionDialogOpen] = useState(false);
   const [resetPasswordAlertOpen, setResetPasswordAlertOpen] = useState(false);
   const [blockUserAlertOpen, setBlockUserAlertOpen] = useState(false);
   const [newPermission, setNewPermission] = useState('');
-  
-  // Apply all filters to the users list
+  const [permissionControlOpen, setPermissionControlOpen] = useState(false);
+
   const filteredUsers = mockUsers.filter(user => {
-    // Search filter (name or email)
     const matchesSearch = searchTerm === '' || 
       user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.email.toLowerCase().includes(searchTerm.toLowerCase());
     
-    // Status filter
     const matchesStatus = statusFilter === 'all' || 
       (statusFilter === 'active' && user.status === 'active') ||
       (statusFilter === 'blocked' && user.status === 'blocked');
     
-    // Store filter
     const matchesStore = storeFilter === '' || 
       user.stores.some(store => store.name.toLowerCase().includes(storeFilter.toLowerCase()));
     
-    // Created date filter
     const matchesCreatedDate = createdDateFilter === '' || 
       (user.created >= new Date(createdDateFilter));
     
@@ -171,27 +179,24 @@ const AdminUsersList: React.FC = () => {
 
   const handleChangePermissions = (user: any) => {
     setSelectedUser(user);
-    setNewPermission(user.permission);
-    setPermissionDialogOpen(true);
+    setPermissionControlOpen(true);
   };
 
-  const confirmChangePermissions = () => {
-    if (selectedUser && newPermission) {
-      const permissionLabel = permissionTypes.find(p => p.value === newPermission)?.label;
-      toast({
-        title: "Permissões atualizadas",
-        description: `O usuário ${selectedUser.name} agora tem permissão de "${permissionLabel}".`,
-      });
-      setPermissionDialogOpen(false);
-    }
+  const handleClosePermissionControl = () => {
+    setPermissionControlOpen(false);
+    setSelectedUser(null);
   };
 
   const handleToggleBlock = (user: any) => {
     if (user.status === 'blocked') {
-      toast({
-        title: "Usuário desbloqueado",
-        description: `A conta de ${user.name} foi desbloqueada.`,
-      });
+      toast.success(
+        <div className="flex flex-col">
+          <span className="font-medium">Usuário desbloqueado</span>
+          <span className="text-sm text-gray-400 mt-1">
+            A conta de {user.name} foi desbloqueada
+          </span>
+        </div>
+      );
     } else {
       setSelectedUser(user);
       setBlockUserAlertOpen(true);
@@ -200,10 +205,14 @@ const AdminUsersList: React.FC = () => {
 
   const confirmBlockUser = () => {
     if (selectedUser) {
-      toast({
-        title: "Usuário bloqueado",
-        description: `A conta de ${selectedUser.name} foi bloqueada. O usuário será desconectado em sua próxima requisição.`,
-      });
+      toast.success(
+        <div className="flex flex-col">
+          <span className="font-medium">Usuário bloqueado</span>
+          <span className="text-sm text-gray-400 mt-1">
+            A conta de {selectedUser.name} foi bloqueada
+          </span>
+        </div>
+      );
       setBlockUserAlertOpen(false);
     }
   };
@@ -224,21 +233,12 @@ const AdminUsersList: React.FC = () => {
     }).format(date);
   };
 
-  const getPermissionLabel = (permission: string) => {
-    return permissionTypes.find(p => p.value === permission)?.label || 'Desconhecido';
-  };
-
-  const getPermissionIcon = (permission: string) => {
-    return permissionTypes.find(p => p.value === permission)?.icon || <Shield className="h-4 w-4" />;
-  };
-
   return (
     <div className="space-y-6 p-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-white">Gestão de Usuários</h1>
       </div>
       
-      {/* Filters */}
       <Card className="bg-[#1E1E1E] border-white/5 shadow-md">
         <CardHeader className="pb-2">
           <CardTitle className="text-white flex items-center gap-2">
@@ -304,14 +304,13 @@ const AdminUsersList: React.FC = () => {
         </CardContent>
       </Card>
       
-      {/* Users Table */}
       <Card className="bg-[#1E1E1E] border-white/5 shadow-md">
         <CardHeader className="pb-2">
           <CardTitle className="text-white">Lista de Usuários ({filteredUsers.length})</CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
-            <TableHeader className="bg-[#262626]">
+            <TableHeader sticky className="bg-[#262626]">
               <TableRow>
                 <TableHead className="text-gray-300">Status</TableHead>
                 <TableHead className="text-gray-300">Nome</TableHead>
@@ -323,132 +322,136 @@ const AdminUsersList: React.FC = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredUsers.map((user) => (
-                <TableRow key={user.id} className="hover:bg-[#2A2A2A] border-t border-white/5">
-                  <TableCell>
-                    <div className={cn(
-                      "flex items-center gap-1.5 text-xs font-medium px-2 py-1 rounded-full w-fit",
-                      user.status === 'active' && "bg-emerald-500/10 text-emerald-500",
-                      user.status === 'blocked' && "bg-red-500/10 text-red-500"
-                    )}>
-                      {user.status === 'active' ? (
-                        <CheckCircle className="h-3 w-3" />
-                      ) : (
-                        <AlertCircle className="h-3 w-3" />
-                      )}
-                      <span>
-                        {user.status === 'active' ? "Ativo" : "Bloqueado"}
-                      </span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="font-medium text-white">
-                    <div className="flex items-center gap-2">
-                      {user.name}
-                      {user.emailVerified && (
-                        <Badge variant="success" className="text-[10px] py-0 h-5">
-                          <CheckCircle className="h-3 w-3 mr-1" />
-                          Verificado
-                        </Badge>
-                      )}
-                      {!user.lastAccess && (
-                        <Badge variant="warning" className="text-[10px] py-0 h-5">
-                          Nunca acessou
-                        </Badge>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-gray-300">{user.email}</TableCell>
-                  <TableCell>
-                    <div className="flex flex-wrap gap-1">
-                      {user.stores.map((store, index) => (
-                        <Badge 
-                          key={store.id} 
-                          variant="secondary" 
-                          className="bg-[#303030] text-gray-300 hover:bg-[#404040]"
-                        >
-                          {store.name}
-                        </Badge>
-                      ))}
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-gray-300 text-sm">
-                    <div className="flex items-center gap-1.5">
-                      <Clock className="h-3.5 w-3.5 text-gray-400" />
-                      {formatDate(user.lastAccess)}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-1.5 text-xs font-medium px-2 py-1 rounded-full w-fit bg-[#303030]">
-                      {getPermissionIcon(user.permission)}
-                      <span className="text-gray-300">{getPermissionLabel(user.permission)}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="h-8 w-8 text-gray-400 hover:text-white hover:bg-[#262626]"
-                        onClick={() => handleViewProfile(user)}
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      
-                      <Button 
-                        variant="ghost" 
-                        size="icon"
-                        className={cn(
-                          "h-8 w-8 hover:bg-[#262626]",
-                          user.status === 'blocked' 
-                            ? "text-amber-500 hover:text-amber-400" 
-                            : "text-red-500 hover:text-red-400"
-                        )}
-                        onClick={() => handleToggleBlock(user)}
-                      >
-                        {user.status === 'blocked' ? (
-                          <Unlock className="h-4 w-4" />
+              {filteredUsers.length > 0 ? (
+                filteredUsers.map((user) => (
+                  <TableRow key={user.id} className="hover:bg-[#2A2A2A] border-t border-white/5">
+                    <TableCell>
+                      <div className={cn(
+                        "flex items-center gap-1.5 text-xs font-medium px-2 py-1 rounded-full w-fit",
+                        user.status === 'active' && "bg-emerald-500/10 text-emerald-500",
+                        user.status === 'blocked' && "bg-red-500/10 text-red-500"
+                      )}>
+                        {user.status === 'active' ? (
+                          <CheckCircle className="h-3 w-3" />
                         ) : (
-                          <Lock className="h-4 w-4" />
+                          <AlertCircle className="h-3 w-3" />
                         )}
-                      </Button>
-                      
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button 
-                            variant="ghost" 
-                            size="icon"
-                            className="h-8 w-8 text-gray-400 hover:text-white hover:bg-[#262626]"
+                        <span>
+                          {user.status === 'active' ? "Ativo" : "Bloqueado"}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="font-medium text-white">
+                      <div className="flex items-center gap-2">
+                        {user.name}
+                        {user.emailVerified && (
+                          <Badge variant="success" className="text-[10px] py-0 h-5">
+                            <CheckCircle className="h-3 w-3 mr-1" />
+                            Verificado
+                          </Badge>
+                        )}
+                        {!user.lastAccess && (
+                          <Badge variant="warning" className="text-[10px] py-0 h-5">
+                            Nunca acessou
+                          </Badge>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-gray-300">{user.email}</TableCell>
+                    <TableCell>
+                      <div className="flex flex-wrap gap-1">
+                        {user.stores.map((store: any, index: number) => (
+                          <Badge 
+                            key={store.id} 
+                            variant="secondary" 
+                            className="bg-[#303030] text-gray-300 hover:bg-[#404040]"
                           >
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="bg-[#262626] border-white/5">
-                          <DropdownMenuItem 
-                            className="cursor-pointer hover:bg-[#2A2A2A] text-gray-300 hover:text-white"
-                            onClick={() => handleResetPassword(user)}
-                          >
-                            <Mail className="h-4 w-4 mr-2" />
-                            Resetar Senha
-                          </DropdownMenuItem>
-                          <DropdownMenuItem 
-                            className="cursor-pointer hover:bg-[#2A2A2A] text-gray-300 hover:text-white"
-                            onClick={() => handleChangePermissions(user)}
-                          >
-                            <ShieldCheck className="h-4 w-4 mr-2" />
-                            Alterar Permissões
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
+                            {store.name}
+                          </Badge>
+                        ))}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-gray-300 text-sm">
+                      <div className="flex items-center gap-1.5">
+                        <Clock className="h-3.5 w-3.5 text-gray-400" />
+                        {formatDate(user.lastAccess)}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <PermissionBadge type={user.permission as any} />
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-2">
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-8 w-8 text-gray-400 hover:text-white hover:bg-[#262626]"
+                          onClick={() => handleViewProfile(user)}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        
+                        <Button 
+                          variant="ghost" 
+                          size="icon"
+                          className={cn(
+                            "h-8 w-8 hover:bg-[#262626]",
+                            user.status === 'blocked' 
+                              ? "text-amber-500 hover:text-amber-400" 
+                              : "text-red-500 hover:text-red-400"
+                          )}
+                          onClick={() => handleToggleBlock(user)}
+                        >
+                          {user.status === 'blocked' ? (
+                            <Unlock className="h-4 w-4" />
+                          ) : (
+                            <Lock className="h-4 w-4" />
+                          )}
+                        </Button>
+                        
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button 
+                              variant="ghost" 
+                              size="icon"
+                              className="h-8 w-8 text-gray-400 hover:text-white hover:bg-[#262626]"
+                            >
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="bg-[#262626] border-white/5">
+                            <DropdownMenuItem 
+                              className="cursor-pointer hover:bg-[#2A2A2A] text-gray-300 hover:text-white"
+                              onClick={() => handleResetPassword(user)}
+                            >
+                              <Mail className="h-4 w-4 mr-2" />
+                              Resetar Senha
+                            </DropdownMenuItem>
+                            <DropdownMenuItem 
+                              className="cursor-pointer hover:bg-[#2A2A2A] text-gray-300 hover:text-white"
+                              onClick={() => handleChangePermissions(user)}
+                            >
+                              <Shield className="h-4 w-4 mr-2" />
+                              Controle de Permissões
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={7} className="h-24 text-center">
+                    Nenhum usuário encontrado com os filtros selecionados
                   </TableCell>
                 </TableRow>
-              ))}
+              )}
             </TableBody>
           </Table>
         </CardContent>
       </Card>
       
-      {/* User Profile Dialog */}
       <Dialog open={profileDialogOpen} onOpenChange={setProfileDialogOpen}>
         <DialogContent className="bg-[#1E1E1E] border-white/5 text-white max-w-3xl">
           <DialogHeader>
@@ -475,9 +478,12 @@ const AdminUsersList: React.FC = () => {
                   <History className="h-4 w-4 mr-2" />
                   Histórico de Acessos
                 </TabsTrigger>
+                <TabsTrigger value="permissions" className="data-[state=active]:bg-[#3E3E3E]">
+                  <Shield className="h-4 w-4 mr-2" />
+                  Permissões
+                </TabsTrigger>
               </TabsList>
               
-              {/* Dados Pessoais */}
               <TabsContent value="personal" className="border-none p-0 mt-4">
                 <Card className="bg-[#262626] border-white/5">
                   <CardContent className="p-4">
@@ -522,8 +528,7 @@ const AdminUsersList: React.FC = () => {
                         <div>
                           <p className="text-gray-400 text-sm">Nível de Permissão</p>
                           <div className="flex items-center gap-2 mt-1">
-                            {getPermissionIcon(selectedUser.permission)}
-                            <p className="text-white font-medium">{getPermissionLabel(selectedUser.permission)}</p>
+                            <PermissionBadge type={selectedUser.permission as any} showIcon />
                           </div>
                         </div>
                         <div>
@@ -546,7 +551,6 @@ const AdminUsersList: React.FC = () => {
                 </Card>
               </TabsContent>
               
-              {/* Lojas Vinculadas */}
               <TabsContent value="stores" className="border-none p-0 mt-4">
                 <Card className="bg-[#262626] border-white/5">
                   <CardContent className="p-4">
@@ -578,7 +582,6 @@ const AdminUsersList: React.FC = () => {
                 </Card>
               </TabsContent>
               
-              {/* Histórico de Acessos */}
               <TabsContent value="access" className="border-none p-0 mt-4">
                 <Card className="bg-[#262626] border-white/5">
                   <CardContent className="p-4">
@@ -611,6 +614,39 @@ const AdminUsersList: React.FC = () => {
                   </CardContent>
                 </Card>
               </TabsContent>
+              
+              <TabsContent value="permissions" className="border-none p-0 mt-4">
+                <Card className="bg-[#262626] border-white/5">
+                  <CardContent className="p-4">
+                    <div className="mb-4">
+                      <h3 className="text-white font-medium flex items-center gap-2 mb-1">
+                        <Shield className="h-4 w-4 text-green-500" />
+                        Perfil de Acesso Atual
+                      </h3>
+                      <div className="flex items-center gap-2 py-2">
+                        <PermissionBadge type={selectedUser.permission as any} size="lg" />
+                        <span className="text-gray-400 text-sm ml-2">
+                          {permissionTypes.find(p => p.value === selectedUser.permission)?.description}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-6 pt-4 border-t border-white/10">
+                      <Button 
+                        variant="outline" 
+                        className="bg-[#2A2A2A] text-white hover:bg-[#333] border-white/10"
+                        onClick={() => {
+                          setProfileDialogOpen(false);
+                          setTimeout(() => handleChangePermissions(selectedUser), 100);
+                        }}
+                      >
+                        <Shield className="h-4 w-4 mr-2" />
+                        Modificar Permissões
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
             </Tabs>
           )}
           
@@ -620,51 +656,17 @@ const AdminUsersList: React.FC = () => {
         </DialogContent>
       </Dialog>
       
-      {/* Change Permission Dialog */}
-      <Dialog open={permissionDialogOpen} onOpenChange={setPermissionDialogOpen}>
-        <DialogContent className="bg-[#1E1E1E] border-white/5 text-white">
-          <DialogHeader>
-            <DialogTitle>Alterar Permissões</DialogTitle>
-            <DialogDescription className="text-gray-400">
-              Defina o nível de acesso para o usuário {selectedUser?.name}.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            {permissionTypes.map((permission) => (
-              <div 
-                key={permission.value}
-                className={cn(
-                  "flex items-start p-3 rounded-md cursor-pointer border",
-                  newPermission === permission.value 
-                    ? "border-[#10B981] bg-[#10B981]/5" 
-                    : "border-white/5 hover:bg-[#262626]"
-                )}
-                onClick={() => setNewPermission(permission.value)}
-              >
-                <div className="mr-3 mt-0.5">
-                  <Switch 
-                    checked={newPermission === permission.value}
-                    onCheckedChange={() => setNewPermission(permission.value)}
-                  />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    {permission.icon}
-                    <h4 className="font-medium text-white">{permission.label}</h4>
-                  </div>
-                  <p className="text-sm text-gray-400 mt-1">{permission.description}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setPermissionDialogOpen(false)}>Cancelar</Button>
-            <Button onClick={confirmChangePermissions}>Salvar alterações</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {selectedUser && (
+        <PermissionControl 
+          isOpen={permissionControlOpen}
+          onClose={handleClosePermissionControl}
+          userId={selectedUser.id}
+          userName={selectedUser.name}
+          userEmail={selectedUser.email}
+          currentPermission={selectedUser.permission as PermissionProfile}
+        />
+      )}
       
-      {/* Reset Password Alert Dialog */}
       <AlertDialog open={resetPasswordAlertOpen} onOpenChange={setResetPasswordAlertOpen}>
         <AlertDialogContent className="bg-[#1E1E1E] border-white/5 text-white">
           <AlertDialogHeader>
@@ -685,7 +687,6 @@ const AdminUsersList: React.FC = () => {
         </AlertDialogContent>
       </AlertDialog>
       
-      {/* Block User Alert Dialog */}
       <AlertDialog open={blockUserAlertOpen} onOpenChange={setBlockUserAlertOpen}>
         <AlertDialogContent className="bg-[#1E1E1E] border-white/5 text-white">
           <AlertDialogHeader>
