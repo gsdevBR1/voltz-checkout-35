@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { 
-  Bell, 
   Search, 
   User,
   ChevronDown,
@@ -19,6 +18,7 @@ import {
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { NotificationCenter } from './NotificationCenter';
 
 export const AdminHeader: React.FC = () => {
   const handleLogout = () => {
@@ -43,10 +43,7 @@ export const AdminHeader: React.FC = () => {
         <div className="flex items-center space-x-4">
           <ThemeToggle />
           
-          <Button variant="ghost" size="icon" className="relative text-gray-400 hover:text-white">
-            <Bell className="h-5 w-5" />
-            <span className="absolute top-0 right-0 h-2 w-2 rounded-full bg-red-500"></span>
-          </Button>
+          <NotificationCenter />
           
           <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
             <HelpCircle className="h-5 w-5" />

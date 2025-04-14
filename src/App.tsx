@@ -79,6 +79,7 @@ import { AdminLayout } from "./components/admin/AdminLayout";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminStoresList from "./pages/admin/AdminStoresList";
 import AdminLoginPage from "./pages/admin/AdminLoginPage";
+import AdminNotificacoes from "./pages/admin/AdminNotificacoes";
 
 import AdminConfiguracoesGerais from "./pages/admin/AdminConfiguracoesGerais";
 
@@ -184,6 +185,7 @@ function App() {
                     <Route path="financeiro" element={<AdminFinanceiroGlobal />} />
                     <Route path="configuracoes" element={<AdminConfiguracoesGerais />} />
                     <Route path="logs" element={<AdminLogsAuditoria />} />
+                    <Route path="notificacoes" element={<AdminNotificacoes />} />
                     <Route path="*" element={<Navigate to="/admin" replace />} />
                   </Route>
                   
