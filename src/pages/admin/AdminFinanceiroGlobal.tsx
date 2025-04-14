@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -64,7 +63,7 @@ import { Pagination, PaginationContent, PaginationItem, PaginationLink, Paginati
 
 // Tipos de dados
 type TransactionType = 'Venda' | 'Taxa VOLTZ' | 'Reembolso' | 'Estorno';
-type TransactionStatus = 'Aprovado' | 'Pendente' | 'Recusado' | 'Em análise' | 'Confirmado' | 'Cancelado';
+type TransactionStatus = 'Aprovado' | 'Pendente' | 'Recusado' | 'Em análise' | 'Confirmado' | 'Cancelado' | 'Solicitado';
 type CycleStatus = 'Em dia' | 'Estourado' | 'Sem cartão';
 
 interface Transaction {
@@ -1271,4 +1270,3 @@ const AdminFinanceiroGlobal: React.FC = () => {
 };
 
 export default AdminFinanceiroGlobal;
-
