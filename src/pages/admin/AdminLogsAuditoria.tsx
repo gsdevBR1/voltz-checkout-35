@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { 
   Table, 
@@ -57,6 +58,7 @@ const AdminLogsAuditoria = () => {
     to: new Date() 
   });
 
+  // Fixed handleDateRangeChange function to match the expected type
   const handleDateRangeChange = (newDateRange: DateRange | undefined) => {
     setDateRange(newDateRange);
   };
