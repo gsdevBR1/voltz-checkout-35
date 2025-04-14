@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -78,6 +77,8 @@ import { AdminLayout } from "./components/admin/AdminLayout";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminStoresList from "./pages/admin/AdminStoresList";
 import AdminLoginPage from "./pages/admin/AdminLoginPage";
+
+import AdminConfiguracoesGerais from "./pages/admin/AdminConfiguracoesGerais";
 
 const App: React.FC = () => {
   const queryClient = new QueryClient({
@@ -168,13 +169,13 @@ const App: React.FC = () => {
                   <Route path="/configuracoes/logistica" element={<LogisticaPage />} />
                   <Route path="/configuracoes/webhooks" element={<WebhooksPage />} />
                   
-                  {/* Admin Routes */}
                   <Route path="/admin/login" element={<AdminLoginPage />} />
                   <Route path="/admin" element={<AdminLayout />}>
                     <Route index element={<AdminDashboard />} />
                     <Route path="lojas" element={<AdminStoresList />} />
                     <Route path="usuarios" element={<AdminUsersList />} />
                     <Route path="financeiro" element={<AdminFinanceiroGlobal />} />
+                    <Route path="configuracoes" element={<AdminConfiguracoesGerais />} />
                     <Route path="*" element={<Navigate to="/admin" replace />} />
                   </Route>
                   
@@ -192,4 +193,3 @@ const App: React.FC = () => {
 };
 
 export default App;
-
