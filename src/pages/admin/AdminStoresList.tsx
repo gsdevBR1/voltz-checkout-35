@@ -15,6 +15,7 @@ import {
   Calendar,
   Filter as FilterIcon,
   DollarSign,
+  LogIn,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -60,7 +61,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 
 const mockStores = Array.from({ length: 20 }).map((_, i) => ({
   id: `store-${i+1}`,
@@ -93,6 +94,7 @@ const AdminStoresList: React.FC = () => {
   const [cycleDialogOpen, setCycleDialogOpen] = useState(false);
   const [newCycleLimit, setNewCycleLimit] = useState('');
   const [chargeAlertOpen, setChargeAlertOpen] = useState(false);
+  const [accessAsOwnerAlertOpen, setAccessAsOwnerAlertOpen] = useState(false);
   
   const filteredStores = mockStores.filter(store => {
     const matchesSearch = searchTerm === '' || 
@@ -121,8 +123,7 @@ const AdminStoresList: React.FC = () => {
 
   const confirmForceCharge = () => {
     if (selectedStore) {
-      toast({
-        title: "Cobrança forçada",
+      toast.success("Cobrança forçada", {
         description: `A cobrança para a loja ${selectedStore.name} foi iniciada.`,
       });
       setChargeAlertOpen(false);
@@ -131,8 +132,7 @@ const AdminStoresList: React.FC = () => {
 
   const handleToggleLock = (store: any) => {
     const newStatus = store.status === 'suspended' ? 'active' : 'suspended';
-    toast({
-      title: newStatus === 'suspended' ? "Loja bloqueada" : "Loja desbloqueada",
+    toast.success(newStatus === 'suspended' ? "Loja bloqueada" : "Loja desbloqueada", {
       description: `A loja ${store.name} foi ${newStatus === 'suspended' ? 'bloqueada' : 'desbloqueada'}.`,
     });
   };
@@ -145,17 +145,47 @@ const AdminStoresList: React.FC = () => {
 
   const confirmEditCycle = () => {
     if (selectedStore && newCycleLimit) {
-      toast({
-        title: "Ciclo atualizado",
+      toast.success("Ciclo atualizado", {
         description: `O ciclo da loja ${selectedStore.name} foi atualizado para R$ ${newCycleLimit}.`,
       });
       setCycleDialogOpen(false);
     }
   };
 
+  const handleAccessAsOwner = (store: any) => {
+    setSelectedStore(store);
+    setAccessAsOwnerAlertOpen(true);
+  };
+
+  const confirmAccessAsOwner = () => {
+    if (selectedStore) {
+      const auditData = {
+        adminEmail: localStorage.getItem('admin_email') || 'admin@example.com',
+        action: 'accessed_store_as_owner',
+        storeId: selectedStore.id,
+        storeName: selectedStore.name,
+        ownerEmail: selectedStore.owner.email,
+        timestamp: new Date()
+      };
+      
+      console.log('Audit log:', auditData);
+      
+      localStorage.setItem('admin_accessing_store', 'true');
+      localStorage.setItem('admin_accessing_store_id', selectedStore.id);
+      localStorage.setItem('admin_accessing_store_name', selectedStore.name);
+      
+      toast.success("Acessando como lojista", {
+        description: `Você está acessando a loja ${selectedStore.name} como lojista.`,
+      });
+      
+      setAccessAsOwnerAlertOpen(false);
+      
+      window.location.href = '/pagina-inicial';
+    }
+  };
+
   const handleExportCsv = () => {
-    toast({
-      title: "Exportação iniciada",
+    toast.success("Exportação iniciada", {
       description: "A lista de lojas será baixada em formato CSV em instantes.",
     });
   };
@@ -350,6 +380,16 @@ const AdminStoresList: React.FC = () => {
                             <Lock className="h-4 w-4" />
                           )}
                         </Button>
+
+                        <Button 
+                          variant="ghost" 
+                          size="icon"
+                          className="h-8 w-8 text-emerald-500 hover:text-emerald-400 hover:bg-[#262626]"
+                          onClick={() => handleAccessAsOwner(store)}
+                          title="Acessar como lojista"
+                        >
+                          <LogIn className="h-4 w-4" />
+                        </Button>
                         
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -362,6 +402,13 @@ const AdminStoresList: React.FC = () => {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="bg-[#262626] border-white/5">
+                            <DropdownMenuItem 
+                              className="cursor-pointer hover:bg-[#2A2A2A] text-gray-300 hover:text-white"
+                              onClick={() => handleAccessAsOwner(store)}
+                            >
+                              <LogIn className="h-4 w-4 mr-2" />
+                              Acessar como lojista
+                            </DropdownMenuItem>
                             <DropdownMenuItem 
                               className="cursor-pointer hover:bg-[#2A2A2A] text-gray-300 hover:text-white"
                               onClick={() => handleForceCharge(store)}
@@ -441,6 +488,38 @@ const AdminStoresList: React.FC = () => {
             <AlertDialogCancel className="bg-transparent border-white/10 hover:bg-[#262626] text-gray-300">Cancelar</AlertDialogCancel>
             <AlertDialogAction onClick={confirmForceCharge} className="bg-[#10B981] hover:bg-[#0D9669]">
               Confirmar Cobrança
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={accessAsOwnerAlertOpen} onOpenChange={setAccessAsOwnerAlertOpen}>
+        <AlertDialogContent className="bg-[#1E1E1E] border-white/5 text-white">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Acessar como lojista</AlertDialogTitle>
+            <AlertDialogDescription className="text-gray-400">
+              Você está prestes a acessar a loja{" "}
+              <span className="font-medium text-white">{selectedStore?.name}</span>{" "}
+              como se fosse o lojista{" "}
+              <span className="font-medium text-white">{selectedStore?.owner.name}</span>.<br /><br />
+              
+              {selectedStore?.status === 'suspended' && (
+                <div className="bg-red-500/10 text-red-400 p-3 rounded-md my-2 flex items-start gap-2">
+                  <AlertCircle className="h-5 w-5 mt-0.5" />
+                  <div>
+                    <strong>Atenção:</strong> Esta loja está suspensa. 
+                    Ao acessá-la, você poderá ver o motivo da suspensão.
+                  </div>
+                </div>
+              )}
+              
+              Esta ação será registrada nos logs de auditoria do sistema.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="bg-transparent border-white/10 hover:bg-[#262626] text-gray-300">Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmAccessAsOwner} className="bg-[#10B981] hover:bg-[#0D9669]">
+              Acessar Loja
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
