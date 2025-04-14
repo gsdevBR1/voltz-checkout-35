@@ -36,12 +36,6 @@ export const PermissionBadge: React.FC<PermissionBadgeProps> = ({
   };
 
   const getStyles = () => {
-    const sizeStyles = {
-      sm: 'text-[10px] py-0 px-2 h-5',
-      md: 'text-xs py-0.5 px-2.5',
-      lg: 'text-sm py-1 px-3',
-    };
-
     switch (type) {
       case 'admin_global':
         return 'bg-red-500/10 text-red-500 border-red-500/20';
@@ -55,6 +49,18 @@ export const PermissionBadge: React.FC<PermissionBadgeProps> = ({
         return 'bg-green-500/10 text-green-500 border-green-500/20';
       default:
         return 'bg-gray-500/10 text-gray-500 border-gray-500/20';
+    }
+  };
+
+  const getSizeStyles = () => {
+    switch (size) {
+      case 'sm':
+        return 'text-[10px] py-0 px-2 h-5';
+      case 'lg':
+        return 'text-sm py-1 px-3';
+      case 'md':
+      default:
+        return 'text-xs py-0.5 px-2.5';
     }
   };
 
@@ -81,7 +87,7 @@ export const PermissionBadge: React.FC<PermissionBadgeProps> = ({
       className={cn(
         "font-medium flex items-center", 
         getStyles(),
-        sizeStyles[size],
+        getSizeStyles(),
         className
       )}
     >

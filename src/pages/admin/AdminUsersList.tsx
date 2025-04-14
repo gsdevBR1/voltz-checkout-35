@@ -169,10 +169,14 @@ const AdminUsersList: React.FC = () => {
 
   const confirmResetPassword = () => {
     if (selectedUser) {
-      toast({
-        title: "Link de redefinição enviado",
-        description: `Um e-mail foi enviado para ${selectedUser.email} com instruções para redefinir a senha.`,
-      });
+      toast.success(
+        <div className="flex flex-col">
+          <span className="font-medium">Link de redefinição enviado</span>
+          <span className="text-sm text-gray-400 mt-1">
+            Um e-mail foi enviado para {selectedUser.email} com instruções para redefinir a senha.
+          </span>
+        </div>
+      );
       setResetPasswordAlertOpen(false);
     }
   };
@@ -672,7 +676,7 @@ const AdminUsersList: React.FC = () => {
           <AlertDialogHeader>
             <AlertDialogTitle>Redefinir senha do usuário</AlertDialogTitle>
             <AlertDialogDescription className="text-gray-400">
-              Um e-mail com instruções para redefinição de senha será enviado para{" "}
+              Um e-mail com instruções para redefinir senha será enviado para{" "}
               <span className="font-medium text-white">{selectedUser?.email}</span>.
               <br /><br />
               O link de redefinição é válido por 24 horas.

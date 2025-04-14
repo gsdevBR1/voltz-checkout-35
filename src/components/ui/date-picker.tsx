@@ -14,11 +14,17 @@ import {
 } from "@/components/ui/popover"
 
 interface DatePickerProps {
-  className?: string
+  className?: string;
+  date?: Date;
+  setDate?: (date: Date | undefined) => void;
 }
 
-export function DatePicker({ className }: DatePickerProps) {
-  const [date, setDate] = React.useState<Date>()
+export function DatePicker({ className, date, setDate }: DatePickerProps) {
+  const [internalDate, setInternalDate] = React.useState<Date | undefined>(date);
+
+  // Use the controlled state if provided, otherwise use internal state
+  const currentDate = date !== undefined ? date : internalDate;
+  const handleDateChange = setDate || setInternalDate;
 
   return (
     <div className={cn("grid gap-2", className)}>
@@ -29,18 +35,18 @@ export function DatePicker({ className }: DatePickerProps) {
             variant={"outline"}
             className={cn(
               "w-full justify-start text-left font-normal",
-              !date && "text-muted-foreground"
+              !currentDate && "text-muted-foreground"
             )}
           >
             <CalendarIcon className="mr-2 h-4 w-4" />
-            {date ? format(date, "PPP") : <span>Selecionar data</span>}
+            {currentDate ? format(currentDate, "PPP") : <span>Selecionar data</span>}
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start">
           <Calendar
             mode="single"
-            selected={date}
-            onSelect={setDate}
+            selected={currentDate}
+            onSelect={handleDateChange}
             initialFocus
           />
         </PopoverContent>
