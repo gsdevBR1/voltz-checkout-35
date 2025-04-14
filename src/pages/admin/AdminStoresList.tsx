@@ -1,5 +1,5 @@
-
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   Eye, 
   Lock, 
@@ -62,7 +62,6 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { toast } from '@/hooks/use-toast';
 
-// Mock store data
 const mockStores = Array.from({ length: 20 }).map((_, i) => ({
   id: `store-${i+1}`,
   name: `Loja ${i+1}`,
@@ -85,6 +84,7 @@ const mockStores = Array.from({ length: 20 }).map((_, i) => ({
 }));
 
 const AdminStoresList: React.FC = () => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [minBillingFilter, setMinBillingFilter] = useState('');
@@ -94,25 +94,20 @@ const AdminStoresList: React.FC = () => {
   const [newCycleLimit, setNewCycleLimit] = useState('');
   const [chargeAlertOpen, setChargeAlertOpen] = useState(false);
   
-  // Apply all filters to the stores list
   const filteredStores = mockStores.filter(store => {
-    // Search filter (name or email)
     const matchesSearch = searchTerm === '' || 
       store.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       store.owner.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
       store.owner.name.toLowerCase().includes(searchTerm.toLowerCase());
     
-    // Status filter
     const matchesStatus = statusFilter === 'all' || 
       (statusFilter === 'active' && store.status === 'active') ||
       (statusFilter === 'suspended' && store.status === 'suspended') ||
       (statusFilter === 'no_card' && store.status === 'no_card');
     
-    // Minimum billing filter
     const matchesMinBilling = minBillingFilter === '' || 
       store.billing.current >= parseInt(minBillingFilter);
     
-    // Start date filter
     const matchesStartDate = startDateFilter === '' || 
       (store.created >= new Date(startDateFilter));
     
@@ -194,7 +189,6 @@ const AdminStoresList: React.FC = () => {
         </Button>
       </div>
       
-      {/* Filters */}
       <Card className="bg-[#1E1E1E] border-white/5 shadow-md">
         <CardHeader className="pb-2">
           <CardTitle className="text-white flex items-center gap-2">
@@ -265,7 +259,6 @@ const AdminStoresList: React.FC = () => {
         </CardContent>
       </Card>
       
-      {/* Stores Table */}
       <Card className="bg-[#1E1E1E] border-white/5 shadow-md">
         <CardHeader className="pb-2">
           <CardTitle className="text-white">Lista de Lojas ({filteredStores.length})</CardTitle>
@@ -340,6 +333,7 @@ const AdminStoresList: React.FC = () => {
                           variant="ghost" 
                           size="icon" 
                           className="h-8 w-8 text-gray-400 hover:text-white hover:bg-[#262626]"
+                          onClick={() => navigate(`/admin/lojas/${store.id}`)}
                         >
                           <Eye className="h-4 w-4" />
                         </Button>
@@ -394,7 +388,6 @@ const AdminStoresList: React.FC = () => {
         </CardContent>
       </Card>
       
-      {/* Edit Cycle Dialog */}
       <Dialog open={cycleDialogOpen} onOpenChange={setCycleDialogOpen}>
         <DialogContent className="bg-[#1E1E1E] border-white/5 text-white">
           <DialogHeader>
@@ -429,7 +422,6 @@ const AdminStoresList: React.FC = () => {
         </DialogContent>
       </Dialog>
       
-      {/* Force Charge Alert Dialog */}
       <AlertDialog open={chargeAlertOpen} onOpenChange={setChargeAlertOpen}>
         <AlertDialogContent className="bg-[#1E1E1E] border-white/5 text-white">
           <AlertDialogHeader>
@@ -457,7 +449,6 @@ const AdminStoresList: React.FC = () => {
   );
 };
 
-// Status Badge Component
 type StatusBadgeProps = {
   status: string;
 };

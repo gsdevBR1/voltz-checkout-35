@@ -80,7 +80,9 @@ import AdminLoginPage from "./pages/admin/AdminLoginPage";
 
 import AdminConfiguracoesGerais from "./pages/admin/AdminConfiguracoesGerais";
 
-const App: React.FC = () => {
+import AdminStoreDetail from '@/pages/admin/AdminStoreDetail';
+
+function App() {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
@@ -190,6 +192,6 @@ const App: React.FC = () => {
       </ThemeProvider>
     </QueryClientProvider>
   );
-};
+}
 
 export default App;
