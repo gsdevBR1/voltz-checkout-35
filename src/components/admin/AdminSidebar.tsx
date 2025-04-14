@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import {
@@ -118,7 +117,7 @@ export const AdminSidebar: React.FC = () => {
         <NavItem
           to="/admin/logs"
           icon={<FileText size={18} />}
-          label="Logs e Auditoria"
+          label="Logs & Auditoria"
         />
 
         <div className="pt-4 mt-4 border-t border-white/5">
@@ -147,4 +146,3 @@ export const AdminSidebar: React.FC = () => {
     </div>
   );
 };
-

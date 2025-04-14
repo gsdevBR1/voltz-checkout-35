@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -82,6 +83,7 @@ import AdminLoginPage from "./pages/admin/AdminLoginPage";
 import AdminConfiguracoesGerais from "./pages/admin/AdminConfiguracoesGerais";
 
 import AdminStoreDetail from '@/pages/admin/AdminStoreDetail';
+import AdminLogsAuditoria from "@/pages/admin/AdminLogsAuditoria";
 
 function App() {
   const queryClient = new QueryClient({
@@ -177,9 +179,11 @@ function App() {
                   <Route path="/admin" element={<AdminLayout />}>
                     <Route index element={<AdminDashboard />} />
                     <Route path="lojas" element={<AdminStoresList />} />
+                    <Route path="lojas/:id" element={<AdminStoreDetail />} />
                     <Route path="usuarios" element={<AdminUsersList />} />
                     <Route path="financeiro" element={<AdminFinanceiroGlobal />} />
                     <Route path="configuracoes" element={<AdminConfiguracoesGerais />} />
+                    <Route path="logs" element={<AdminLogsAuditoria />} />
                     <Route path="*" element={<Navigate to="/admin" replace />} />
                   </Route>
                   
