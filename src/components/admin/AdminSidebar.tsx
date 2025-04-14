@@ -92,6 +92,7 @@ export const AdminSidebar: React.FC = () => {
           to="/admin/financeiro"
           icon={<DollarSign size={18} />}
           label="Financeiro Global"
+          badge="28"
         />
         
         <NavItem
@@ -146,3 +147,4 @@ export const AdminSidebar: React.FC = () => {
     </div>
   );
 };
+

@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -71,6 +72,7 @@ import TrackingIntegrations from "./pages/integracoes/TrackingIntegrations";
 import PixelManagementPage from "./pages/integracoes/PixelManagementPage";
 
 import AdminUsersList from './pages/admin/AdminUsersList';
+import AdminFinanceiroGlobal from './pages/admin/AdminFinanceiroGlobal';
 
 import { AdminLayout } from "./components/admin/AdminLayout";
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -172,6 +174,7 @@ const App: React.FC = () => {
                     <Route index element={<AdminDashboard />} />
                     <Route path="lojas" element={<AdminStoresList />} />
                     <Route path="usuarios" element={<AdminUsersList />} />
+                    <Route path="financeiro" element={<AdminFinanceiroGlobal />} />
                     <Route path="*" element={<Navigate to="/admin" replace />} />
                   </Route>
                   
@@ -189,3 +192,4 @@ const App: React.FC = () => {
 };
 
 export default App;
+
