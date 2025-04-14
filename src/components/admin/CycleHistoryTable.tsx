@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -34,6 +33,7 @@ import {
 import { DatePickerWithRange } from '@/components/ui/date-picker';
 import { cn } from '@/lib/utils';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { DateRange } from 'react-day-picker';
 
 // Types for cycle history entries
 export interface CycleHistoryEntry {
@@ -55,10 +55,7 @@ interface CycleHistoryTableProps {
 }
 
 const CycleHistoryTable: React.FC<CycleHistoryTableProps> = ({ storeId }) => {
-  const [dateRange, setDateRange] = useState<{
-    from: Date | undefined;
-    to: Date | undefined;
-  }>({
+  const [dateRange, setDateRange] = useState<DateRange>({
     from: undefined,
     to: undefined,
   });
@@ -166,31 +163,10 @@ const CycleHistoryTable: React.FC<CycleHistoryTableProps> = ({ storeId }) => {
           </Select>
           
           {periodFilter === 'custom' && (
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="outline" className="flex items-center">
-                  <Calendar className="mr-2 h-4 w-4" />
-                  {dateRange.from ? (
-                    dateRange.to ? (
-                      <>
-                        {format(dateRange.from, 'dd/MM/yyyy')} -{' '}
-                        {format(dateRange.to, 'dd/MM/yyyy')}
-                      </>
-                    ) : (
-                      format(dateRange.from, 'dd/MM/yyyy')
-                    )
-                  ) : (
-                    <span>Selecionar datas</span>
-                  )}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <DatePickerWithRange
-                  selected={dateRange}
-                  onSelect={setDateRange}
-                />
-              </PopoverContent>
-            </Popover>
+            <DatePickerWithRange
+              selected={dateRange}
+              onSelect={(range) => setDateRange(range || { from: undefined, to: undefined })}
+            />
           )}
         </div>
       </div>
