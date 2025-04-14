@@ -18,34 +18,37 @@ import AdminConfiguracoesGerais from "./pages/admin/AdminConfiguracoesGerais";
 import AdminLogsAuditoria from "./pages/admin/AdminLogsAuditoria";
 import AdminNotificacoes from "./pages/admin/AdminNotificacoes";
 import AdminReportsExports from "./pages/admin/AdminReportsExports";
+import { StoreProvider } from "./contexts/StoreContext";
 
 function App() {
   return (
     <ThemeProvider>
-      <Routes>
-        <Route path="/" element={<Index />} />
-        <Route path="/pagina-inicial" element={<HomePage />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/lojas" element={<Stores />} />
-        
-        {/* Admin Routes */}
-        <Route path="/admin/login" element={<AdminLoginPage />} />
-        <Route path="/admin" element={<AdminLayout />}>
-          <Route index element={<Navigate to="/admin/dashboard" replace />} />
-          <Route path="dashboard" element={<AdminDashboard />} />
-          <Route path="usuarios" element={<AdminUsersList />} />
-          <Route path="lojas" element={<AdminStoresList />} />
-          <Route path="lojas/:id" element={<AdminStoreDetail />} />
-          <Route path="financeiro" element={<AdminFinanceiroGlobal />} />
-          <Route path="configuracoes" element={<AdminConfiguracoesGerais />} />
-          <Route path="auditoria" element={<AdminLogsAuditoria />} />
-          <Route path="notificacoes" element={<AdminNotificacoes />} />
-          <Route path="relatorios" element={<AdminReportsExports />} />
-        </Route>
-        
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-      <Toaster richColors position="top-right" />
+      <StoreProvider>
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route path="/pagina-inicial" element={<HomePage />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/lojas" element={<Stores />} />
+          
+          {/* Admin Routes */}
+          <Route path="/admin/login" element={<AdminLoginPage />} />
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<Navigate to="/admin/dashboard" replace />} />
+            <Route path="dashboard" element={<AdminDashboard />} />
+            <Route path="usuarios" element={<AdminUsersList />} />
+            <Route path="lojas" element={<AdminStoresList />} />
+            <Route path="lojas/:id" element={<AdminStoreDetail />} />
+            <Route path="financeiro" element={<AdminFinanceiroGlobal />} />
+            <Route path="configuracoes" element={<AdminConfiguracoesGerais />} />
+            <Route path="auditoria" element={<AdminLogsAuditoria />} />
+            <Route path="notificacoes" element={<AdminNotificacoes />} />
+            <Route path="relatorios" element={<AdminReportsExports />} />
+          </Route>
+          
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+        <Toaster richColors position="top-right" />
+      </StoreProvider>
     </ThemeProvider>
   );
 }
