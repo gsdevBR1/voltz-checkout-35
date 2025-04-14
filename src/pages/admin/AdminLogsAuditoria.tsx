@@ -57,8 +57,8 @@ const AdminLogsAuditoria = () => {
     to: new Date() 
   });
 
-  const handleDateRangeChange = (date: DateRange | undefined) => {
-    setDateRange(date);
+  const handleDateRangeChange = (newDateRange: DateRange | undefined) => {
+    setDateRange(newDateRange);
   };
 
   const allLogs: LogEntry[] = [
