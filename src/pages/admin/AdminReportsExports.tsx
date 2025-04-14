@@ -1,10 +1,9 @@
-
 import React, { useState } from 'react';
 import { 
   Calendar, 
   Download, 
   FileSpreadsheet, 
-  FilePdf, 
+  FileText,
   Store, 
   CreditCard,
   BarChart3,
@@ -340,7 +339,7 @@ const AdminReportsExports: React.FC = () => {
                 className="gap-2 bg-[#262626] border-white/10 hover:bg-[#333]"
                 onClick={handleExportPdf}
               >
-                <FilePdf className="h-4 w-4" />
+                <FileText className="h-4 w-4" />
                 Exportar PDF
               </Button>
             </div>

@@ -1,21 +1,22 @@
+
 import { Routes, Route, Navigate } from "react-router-dom";
-import { Index } from "./pages/Index";
-import { HomePage } from "./pages/HomePage";
-import { Dashboard } from "./pages/Dashboard";
-import { NotFound } from "./pages/NotFound";
-import { Stores } from "./pages/Stores";
+import Index from "./pages/Index";
+import HomePage from "./pages/HomePage";
+import Dashboard from "./pages/Dashboard";
+import NotFound from "./pages/NotFound";
+import Stores from "./pages/Stores";
 import { ThemeProvider } from "./providers/ThemeProvider";
 import { Toaster } from "@/components/ui/sonner";
 import { AdminLayout } from "./components/admin/AdminLayout";
-import { AdminLoginPage } from "./pages/admin/AdminLoginPage";
-import { AdminDashboard } from "./pages/admin/AdminDashboard";
-import { AdminUsersList } from "./pages/admin/AdminUsersList";
-import { AdminStoresList } from "./pages/admin/AdminStoresList";
-import { AdminStoreDetail } from "./pages/admin/AdminStoreDetail";
-import { AdminFinanceiroGlobal } from "./pages/admin/AdminFinanceiroGlobal";
-import { AdminConfiguracoesGerais } from "./pages/admin/AdminConfiguracoesGerais";
-import { AdminLogsAuditoria } from "./pages/admin/AdminLogsAuditoria";
-import { AdminNotificacoes } from "./pages/admin/AdminNotificacoes";
+import AdminLoginPage from "./pages/admin/AdminLoginPage";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminUsersList from "./pages/admin/AdminUsersList";
+import AdminStoresList from "./pages/admin/AdminStoresList";
+import AdminStoreDetail from "./pages/admin/AdminStoreDetail";
+import AdminFinanceiroGlobal from "./pages/admin/AdminFinanceiroGlobal";
+import AdminConfiguracoesGerais from "./pages/admin/AdminConfiguracoesGerais";
+import AdminLogsAuditoria from "./pages/admin/AdminLogsAuditoria";
+import AdminNotificacoes from "./pages/admin/AdminNotificacoes";
 import AdminReportsExports from "./pages/admin/AdminReportsExports";
 
 function App() {
