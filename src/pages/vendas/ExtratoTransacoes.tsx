@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -318,15 +317,6 @@ const ExtratoTransacoes: React.FC = () => {
           <CardContent>
             {filteredTransactions.length > 0 ? (
               <>
-                <div className="rounded-md border mb-4 p-3 bg-slate-50">
-                  <p className="text-sm text-muted-foreground flex items-center">
-                    <Info className="h-4 w-4 mr-2 text-blue-500" />
-                    As Taxas da VOLTZ (2,5%) são cobradas automaticamente a cada transação aprovada e acumuladas 
-                    até atingir R$ 100. Estas taxas não afetam o valor recebido pelo cliente final, sendo visíveis 
-                    apenas no seu painel administrativo.
-                  </p>
-                </div>
-                
                 <Table>
                   <TableHeader>
                     <TableRow>
